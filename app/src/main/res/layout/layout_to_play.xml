@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:background="@color/border"
+        >
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_centerHorizontal="true"
+            android:background="@color/background"
+            android:paddingHorizontal="15dp"
+            >
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/rl_nickname"
+                >
+                <TextView
+                    android:id="@+id/tv_nickname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:textColor="@color/text"
+                    android:fontFamily="@font/pixelar"
+                    android:text="NICKNAME: "
+                    android:textSize="50sp"
+                    />
+                <EditText
+                    android:id="@+id/et_nickname"
+                    android:layout_toRightOf="@+id/tv_nickname"
+                    android:layout_centerVertical="true"
+                    android:layout_width="130sp"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:fontFamily="@font/pixelar"
+                    android:textSize="45sp"
+                    android:backgroundTint="@color/white"
+                    android:maxLength="6"
+                    android:inputType="textCapCharacters"
+                    />
+            </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@id/rl_nickname"
+                >
+                <Button
+                    android:id="@+id/btn_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pixelar"
+                    android:textSize="40sp"
+                    android:text="PLAY"
+                    android:backgroundTint="@color/white"
+                    android:textAlignment="center"
+                    android:layout_marginBottom="5dp"
+                    />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

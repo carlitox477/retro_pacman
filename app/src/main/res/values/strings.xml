@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Pacman</string>
+
+    <!--Main activity -->
+    <string name="start_game">START GAME</string>
+    <string name="scores">SCORES</string>
+    <string name="creators">CREATORS</string>
+
+    <!--Presentation activity -->
+    <string name="original_name">ORIGINAL NAME: PAKKU MAN</string>
+    <string name="original_idea">ORIGINAL IDEA: NAMCO LTD</string>
+    <string name="creation_year">CREATION YEAR: 1980</string>
+    <string name="calification_us">CALIFICATION US: ESRB E</string>
+    <string name="calification_eu">CALIFICATION EU: PEGI 3</string>
+    <string name="production" translatable="false">AN AMARANTE - SREBERNIC 2020 PRODUCTION</string>
+
+
+</resources>

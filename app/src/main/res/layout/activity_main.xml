@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    >
+
+    <RelativeLayout
+        android:id="@+id/title"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        >
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/pacman_title"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/title"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+
+        >
+
+        <RelativeLayout
+            android:id="@+id/rl_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="20dp"
+            android:padding="7dp"
+            android:background="@color/border"
+            android:onClick="onClickPlay"
+            >
+            <Button
+                android:id="@+id/btn_start"
+                android:layout_width="270dp"
+                android:layout_height="120dp"
+                android:layout_centerHorizontal="true"
+                android:background="@color/background"
+                android:textColor="@color/text"
+                android:text="@string/start_game"
+                android:fontFamily="@font/pixelar"
+                android:textSize="50sp"
+                android:onClick="onClickPlay"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/rl_scores"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/rl_start"
+            android:layout_margin="20dp"
+            android:padding="7dp"
+            android:background="@color/border"
+            >
+            <Button
+                android:id="@+id/btn_scores"
+                android:layout_width="270dp"
+                android:layout_height="120dp"
+                android:layout_centerHorizontal="true"
+                android:background="@color/background"
+                android:textColor="@color/text"
+                android:text="@string/scores"
+                android:fontFamily="@font/pixelar"
+                android:textSize="50sp"
+                />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rl_scores"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="20dp"
+            android:padding="7dp"
+            android:background="@color/border"
+            android:onClick="onClickCreators"
+            >
+            <Button
+                android:id="@+id/btn_creator"
+                android:layout_width="270dp"
+                android:layout_height="120dp"
+                android:layout_centerHorizontal="true"
+                android:background="@color/background"
+                android:textColor="@color/text"
+                android:text="@string/creators"
+                android:fontFamily="@font/pixelar"
+                android:textSize="50sp"
+                android:onClick="onClickCreators"
+                />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

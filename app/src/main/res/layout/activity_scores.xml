@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_centerHorizontal="true"
+        android:textAlignment="center"
+        android:text="@string/scores"
+        android:textColor="@color/text"
+        android:textSize="120sp"
+        android:fontFamily="@font/pixelar"
+        />
+    <LinearLayout
+        android:id="@+id/column_labels"
+        android:layout_below="@id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="5dp"
+        >
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="POSITION"
+                android:fontFamily="@font/pixelar"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:padding="4dp"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="NICKNAME"
+                android:fontFamily="@font/pixelar"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:padding="4dp"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:text="MAX SCORE"
+                android:fontFamily="@font/pixelar"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:padding="4dp"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/column_labels"
+        android:layout_marginHorizontal="10dp"
+        >
+    </LinearLayout>
+    <ListView
+        android:id="@+id/lv_scores"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/column_labels"
+        android:layout_above="@id/rl_search"
+        >
+    </ListView>
+
+    <RelativeLayout
+        android:id="@+id/rl_search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/border"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginVertical="30dp"
+        >
+        <Button
+            android:id="@+id/btn_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:padding="16dp"
+            android:textSize="35sp"
+            android:background="@color/background"
+            android:textColor="@color/text"
+            android:fontFamily="@font/pixelar"
+            android:layout_centerHorizontal="true"
+            android:text="SEARCH BY NICKNAME"
+            />
+    </RelativeLayout>
+
+</RelativeLayout>
