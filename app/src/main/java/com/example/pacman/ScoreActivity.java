@@ -2,6 +2,7 @@ package com.example.pacman;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,7 +12,6 @@ import java.util.ArrayList;
 public class ScoreActivity extends AppCompatActivity {
     private ListView lvScores;
     private ScoreAdapter scoreAdapter;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -23,9 +23,9 @@ public class ScoreActivity extends AppCompatActivity {
         lvScores.setAdapter(scoreAdapter);
     }
 
-    private void onClickSearch(View view){
-        PreviousPlayFragment fragmentToPlay=new PreviousPlayFragment();
-        fragmentToPlay.show(getSupportFragmentManager(),"ToPlay");
+    public void onClickSearch(View view){
+        SearchForNick fragmentToSearch=new SearchForNick();
+        fragmentToSearch.show(getSupportFragmentManager(),"ToSearch");
     }
 
     private ArrayList<Score> getTestScore(){

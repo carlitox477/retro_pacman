@@ -36,7 +36,7 @@
                     android:textSize="50sp"
                     />
                 <EditText
-                    android:id="@+id/et_nickname"
+                    android:id="@+id/et_nickname_for_search"
                     android:layout_toRightOf="@+id/tv_nickname"
                     android:layout_centerVertical="true"
                     android:layout_width="130sp"
@@ -56,7 +56,7 @@
                 android:layout_below="@id/rl_nickname"
                 >
                 <Button
-                    android:id="@+id/btn_play"
+                    android:id="@+id/btn_search"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pixelar"

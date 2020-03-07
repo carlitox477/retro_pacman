@@ -112,12 +112,13 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginVertical="30dp"
-        android:onClick="onClickScores"
+        android:onClick="onClickSearch"
         >
         <Button
             android:id="@+id/btn_search"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="onClickSearch"
             android:layout_margin="5dp"
             android:padding="16dp"
             android:textSize="35sp"
@@ -126,7 +127,6 @@
             android:fontFamily="@font/pixelar"
             android:layout_centerHorizontal="true"
             android:text="@string/search"
-
             />
     </RelativeLayout>
 

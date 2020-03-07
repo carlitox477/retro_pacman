@@ -33,17 +33,21 @@ public class DBManager extends SQLiteOpenHelper implements Serializable {
 
     }
 
-    public Cursor getAllContacts(){
+    public Cursor getAllScores(){
         return getReadableDatabase().query(ScoreContract.ScoreEntry.TABLE_NAME, null, null, null, null, null, ScoreContract.ScoreEntry.MAX_SCORE + " DESC");
     }
 
-    public long saveContact(Score s){
+    public long saveScore(Score s){
         long row;
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
         row= sqLiteDatabase.insert(ScoreContract.ScoreEntry.TABLE_NAME, null, s.toContentValues());
 
         sqLiteDatabase.close();
         return row;
+    }
+
+    public Cursor getScoresByNickname(){
+        return getReadableDatabase().query(ScoreContract.ScoreEntry.TABLE_NAME, null, null, null, null, null, ScoreContract.ScoreEntry.MAX_SCORE + " DESC");
     }
 
 }
