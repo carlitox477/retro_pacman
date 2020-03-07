@@ -4,7 +4,7 @@ Retro pacman developed in andrioid studio with java
 Del menu inicial falta:
  - Crear la base de datos
  - Añadir puntuaciones a la base de datos
- - Habilitar la busqueda de puntuacion de usuario (debe mostrarse el nick, la posición y la puntuación; si no existe decir que ese usuario todavia no ha completado la partida via toaster, que pruebe otro usuario)
+ - Habilitar la busqueda de puntuacion de usuario (falta la consulta a la base de datos, la interfaz visual ya esta hecha)
 
 El paso a paso para hacer el juego:
  1 - Reflejar el mapa en la pantalla, junto con la puntuación, las vidas y algo que indique como se va a mover el pacman
