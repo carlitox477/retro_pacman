@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickScores(View view){
         //View scores
-        Intent intent = new Intent(this, CreatorsActivity.class);
+        Intent intent = new Intent(this, ScoreActivity.class);
         startActivity(intent);
     }
 

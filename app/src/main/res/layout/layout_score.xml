@@ -26,10 +26,12 @@
                 android:layout_gravity="center"
                 >
                 <TextView
+                    android:id="@+id/tv_position"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="#"
-                    android:textSize="15sp"
+                    android:fontFamily="@font/pixelar"
+                    android:textSize="30sp"
                     android:textColor="#FFFFFF"
                     />
             </LinearLayout>
@@ -42,10 +44,12 @@
                 android:layout_gravity="center"
                 >
                 <TextView
+                    android:id="@+id/tv_nickname"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="nickname"
-                    android:textSize="15sp"
+                    android:fontFamily="@font/pixelar"
+                    android:textSize="30sp"
                     android:textColor="#FFFFFF"
                     />
             </LinearLayout>
@@ -58,10 +62,12 @@
                 android:layout_gravity="center"
                 >
                 <TextView
+                    android:id="@+id/tv_score"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="score"
-                    android:textSize="15sp"
+                    android:fontFamily="@font/pixelar"
+                    android:textSize="30sp"
                     android:textColor="#FFFFFF"
                     />
             </LinearLayout>

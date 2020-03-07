@@ -19,6 +19,15 @@ public class Score {
         return score;
     }
 
+    public String getScoreString(){
+        String sal;
+        int posPoint;
+        sal=String.valueOf(this.score);
+        posPoint=sal.indexOf(".");
+        sal=sal.substring(0,posPoint);
+        return sal;
+    }
+
     public void setNickname(String nickname) {
         this.nickname = nickname;
     }

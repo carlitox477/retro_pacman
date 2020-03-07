@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="POSITION"
+                android:text="@string/position"
                 android:fontFamily="@font/pixelar"
                 android:textColor="#FFFFFF"
                 android:textSize="30sp"
@@ -56,7 +56,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="NICKNAME"
+                android:text="@string/nickname"
                 android:fontFamily="@font/pixelar"
                 android:textColor="#FFFFFF"
                 android:textSize="30sp"
@@ -77,7 +77,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:text="MAX SCORE"
+                android:text="@string/max_score"
                 android:fontFamily="@font/pixelar"
                 android:textColor="#FFFFFF"
                 android:textSize="30sp"
@@ -112,6 +112,7 @@
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
         android:layout_marginVertical="30dp"
+        android:onClick="onClickScores"
         >
         <Button
             android:id="@+id/btn_search"
@@ -124,7 +125,8 @@
             android:textColor="@color/text"
             android:fontFamily="@font/pixelar"
             android:layout_centerHorizontal="true"
-            android:text="SEARCH BY NICKNAME"
+            android:text="@string/search"
+
             />
     </RelativeLayout>
 

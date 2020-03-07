@@ -14,5 +14,11 @@
     <string name="calification_eu">CALIFICATION EU: PEGI 3</string>
     <string name="production" translatable="false">AN AMARANTE - SREBERNIC 2020 PRODUCTION</string>
 
+    <!--Scores activity-->
+    <string name="position">POSITION</string>
+    <string name="nickname">NICKNAME</string>
+    <string name="max_score">MAX SCORE</string>
+    <string name="search">SEARCH BY NICKNAME</string>
+
 
 </resources>
