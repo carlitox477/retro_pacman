@@ -1,6 +1,7 @@
 package com.example.pacman;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.Editable;
@@ -72,9 +73,14 @@ public class PreviousPlayFragment extends DialogFragment {
                             //We register the score in the DB
 
                             Toast.makeText(getContext(),"Register "+score.getNickname()+" with a "+integerScore+" score",Toast.LENGTH_SHORT).show();
+
                             //Finish test code
+                            Intent intent = new Intent(getActivity(), PlayActivity.class);
+                            startActivity(intent);
+
                         }
                     });
+
                 }
 
             }
