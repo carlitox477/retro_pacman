@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -14,8 +16,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.util.Random;
+
 public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     private Thread thread;
+
     private SurfaceHolder holder;
     private boolean canDraw = false;
 
@@ -24,19 +29,27 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private int blockSize;
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
-    public int xPosPacman;
-    public int yPosPacman;
-    private int totalFrame = 4;             // Total amount of frames fo each direction
-    private int currentPacmanFrame = 0;     // Current Pacman frame to draw
-    private int currentArrowFrame = 0;      // Current arrow frame to draw
-    private long frameTicker;               // Current time since last frame has been drawn
+    private Bitmap ghostBitmap;
+    private Bitmap cherryBitmap;
+    private int xPosPacman;
+    private int yPosPacman;
+    private int totalFrame = 4;             // Cantidad total de animation frames por direccion
+    private int currentPacmanFrame = 0;     // animation frame de pacman actual
+    private int currentArrowFrame = 0;      // animation frame de arrow actual
+    private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
+
+    private int bonusResetTime = 10;
+    private CountDownTimer bonusTimer;
+    private boolean bonusAvailable = false;
+    private int bonusX;
+    private int bonusY;
 
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
     private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
     private int viewDirection = 2;          // Direccion en la que pacman esta mirando
 
-    public static int LONG_PRESS_TIME=750;  // Time in milliseconds
+    public static int LONG_PRESS_TIME = 750;  // Time in milliseconds
     final Handler handler = new Handler();
 
     public DrawingView(Context context) {
@@ -45,17 +58,24 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         setFocusable(true);
         holder = getHolder();
         holder.addCallback(this);
-        frameTicker = 1000/totalFrame;
+        frameTicker = 1000 / totalFrame;
         paint = new Paint();
         paint.setColor(Color.WHITE);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         screenWidth = metrics.widthPixels;
-        blockSize = screenWidth/17;
+        blockSize = screenWidth / 17;
         blockSize = (blockSize / 5) * 5;
         xPosPacman = 8 * blockSize;
         yPosPacman = 13 * blockSize;
+        bonusX = 9 ;
+        bonusY = 14 ;
+
         loadBitmapImages();
+
+
     }
+
+
     @Override
     public void run() {
         Log.i("info", "Run");
@@ -69,21 +89,25 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 canvas.drawColor(Color.BLACK);
                 drawMap(canvas);
                 updateFrame(System.currentTimeMillis());
-                //moveGhosts()
+                //moveGhosts(canvas)
                 movePacman(canvas);
-                //drawPellets()
-
-
+                drawPellets(canvas);
+                drawSuperPellets(canvas);
+                drawBonus(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
         }
     }
+
+
+
+
     public void movePacman(Canvas canvas) {
         short ch;
 
 
         //Chequeamos si xPos y yPos de pacman son multiplos del tamaño del bloque (blocksize)
-        if ( (xPosPacman % blockSize == 0) && (yPosPacman  % blockSize == 0) ) {
+        if ((xPosPacman % blockSize == 0) && (yPosPacman % blockSize == 0)) {
 
             //Cuando pacman entra por el tunel de la derecha reaparece por la izquierda
             if (xPosPacman >= blockSize * 17) {
@@ -102,6 +126,16 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if ((ch & 16) != 0) {
                 // Invisibilizamos la pastilla asi no se renderiza
                 leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 16);
+            }
+            // Si hay un bonus, pacman la come
+            if ((ch & 32) != 0) {
+                // Invisibilizamos la pastilla asi no se renderiza
+                leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 32);
+            }
+            // Si hay una super pastilla, pacman la come y los fantasmas se vuelven vulnerables
+            if ((ch & 64) != 0) {
+                // Invisibilizamos la pastilla asi no se renderiza
+                leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 64);
             }
 
             // Chequeamos el buffering de la direccion
@@ -122,18 +156,17 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
 
 
-
         drawPacman(canvas);
 
         //Dependiendo de la direccion, movemos la posicion de pacman
         if (direction == 0) {
-            yPosPacman += -blockSize/15;
+            yPosPacman += -blockSize / 15;
         } else if (direction == 1) {
-            xPosPacman += blockSize/15;
+            xPosPacman += blockSize / 15;
         } else if (direction == 2) {
-            yPosPacman += blockSize/15;
+            yPosPacman += blockSize / 15;
         } else if (direction == 3) {
-            xPosPacman += -blockSize/15;
+            xPosPacman += -blockSize / 15;
         }
     }
 
@@ -155,8 +188,42 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
     }
 
+    // Metodos que dibuja las pastillas y las actualiza cuando son comidas
+    public void drawPellets(Canvas canvas) {
+        float x;
+        float y;
+        for (int i = 0; i < 18; i++) {
+            for (int j = 0; j < 17; j++) {
+                x = j * blockSize;
+                y = i * blockSize;
+                // Dibuja pastilla en el medio del bloque
+                if ((leveldata1[i][j] & 16) != 0)
+                    canvas.drawCircle(x + blockSize / 2, y + blockSize / 2, blockSize / 10, paint);
+            }
+        }
+    }
+    private void drawSuperPellets(Canvas canvas) {
+        float x;
+        float y;
+        for (int i = 0; i < 18; i++) {
+            for (int j = 0; j < 17; j++) {
+                x = j * blockSize;
+                y = i * blockSize;
+                // Dibuja pastilla en el medio del bloque
+                if ((leveldata1[i][j] & 64) != 0)
+                    canvas.drawCircle(x + blockSize / 2, y + blockSize / 2, blockSize / 6, paint);
+            }
+        }
+    }
 
-    public void drawMap(Canvas canvas){
+    private void drawBonus(Canvas canvas) {
+
+        if ((leveldata1[bonusY][bonusX] & 32) != 0)
+            canvas.drawBitmap(cherryBitmap, bonusX * blockSize  , bonusY * blockSize, null);;
+
+    }
+
+    public void drawMap(Canvas canvas) {
         Log.i("info", "Drawing map");
         paint.setColor(Color.BLUE);
         paint.setStrokeWidth(2.5f);
@@ -166,31 +233,35 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             for (int j = 0; j < 17; j++) {
                 x = j * blockSize;
                 y = i * blockSize;
-                if ((leveldata1[i][j] & 1) != 0) // dibuja izquierda
+                if ((leveldata1[i][j] & 1) != 0) { // dibuja izquierda
                     canvas.drawLine(x, y, x, y + blockSize - 1, paint);
-
-                if ((leveldata1[i][j] & 2) != 0) // dibuja arriba
+                    Log.i("info", "Drawing map");
+                }
+                if ((leveldata1[i][j] & 2) != 0) { // dibuja arriba
                     canvas.drawLine(x, y, x + blockSize - 1, y, paint);
-
-                if ((leveldata1[i][j] & 4) != 0) // dibuja derecha
+                }
+                if ((leveldata1[i][j] & 4) != 0) { // dibuja derecha
                     canvas.drawLine(
                             x + blockSize, y, x + blockSize, y + blockSize - 1, paint);
-                if ((leveldata1[i][j] & 8) != 0) // dibuja abajo
+                }
+                if ((leveldata1[i][j] & 8) != 0) { // dibuja abajo
                     canvas.drawLine(
-                            x, y + blockSize, x + blockSize - 1, y + blockSize , paint);
+                            x, y + blockSize, x + blockSize - 1, y + blockSize, paint);
+                }
             }
         }
         paint.setColor(Color.WHITE);
     }
+
     private void loadBitmapImages() {
         // Escala los sprites en base al tamaño de la pantalla
-        int spriteSize = screenWidth/17;        // Tamaño de pacman y fantasmas
+        int spriteSize = screenWidth / 17;        // Tamaño de pacman y fantasmas
         spriteSize = (spriteSize / 5) * 5;      // Los mantenemos multiplos de 5
 
         // Añadir bitmap de pacman mirando a la derecha
         pacmanRight = new Bitmap[totalFrame];
         pacmanRight[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(),R.drawable.pacman_right1), spriteSize, spriteSize, false);
+                getResources(), R.drawable.pacman_right1), spriteSize, spriteSize, false);
         pacmanRight[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_right2), spriteSize, spriteSize, false);
         pacmanRight[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
@@ -227,6 +298,13 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 getResources(), R.drawable.pacman_up3), spriteSize, spriteSize, false);
         pacmanUp[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_up), spriteSize, spriteSize, false);
+
+        //Añadir bitmap de fantasma
+        ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.ghost), spriteSize, spriteSize, false);
+
+        //Añadir bitmap de cerezas bonus
+        cherryBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.cherry), spriteSize, spriteSize, false);
     }
 
     Runnable longPressed = new Runnable() {
@@ -257,6 +335,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
         return true;
     }
+
     // Calcula la direccion en la que el jugador realiza el swipe
     // basado en la calculacion de las diferencias en
     // la posicion inicial y la posicion final del swipe
@@ -288,6 +367,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
     }
+
     //Chequea si se deberia actualizar el frame actual basado en el
     // tiempo que a transcurrido asi la animacion
     //no se ve muy rapida y mala
@@ -311,10 +391,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
     }
+
+    //Cada bloque es representado con 5 bits, el cual nos dice informacion tal como la posicion de la pared, si hay una pastilla, si hay una fruta,
+    //si pacman esta atravesandolo o si un fantasma se encuentra atravesandolo, por eso es necesario descomponer cada uno de estos numeros en la composicion binaria
+    //para entender las operaciones que estan ocurriendo a la hora de realizar los chequeos
     final short leveldata1[][] = new short[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {19, 26, 26, 18, 26, 26, 26, 22, 0, 19, 26, 26, 26, 18, 26, 26, 22},
+            {67, 26, 26, 18, 26, 26, 26, 22, 0, 19, 26, 26, 26, 18, 26, 26, 70},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
             {17, 26, 26, 16, 26, 18, 26, 24, 26, 24, 26, 18, 26, 16, 26, 26, 20},
             {25, 26, 26, 20, 0, 25, 26, 22, 0, 19, 26, 28, 0, 17, 26, 26, 28},
@@ -326,10 +410,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             {19, 26, 26, 16, 26, 24, 26, 22, 0, 19, 26, 24, 26, 16, 26, 26, 22},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
             {25, 22, 0, 21, 0, 0, 0, 17, 2, 20, 0, 0, 0, 21, 0, 19, 28}, // "2" es el spawn de pacman
-            {0, 21, 0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20, 0, 21, 0},
+            {0, 21, 0, 17, 26, 26, 18, 24, 24, 56, 18, 26, 26, 20, 0, 21, 0},
             {19, 24, 26, 28, 0, 0, 25, 18, 26, 18, 28, 0, 0, 25, 26, 24, 22},
             {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
-            {25, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 28},
+            {73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
     };
 
     //Callback methods
@@ -347,18 +431,20 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public void surfaceDestroyed(SurfaceHolder holder) {
 
     }
-    public void resume(){
+
+    public void resume() {
         canDraw = true;
         thread = new Thread(this);
         thread.start();
     }
+
     public void pause() {
         canDraw = false;
-        while(true){
+        while (true) {
             try {
                 thread.join();
                 return;
-            } catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 // retry
             }
         }
