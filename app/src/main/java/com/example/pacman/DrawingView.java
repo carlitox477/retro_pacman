@@ -20,19 +20,41 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private boolean canDraw = false;
 
     private Paint paint = new Paint();
-    private int screenWidth;                // Width of the phone screen
+    private int screenWidth;                // Ancho de la pantalla
     private int blockSize;
+
+    private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
+    public int xPosPacman;
+    public int yPosPacman;
+    private int totalFrame = 4;             // Total amount of frames fo each direction
+    private int currentPacmanFrame = 0;     // Current Pacman frame to draw
+    private int currentArrowFrame = 0;      // Current arrow frame to draw
+    private long frameTicker;               // Current time since last frame has been drawn
+
+    private float x1, x2, y1, y2;           // Initial/Final positions of swipe
+    private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
+    private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
+    private int viewDirection = 2;          // Direccion en la que pacman esta mirando
+
+    public static int LONG_PRESS_TIME=750;  // Time in milliseconds
+    final Handler handler = new Handler();
 
     public DrawingView(Context context) {
         super(context);
-        getHolder().addCallback(this);
+
         setFocusable(true);
         holder = getHolder();
-
+        holder.addCallback(this);
+        frameTicker = 1000/totalFrame;
+        paint = new Paint();
+        paint.setColor(Color.WHITE);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         screenWidth = metrics.widthPixels;
         blockSize = screenWidth/17;
         blockSize = (blockSize / 5) * 5;
+        xPosPacman = 8 * blockSize;
+        yPosPacman = 13 * blockSize;
+        loadBitmapImages();
     }
     @Override
     public void run() {
@@ -42,17 +64,94 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 continue;
             }
             Canvas canvas = holder.lockCanvas();
-            // Set background color to Transparent
-            if (canvas != null) {
-                drawMap(canvas);
 
+            if (canvas != null) {
+                canvas.drawColor(Color.BLACK);
+                drawMap(canvas);
+                updateFrame(System.currentTimeMillis());
                 //moveGhosts()
-                //movePacman()
+                movePacman(canvas);
                 //drawPellets()
 
 
                 holder.unlockCanvasAndPost(canvas);
             }
+        }
+    }
+    public void movePacman(Canvas canvas) {
+        short ch;
+
+
+        //Chequeamos si xPos y yPos de pacman son multiplos del tamaño del bloque (blocksize)
+        if ( (xPosPacman % blockSize == 0) && (yPosPacman  % blockSize == 0) ) {
+
+            //Cuando pacman entra por el tunel de la derecha reaparece por la izquierda
+            if (xPosPacman >= blockSize * 17) {
+                xPosPacman = 0;
+            }
+            //Cuando pacman entra por el tunel de la izquierda reaparece por la derecha
+            if (xPosPacman < 0) {
+                xPosPacman = blockSize * 16;
+            }
+
+            //Es utilizado para buscar el numero en el arreglo del nivel para chequear la posicion de las paredes
+            //las pastillas y los caramelos
+            ch = leveldata1[yPosPacman / blockSize][xPosPacman / blockSize];
+
+            // Si hay una pastilla, pacman la come
+            if ((ch & 16) != 0) {
+                // Invisibilizamos la pastilla asi no se renderiza
+                leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 16);
+            }
+
+            // Chequeamos el buffering de la direccion
+            if (!((nextDirection == 3 && (ch & 1) != 0) ||
+                    (nextDirection == 1 && (ch & 4) != 0) ||
+                    (nextDirection == 0 && (ch & 2) != 0) ||
+                    (nextDirection == 2 && (ch & 8) != 0))) {
+                viewDirection = direction = nextDirection;
+            }
+
+            // Chequeamos por la colision de las paredes
+            if ((direction == 3 && (ch & 1) != 0) ||
+                    (direction == 1 && (ch & 4) != 0) ||
+                    (direction == 0 && (ch & 2) != 0) ||
+                    (direction == 2 && (ch & 8) != 0)) {
+                direction = 4;
+            }
+        }
+
+
+
+        drawPacman(canvas);
+
+        //Dependiendo de la direccion, movemos la posicion de pacman
+        if (direction == 0) {
+            yPosPacman += -blockSize/15;
+        } else if (direction == 1) {
+            xPosPacman += blockSize/15;
+        } else if (direction == 2) {
+            yPosPacman += blockSize/15;
+        } else if (direction == 3) {
+            xPosPacman += -blockSize/15;
+        }
+    }
+
+    // Metodo que dibuja a pacman segun su direccion
+    public void drawPacman(Canvas canvas) {
+        switch (viewDirection) {
+            case (0):
+                canvas.drawBitmap(pacmanUp[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                break;
+            case (1):
+                canvas.drawBitmap(pacmanRight[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                break;
+            case (3):
+                canvas.drawBitmap(pacmanLeft[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                break;
+            default:
+                canvas.drawBitmap(pacmanDown[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                break;
         }
     }
 
@@ -67,21 +166,150 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             for (int j = 0; j < 17; j++) {
                 x = j * blockSize;
                 y = i * blockSize;
-                if ((leveldata1[i][j] & 1) != 0) // draws left
+                if ((leveldata1[i][j] & 1) != 0) // dibuja izquierda
                     canvas.drawLine(x, y, x, y + blockSize - 1, paint);
 
-                if ((leveldata1[i][j] & 2) != 0) // draws top
+                if ((leveldata1[i][j] & 2) != 0) // dibuja arriba
                     canvas.drawLine(x, y, x + blockSize - 1, y, paint);
 
-                if ((leveldata1[i][j] & 4) != 0) // draws right
+                if ((leveldata1[i][j] & 4) != 0) // dibuja derecha
                     canvas.drawLine(
                             x + blockSize, y, x + blockSize, y + blockSize - 1, paint);
-                if ((leveldata1[i][j] & 8) != 0) // draws bottom
+                if ((leveldata1[i][j] & 8) != 0) // dibuja abajo
                     canvas.drawLine(
                             x, y + blockSize, x + blockSize - 1, y + blockSize , paint);
             }
         }
         paint.setColor(Color.WHITE);
+    }
+    private void loadBitmapImages() {
+        // Escala los sprites en base al tamaño de la pantalla
+        int spriteSize = screenWidth/17;        // Tamaño de pacman y fantasmas
+        spriteSize = (spriteSize / 5) * 5;      // Los mantenemos multiplos de 5
+
+        // Añadir bitmap de pacman mirando a la derecha
+        pacmanRight = new Bitmap[totalFrame];
+        pacmanRight[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(),R.drawable.pacman_right1), spriteSize, spriteSize, false);
+        pacmanRight[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_right2), spriteSize, spriteSize, false);
+        pacmanRight[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_right3), spriteSize, spriteSize, false);
+        pacmanRight[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_right), spriteSize, spriteSize, false);
+        // Añadir bitmap de pacman mirando a la abajo
+        pacmanDown = new Bitmap[totalFrame];
+        pacmanDown[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_down1), spriteSize, spriteSize, false);
+        pacmanDown[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_down2), spriteSize, spriteSize, false);
+        pacmanDown[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_down3), spriteSize, spriteSize, false);
+        pacmanDown[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_down), spriteSize, spriteSize, false);
+        // Añadir bitmap de pacman mirando a la izquierda
+        pacmanLeft = new Bitmap[totalFrame];
+        pacmanLeft[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_left1), spriteSize, spriteSize, false);
+        pacmanLeft[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_left2), spriteSize, spriteSize, false);
+        pacmanLeft[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_left3), spriteSize, spriteSize, false);
+        pacmanLeft[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_left), spriteSize, spriteSize, false);
+        // Añadir bitmap de pacman mirando a la arriba
+        pacmanUp = new Bitmap[totalFrame];
+        pacmanUp[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_up1), spriteSize, spriteSize, false);
+        pacmanUp[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_up2), spriteSize, spriteSize, false);
+        pacmanUp[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_up3), spriteSize, spriteSize, false);
+        pacmanUp[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.pacman_up), spriteSize, spriteSize, false);
+    }
+
+    Runnable longPressed = new Runnable() {
+        public void run() {
+            Log.i("info", "LongPress");
+            Intent pauseIntent = new Intent(getContext(), PauseActivity.class);
+            getContext().startActivity(pauseIntent);
+        }
+    };
+
+    // Methodo para captar touchEvents
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case (MotionEvent.ACTION_DOWN): {
+                x1 = event.getX();
+                y1 = event.getY();
+                handler.postDelayed(longPressed, LONG_PRESS_TIME);
+                break;
+            }
+            case (MotionEvent.ACTION_UP): {
+                x2 = event.getX();
+                y2 = event.getY();
+                calculateSwipeDirection();
+                handler.removeCallbacks(longPressed);
+                break;
+            }
+        }
+        return true;
+    }
+    // Calcula la direccion en la que el jugador realiza el swipe
+    // basado en la calculacion de las diferencias en
+    // la posicion inicial y la posicion final del swipe
+    private void calculateSwipeDirection() {
+        float xDiff = (x2 - x1);
+        float yDiff = (y2 - y1);
+
+        // Direcciones
+        // 0 = arriba
+        // 1 = derecha
+        // 2 = abajo
+        // 3 = izquierda
+        // 4 = sin movimiento
+
+        //Chequea que eje tiene la mayor distancia
+        //en orden para saber en que direccion el swipe
+        //va a ser
+        if (Math.abs(yDiff) > Math.abs(xDiff)) {
+            if (yDiff < 0) {
+                nextDirection = 0;
+            } else if (yDiff > 0) {
+                nextDirection = 2;
+            }
+        } else {
+            if (xDiff < 0) {
+                nextDirection = 3;
+            } else if (xDiff > 0) {
+                nextDirection = 1;
+            }
+        }
+    }
+    //Chequea si se deberia actualizar el frame actual basado en el
+    // tiempo que a transcurrido asi la animacion
+    //no se ve muy rapida y mala
+    private void updateFrame(long gameTime) {
+
+        // Si el tiempo suficiente a transcurrido, pasar al siguiente frame
+        if (gameTime > frameTicker + (totalFrame * 30)) {
+            frameTicker = gameTime;
+
+            // incrementar el frame
+            currentPacmanFrame++;
+            // ciclar al principio al frame 0 si han ocurrido todos
+            if (currentPacmanFrame >= totalFrame) {
+                currentPacmanFrame = 0;
+            }
+        }
+        if (gameTime > frameTicker + (50)) {
+            currentArrowFrame++;
+            if (currentArrowFrame >= 7) {
+                currentArrowFrame = 0;
+            }
+        }
     }
     final short leveldata1[][] = new short[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -97,8 +325,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             {0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0},
             {19, 26, 26, 16, 26, 24, 26, 22, 0, 19, 26, 24, 26, 16, 26, 26, 22},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
-            {25, 22, 0, 21, 0, 0, 0, 17, 2, 20, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
-            {0, 21, 0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20, 0, 21, 0}, // pacman's spawn
+            {25, 22, 0, 21, 0, 0, 0, 17, 2, 20, 0, 0, 0, 21, 0, 19, 28}, // "2" es el spawn de pacman
+            {0, 21, 0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20, 0, 21, 0},
             {19, 24, 26, 28, 0, 0, 25, 18, 26, 18, 28, 0, 0, 25, 26, 24, 22},
             {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
             {25, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 28},
