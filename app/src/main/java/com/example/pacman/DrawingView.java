@@ -20,6 +20,7 @@ import java.util.Random;
 
 public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     private Thread thread;
+    private Thread bonusCounter;
 
     private SurfaceHolder holder;
     private boolean canDraw = false;
@@ -38,11 +39,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private int currentArrowFrame = 0;      // animation frame de arrow actual
     private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
 
-    private int bonusResetTime = 10;
-    private CountDownTimer bonusTimer;
+    private int bonusResetTime = 5;
     private boolean bonusAvailable = false;
-    private int bonusX;
-    private int bonusY;
+    private CountDownTimer bonusTimer;
+    private int xPosBonus;
+    private int yPosBonus;
 
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
@@ -54,7 +55,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     public DrawingView(Context context) {
         super(context);
-
         setFocusable(true);
         holder = getHolder();
         holder.addCallback(this);
@@ -63,12 +63,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         paint.setColor(Color.WHITE);
         DisplayMetrics metrics = getResources().getDisplayMetrics();
         screenWidth = metrics.widthPixels;
-        blockSize = screenWidth / 17;
+        blockSize = screenWidth / 17; //
         blockSize = (blockSize / 5) * 5;
         xPosPacman = 8 * blockSize;
         yPosPacman = 13 * blockSize;
-        bonusX = 9 ;
-        bonusY = 14 ;
+        xPosBonus = 9 ;
+        yPosBonus = 14 ;
+        bonusCounter = new CountdownBonusThread(this);
+        bonusCounter.start();
 
         loadBitmapImages();
 
@@ -93,6 +95,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 movePacman(canvas);
                 drawPellets(canvas);
                 drawSuperPellets(canvas);
+
                 drawBonus(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
@@ -129,8 +132,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
             // Si hay un bonus, pacman la come
             if ((ch & 32) != 0) {
-                // Invisibilizamos la pastilla asi no se renderiza
+                Log.i("info", "Bonus has been eaten");
+                // Invisibilizamos el bonus asi no se renderiza
                 leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 32);
+                //Indicamos que el bonus ya no se encuentra disponible
+                bonusAvailable = false;
+                //Comenzamos el countdown nuevamente
+                bonusCounter = new CountdownBonusThread(this);
+                bonusCounter.start();
             }
             // Si hay una super pastilla, pacman la come y los fantasmas se vuelven vulnerables
             if ((ch & 64) != 0) {
@@ -215,14 +224,41 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
     }
-
     private void drawBonus(Canvas canvas) {
 
-        if ((leveldata1[bonusY][bonusX] & 32) != 0)
-            canvas.drawBitmap(cherryBitmap, bonusX * blockSize  , bonusY * blockSize, null);;
+        short ch = leveldata1[yPosBonus][xPosBonus];
+        if ((ch & 32) != 0  && bonusAvailable) {
+            canvas.drawBitmap(cherryBitmap, xPosBonus * blockSize, yPosBonus * blockSize, null);
+        }
 
     }
+    public void setBonusAvailable() {
+    //Se determina en que posicion del mapa se generara el bonus
+        int[] spawn = generateMapSpawn();
+        int y = spawn[0];
+        int x = spawn[1];
+        int ch = leveldata1[y][x];
+        leveldata1[y][x] = (short) (ch ^ 32);
+        this.bonusAvailable = true;
+        Log.i("info", "bonus now available at" + xPosBonus +" , " + yPosBonus);
+    }
+    public int[] generateMapSpawn(){
+        //Se genera una posicion aleatoria valida en la cual pacman pueda moverse
+        int[] spawn = new int[2];
+        xPosBonus = new Random().nextInt(17);
+        yPosBonus = new Random().nextInt(17);
+        short ch = leveldata1[yPosBonus][xPosBonus];
 
+        //Si la posicion generada no es posible moverse
+        if(ch == 0)
+            spawn = generateMapSpawn();
+        else{
+            spawn[0] = yPosBonus;
+            spawn[1] = xPosBonus;
+        }
+
+        return spawn;
+    }
     public void drawMap(Canvas canvas) {
         Log.i("info", "Drawing map");
         paint.setColor(Color.BLUE);
@@ -304,7 +340,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 getResources(), R.drawable.ghost), spriteSize, spriteSize, false);
 
         //Añadir bitmap de cerezas bonus
-        cherryBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.cherry), spriteSize, spriteSize, false);
+        cherryBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                getResources(), R.drawable.cherry), spriteSize, spriteSize, false);
     }
 
     Runnable longPressed = new Runnable() {
@@ -392,11 +429,21 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
     }
 
-    //Cada bloque es representado con 5 bits, el cual nos dice informacion tal como la posicion de la pared, si hay una pastilla, si hay una fruta,
+    //Cada bloque es representado con 6 bits, el cual nos dice informacion tal como la posicion de la pared, si hay una pastilla, si hay una fruta,
     //si pacman esta atravesandolo o si un fantasma se encuentra atravesandolo, por eso es necesario descomponer cada uno de estos numeros en la composicion binaria
     //para entender las operaciones que estan ocurriendo a la hora de realizar los chequeos
+    /*
+    * 2 ^ 0 : Pared
+    * 2 ^ 1 : Pared
+    * 2 ^ 2 : Pared
+    * 2 ^ 3 : Pared
+    * 2 ^ 4 : Pastilla
+    * 2 ^ 5 : Bonus
+    * 2 ^ 6 : Super pastilla
+    * 2 ^ 7 : Fantasma
+    * 2 ^ 8 : Disponible para spawn de bonus
+    * */
     final short leveldata1[][] = new short[][]{
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {67, 26, 26, 18, 26, 26, 26, 22, 0, 19, 26, 26, 26, 18, 26, 26, 70},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
@@ -410,11 +457,15 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             {19, 26, 26, 16, 26, 24, 26, 22, 0, 19, 26, 24, 26, 16, 26, 26, 22},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
             {25, 22, 0, 21, 0, 0, 0, 17, 2, 20, 0, 0, 0, 21, 0, 19, 28}, // "2" es el spawn de pacman
-            {0, 21, 0, 17, 26, 26, 18, 24, 24, 56, 18, 26, 26, 20, 0, 21, 0},
+            {0, 21, 0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20, 0, 21, 0},
             {19, 24, 26, 28, 0, 0, 25, 18, 26, 18, 28, 0, 0, 25, 26, 24, 22},
             {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
             {73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
+
+    /*
+    *     */
 
     //Callback methods
     @Override
@@ -449,4 +500,16 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
     }
+
+    public int getBonusResetTime() {
+        return bonusResetTime;
+    }
+
+
+
+    public boolean isBonusAvailable() {
+        return bonusAvailable;
+    }
+
+
 }
