@@ -13,10 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class PlayActivity extends AppCompatActivity {
     private DrawingView drawingView;
+    private String playerNickname;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //We get player nickname sent previously by the fragment
+        this.playerNickname=getIntent().getExtras().getString("playerNickname");
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,

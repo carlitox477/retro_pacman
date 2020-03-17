@@ -76,6 +76,8 @@ public class PreviousPlayFragment extends DialogFragment {
 
                             //Finish test code
                             Intent intent = new Intent(getActivity(), PlayActivity.class);
+                            intent.putExtra("playerNickname",nickname.getText().toString());
+                            //We close the fragment and star the play activity
                             getDialog().dismiss();
                             startActivity(intent);
 
