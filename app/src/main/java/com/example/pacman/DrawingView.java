@@ -19,6 +19,7 @@ import android.view.SurfaceView;
 import java.util.Random;
 
 public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
+    //SurfaceView actualiza lo que tiene mediante hilo
     private Thread thread;
     private Thread bonusCounter;
 
@@ -71,9 +72,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         yPosBonus = 14 ;
         bonusCounter = new CountdownBonusThread(this);
         bonusCounter.start();
-
         loadBitmapImages();
-
 
     }
 
@@ -106,6 +105,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
 
     public void movePacman(Canvas canvas) {
+        //todas las reacciones que hace el pacman ante esucesos del mapa
         short ch;
 
 
@@ -429,8 +429,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
     }
 
-    //Cada bloque es representado con 6 bits, el cual nos dice informacion tal como la posicion de la pared, si hay una pastilla, si hay una fruta,
-    //si pacman esta atravesandolo o si un fantasma se encuentra atravesandolo, por eso es necesario descomponer cada uno de estos numeros en la composicion binaria
+    //Cada bloque es representado con 6 bits, el cual nos dice informacion tal como la posicion de la pared,
+    // si hay una pastilla, si hay una fruta,
+    //si pacman esta atravesandolo o si un fantasma se encuentra atravesandolo, por eso es necesario
+    // descomponer cada uno de estos numeros en la composicion binaria
     //para entender las operaciones que estan ocurriendo a la hora de realizar los chequeos
     /*
     * 2 ^ 0 : Pared

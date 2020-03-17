@@ -21,6 +21,8 @@
         <activity android:name=".CreatorsActivity" />
         <activity android:name=".ScoreActivity" />
         <activity android:name=".PlayActivity" />
+        <service android:name=".BackgroundMusicService"
+            android:enabled="true"/>
     </application>
 
 </manifest>

@@ -76,6 +76,7 @@ public class PreviousPlayFragment extends DialogFragment {
 
                             //Finish test code
                             Intent intent = new Intent(getActivity(), PlayActivity.class);
+                            getDialog().dismiss();
                             startActivity(intent);
 
                         }
