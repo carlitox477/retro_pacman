@@ -33,7 +33,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     private int blockSize;
 
-    private Ghost clyde;
+    private Ghost blinky;
+    private Ghost pinky;
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -54,6 +55,9 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
     private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
+
+
+
     private int viewDirection = 2;          // Direccion en la que pacman esta mirando
 
     public static int LONG_PRESS_TIME = 750;  // Time in milliseconds
@@ -79,7 +83,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         bonusCounter = new CountdownBonusThread(this);
         bonusCounter.start();
         loadBitmapImages();
-        clyde = new Ghost(this, "Clyde");
+        blinky = new Ghost(this, "Blinky");
+        pinky = new Ghost(this, "Pinky");
 
 
     }
@@ -102,15 +107,21 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 movePacman(canvas);
                 drawPellets(canvas);
                 drawSuperPellets(canvas);
-                clyde.move();
-                moveGhost(clyde, canvas);
+                moveGhosts(canvas);
                 drawBonus(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
         }
     }
 
-    private void moveGhost(Ghost ghost, Canvas canvas) {
+    private void moveGhosts(Canvas canvas) {
+        blinky.move();
+        pinky.move();
+        drawGhost(blinky,canvas);
+        drawGhost(pinky,canvas);
+    }
+
+    private void drawGhost(Ghost ghost, Canvas canvas) {
         canvas.drawBitmap(ghost.getBitmap(), ghost.getxPos(), ghost.getyPos(), paint);
     }
 
@@ -407,7 +418,9 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             getContext().startActivity(pauseIntent);
         }
     };
-
+    public int getPacmanDirection() {
+        return viewDirection;
+    }
     // Methodo para captar touchEvents
     @Override
     public boolean onTouchEvent(MotionEvent event) {

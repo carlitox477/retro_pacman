@@ -2,6 +2,8 @@ package com.example.pacman;
 
 import android.util.Log;
 
+import java.util.LinkedList;
+
 public class ChaseAgressive implements ChaseBehaviour {
 
 
@@ -119,4 +121,5 @@ public class ChaseAgressive implements ChaseBehaviour {
 
         return nextPos;
     }
+
 }

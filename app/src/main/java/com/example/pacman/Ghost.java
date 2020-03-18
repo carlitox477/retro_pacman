@@ -17,6 +17,8 @@ public class Ghost{
 
     private DrawingView dv;
 
+    private boolean frightened = false;
+    private boolean scattering = false;
     private ChaseBehaviour chaseBehaviour;
     private FrightenedBehaviour frightenedBehaviour;
     private ScatterBehaviour scatterBehaviour;
@@ -36,16 +38,38 @@ public class Ghost{
         this.dv = dv;
         this.chaseBehaviour = new ChaseAgressive();
 
-        int spriteSize = dv.getScreenWidth() / 17;        //fantasmas
+        int spriteSize = dv.getScreenWidth() / 17;
         spriteSize = (spriteSize / 5) * 5;
-        //Añadir bitmap de fantasma
-        bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                dv.getContext().getResources(), R.drawable.red_ghost), spriteSize, spriteSize, false);
+
+        switch (name){
+            case "Blinky":this.chaseBehaviour = new ChaseAgressive();
+                //Añadir bitmap de fantasma
+                bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                        dv.getContext().getResources(), R.drawable.red_ghost), spriteSize, spriteSize, false);
+            xPos = 6 * dv.getBlockSize();
+            yPos = 9 * dv.getBlockSize();
+            break;
+            case "Pinky":this.chaseBehaviour = new ChaseAmbush();
+                //Añadir bitmap de fantasma
+                bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                        dv.getContext().getResources(), R.drawable.pink_ghost), spriteSize, spriteSize, false);
+                xPos = 7 * dv.getBlockSize();
+                yPos = 9 * dv.getBlockSize();
+            break;
+            default:break;
+        }
 
     }
 
     public void move() {
-        int[] nextPos = chaseBehaviour.chase(dv,ghostDirection, xPos, yPos);
+        int[] nextPos;
+        if(frightened){
+            nextPos = frightenedBehaviour.runaway(dv,ghostDirection, xPos, yPos);
+        }else if(scattering){
+            nextPos = scatterBehaviour.scatter(dv,ghostDirection, xPos, yPos);
+        }else{
+            nextPos = chaseBehaviour.chase(dv,ghostDirection, xPos, yPos);
+        }
         xPos = nextPos[0];
         yPos = nextPos[1];
         ghostDirection = nextPos[2];
