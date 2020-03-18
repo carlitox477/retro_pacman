@@ -30,6 +30,7 @@ public class Ghost{
 
 
 
+
     private int ghostDirection = 0;
 
     public Ghost(DrawingView dv, String name){
@@ -46,16 +47,23 @@ public class Ghost{
                 //Añadir bitmap de fantasma
                 bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         dv.getContext().getResources(), R.drawable.red_ghost), spriteSize, spriteSize, false);
-            xPos = 6 * dv.getBlockSize();
-            yPos = 9 * dv.getBlockSize();
+            xPos = 7 * dv.getBlockSize();
+            yPos = 8 * dv.getBlockSize();
             break;
             case "Pinky":this.chaseBehaviour = new ChaseAmbush();
                 //Añadir bitmap de fantasma
                 bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         dv.getContext().getResources(), R.drawable.pink_ghost), spriteSize, spriteSize, false);
-                xPos = 7 * dv.getBlockSize();
-                yPos = 9 * dv.getBlockSize();
+                xPos = 8 * dv.getBlockSize();
+                yPos = 8 * dv.getBlockSize();
             break;
+            case "Inky":this.chaseBehaviour = new ChasePatrol();
+                //Añadir bitmap de fantasma
+                bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                        dv.getContext().getResources(), R.drawable.blue_ghost), spriteSize, spriteSize, false);
+                xPos = 9 * dv.getBlockSize();
+                yPos = 8 * dv.getBlockSize();
+                break;
             default:break;
         }
 
@@ -74,8 +82,12 @@ public class Ghost{
         yPos = nextPos[1];
         ghostDirection = nextPos[2];
     }
+
     public Bitmap getBitmap() {
         return bitmap;
+    }
+    public int getGhostDirection() {
+        return ghostDirection;
     }
     public int getxPos() {
         return xPos;

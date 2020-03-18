@@ -35,6 +35,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     private Ghost blinky;
     private Ghost pinky;
+    private Ghost inky;
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -85,7 +86,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         loadBitmapImages();
         blinky = new Ghost(this, "Blinky");
         pinky = new Ghost(this, "Pinky");
-
+        inky = new Ghost(this, "Inky");
 
     }
 
@@ -117,8 +118,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private void moveGhosts(Canvas canvas) {
         blinky.move();
         pinky.move();
+        inky.move();
         drawGhost(blinky,canvas);
         drawGhost(pinky,canvas);
+        drawGhost(inky,canvas);
     }
 
     private void drawGhost(Ghost ghost, Canvas canvas) {
@@ -610,7 +613,9 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
     }
-
+    public int getBlinkyDirection(){
+        return blinky.getGhostDirection();
+    }
     public int getxPosPacman() {
         return xPosPacman;
     }
