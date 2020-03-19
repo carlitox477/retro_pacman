@@ -1,38 +1,20 @@
 package com.example.pacman;
 
-public class ChaseAmbush implements ChaseBehaviour {
+import android.util.Log;
 
-
+public class ScatterTopLeftCorner implements ScatterBehaviour {
     @Override
-    public int[] chase(DrawingView dv, int currentGhostDirection, int currentX, int currentY) {
-
-        int xDistance = 0;
-        int yDistance = 0;
-        switch (dv.getPacmanDirection()) {
-            case 0:
-                xDistance = dv.getxPosPacman() - currentX;
-                yDistance = dv.getyPosPacman() - currentY - (4 * dv.getBlockSize());
-                break;
-            case 1:
-                xDistance = dv.getxPosPacman() - currentX + (4 * dv.getBlockSize());
-                yDistance = dv.getyPosPacman() - currentY;
-                break;
-            case 2:
-                xDistance = dv.getxPosPacman() - currentX;
-                yDistance = dv.getyPosPacman() - currentY + (4 * dv.getBlockSize());
-                break;
-            case 3:
-                xDistance = dv.getxPosPacman() - currentX - (4 * dv.getBlockSize());
-                yDistance = dv.getyPosPacman() - currentY;
-                break;
-        }
-
+    public int[] scatter(DrawingView dv, int currentGhostDirection, int currentX, int currentY) {
+        int xDistance = 17 - currentX ;
+        int yDistance = 17 -  currentY ;
 
         short ch;
 
         int xPosGhost = currentX;
         int yPosGhost = currentY;
         int ghostDirection = currentGhostDirection;
+
+
 
 
         if ((xPosGhost % dv.getBlockSize() == 0) && (yPosGhost % dv.getBlockSize() == 0)) {
@@ -46,45 +28,63 @@ public class ChaseAmbush implements ChaseBehaviour {
             }
             ch = dv.getLevelData()[yPosGhost / dv.getBlockSize()][xPosGhost / dv.getBlockSize()];
 
+
+            //1 izquierda
+            //2 arriba
+            //4 derecha
+            //8 abajo
+
+
             if (xDistance >= 0 && yDistance >= 0) { // Move right and down
-                if ((ch & 4) == 0 && (ch & 8) == 0 && (ch & 256) != 0) {
+                if ((ch & 4) == 0 && (ch & 8) == 0) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
+
                         ghostDirection = 1;
                     } else {
                         ghostDirection = 2;
                     }
-                } else if ((ch & 4) == 0) {
+                }
+                else if ((ch & 4) == 0) {
+
                     ghostDirection = 1;
-                } else if ((ch & 8) == 0) {
+                }
+                else if ((ch & 8) == 0) {
                     ghostDirection = 2;
-                } else
+                }
+                else
                     ghostDirection = 3;
             }
             if (xDistance >= 0 && yDistance <= 0) { // Move right and up
-                if ((ch & 4) == 0 && (ch & 2) == 0) {
+                if ((ch & 4) == 0 && (ch & 2) == 0 ) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
                         ghostDirection = 1;
                     } else {
                         ghostDirection = 0;
                     }
-                } else if ((ch & 4) == 0) {
+                }
+                else if ((ch & 4) == 0) {
                     ghostDirection = 1;
-                } else if ((ch & 2) == 0) {
+                }
+                else if ((ch & 2) == 0) {
                     ghostDirection = 0;
-                } else ghostDirection = 2;
+                }
+                else ghostDirection = 2;
             }
             if (xDistance <= 0 && yDistance >= 0) { // Move left and down
-                if ((ch & 1) == 0 && (ch & 8) == 0 && (ch & 256) != 0) {
+                if ((ch & 1) == 0 && (ch & 8) == 0) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
                         ghostDirection = 3;
                     } else {
                         ghostDirection = 2;
                     }
-                } else if ((ch & 1) == 0) {
+                }
+                else if ((ch & 1) == 0) {
                     ghostDirection = 3;
-                } else if ((ch & 8) == 0) {
+                }
+                else if ((ch & 8) == 0) {
                     ghostDirection = 2;
-                } else ghostDirection = 1;
+                }
+                else ghostDirection = 1;
             }
             if (xDistance <= 0 && yDistance <= 0) { // Move left and up
                 if ((ch & 1) == 0 && (ch & 2) == 0) {
@@ -93,12 +93,18 @@ public class ChaseAmbush implements ChaseBehaviour {
                     } else {
                         ghostDirection = 0;
                     }
-                } else if ((ch & 1) == 0) {
+                }
+                else if ((ch & 1) == 0) {
                     ghostDirection = 3;
-                } else if ((ch & 2) == 0) {
+                }
+                else if ((ch & 2) == 0) {
                     ghostDirection = 0;
-                } else ghostDirection = 2;
+                }
+                else ghostDirection = 2;
             }
+
+
+
             // Handles wall collisions
             if ((ghostDirection == 3 && (ch & 1) != 0) ||
                     (ghostDirection == 1 && (ch & 4) != 0) ||
@@ -106,6 +112,7 @@ public class ChaseAmbush implements ChaseBehaviour {
                     (ghostDirection == 2 && (ch & 8) != 0)) {
                 ghostDirection = 4;
             }
+
             //Handles backtrackings
             if(currentGhostDirection == 0 && ghostDirection == 2){
                 if((ch & 2) == 0)
@@ -147,6 +154,8 @@ public class ChaseAmbush implements ChaseBehaviour {
                         ghostDirection = 2;
                 }
             }
+
+
         }
 
         if (ghostDirection == 0) {
@@ -162,5 +171,37 @@ public class ChaseAmbush implements ChaseBehaviour {
         int[] nextPos = {xPosGhost, yPosGhost, ghostDirection};
 
         return nextPos;
+    }
+
+    int step = 0;
+    @Override
+    public int[] moveOutOfBase(DrawingView dv, int currentGhostDirection, int currentX, int currentY) {
+
+
+        int xPosGhost = currentX;
+        int yPosGhost = currentY;
+        int ghostDirection = currentGhostDirection;
+        int[] direction = {3,0,0,0};
+
+        if ((xPosGhost % dv.getBlockSize() == 0) && (yPosGhost % dv.getBlockSize() == 0)) {
+
+            ghostDirection = direction[step];
+            step++;
+
+        }
+        if (ghostDirection == 0) {
+            yPosGhost += -dv.getBlockSize() / 20;
+        } else if (ghostDirection == 1) {
+            xPosGhost += dv.getBlockSize() / 20;
+        } else if (ghostDirection == 2) {
+            yPosGhost += dv.getBlockSize() / 20;
+        } else if (ghostDirection == 3) {
+            xPosGhost += -dv.getBlockSize() / 20;
+        }
+        Log.i("info", "red ghost direction " + ghostDirection);
+        int[] nextPos = {xPosGhost, yPosGhost, ghostDirection};
+
+        return nextPos;
+
     }
 }

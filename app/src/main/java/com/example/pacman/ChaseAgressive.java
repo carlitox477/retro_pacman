@@ -42,7 +42,7 @@ public class ChaseAgressive implements ChaseBehaviour {
 
 
             if (xDistance >= 0 && yDistance >= 0) { // Move right and down
-                if ((ch & 4) == 0 && (ch & 8) == 0) {
+                if ((ch & 4) == 0 && (ch & 8) == 0 && (ch & 256) != 0) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
 
                         ghostDirection = 1;
@@ -77,7 +77,7 @@ public class ChaseAgressive implements ChaseBehaviour {
                 else ghostDirection = 2;
             }
             if (xDistance <= 0 && yDistance >= 0) { // Move left and down
-                if ((ch & 1) == 0 && (ch & 8) == 0) {
+                if ((ch & 1) == 0 && (ch & 8) == 0 && (ch & 256) != 0) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
                         ghostDirection = 3;
                     } else {
@@ -119,47 +119,7 @@ public class ChaseAgressive implements ChaseBehaviour {
                 ghostDirection = 4;
             }
 
-            //Handles backtrackings
-            if(currentGhostDirection == 0 && ghostDirection == 2){
-                if((ch & 2) == 0)
-                    ghostDirection = 0;
-                else{
-                    if((ch & 1) == 0)
-                        ghostDirection = 3;
-                    else if((ch & 4) == 0)
-                        ghostDirection = 1;
-                }
-            }
-            else if(currentGhostDirection == 2  && ghostDirection == 0){
-                if((ch & 8) == 0){
-                    ghostDirection = 2;
-                }else{
-                    if((ch & 1) == 0)
-                        ghostDirection = 3;
-                    else if((ch & 4) == 0)
-                        ghostDirection = 1;
-                }
-            }
-            else if(currentGhostDirection == 1 && ghostDirection == 3){
-                if((ch & 4) == 0){
-                    ghostDirection = 1;
-                }else{
-                    if((ch & 2) == 0)
-                        ghostDirection = 0;
-                    else if((ch & 8) == 0)
-                        ghostDirection = 2;
-                }
-            }
-            else if(currentGhostDirection == 3 && (ch & 1) == 0 && ghostDirection == 1){
-                if((ch & 4) == 0){
-                    ghostDirection = 3;
-                }else{
-                    if((ch & 2) == 0)
-                        ghostDirection = 0;
-                    else if((ch & 8) == 0)
-                        ghostDirection = 2;
-                }
-            }
+
 
         }
 

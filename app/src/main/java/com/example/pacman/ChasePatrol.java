@@ -67,7 +67,7 @@ public class ChasePatrol implements ChaseBehaviour {
             ch = dv.getLevelData()[yPosGhost / dv.getBlockSize()][xPosGhost / dv.getBlockSize()];
 
             if (xDistance >= 0 && yDistance >= 0) { // Move right and down
-                if ((ch & 4) == 0 && (ch & 8) == 0) {
+                if ((ch & 4) == 0 && (ch & 8) == 0 && (ch & 256) != 0) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
                         ghostDirection = 1;
                     } else {
@@ -94,7 +94,7 @@ public class ChasePatrol implements ChaseBehaviour {
                 } else ghostDirection = 2;
             }
             if (xDistance <= 0 && yDistance >= 0) { // Move left and down
-                if ((ch & 1) == 0 && (ch & 8) == 0) {
+                if ((ch & 1) == 0 && (ch & 8) == 0 && (ch & 256) != 0) {
                     if (Math.abs(xDistance) > Math.abs(yDistance)) {
                         ghostDirection = 3;
                     } else {

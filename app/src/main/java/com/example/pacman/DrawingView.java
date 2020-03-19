@@ -36,6 +36,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private Ghost blinky;
     private Ghost pinky;
     private Ghost inky;
+    private Ghost clyde;
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -56,7 +57,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
     private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
-
 
 
     private int viewDirection = 2;          // Direccion en la que pacman esta mirando
@@ -87,7 +87,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         blinky = new Ghost(this, "Blinky");
         pinky = new Ghost(this, "Pinky");
         inky = new Ghost(this, "Inky");
-
+        clyde = new Ghost(this, "Clyde");
     }
 
 
@@ -119,9 +119,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         blinky.move();
         pinky.move();
         inky.move();
-        drawGhost(blinky,canvas);
-        drawGhost(pinky,canvas);
-        drawGhost(inky,canvas);
+        clyde.move();
+        drawGhost(blinky, canvas);
+        drawGhost(pinky, canvas);
+        drawGhost(inky, canvas);
+        drawGhost(clyde, canvas);
     }
 
     private void drawGhost(Ghost ghost, Canvas canvas) {
@@ -268,7 +270,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         int ch = leveldata1[y][x];
         leveldata1[y][x] = (short) (ch ^ 32);
         this.bonusAvailable = true;
-        Log.i("info", "bonus now available at" + xPosBonus + " , " + yPosBonus);
+
+
     }
 
     public int[] generateMapSpawn() {
@@ -303,7 +306,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 if ((leveldata1[i][j] & 1) != 0) { // dibuja izquierda
                     if ((leveldata1[i][j] & 256) != 0) {
 
-                        canvas.drawLine(x - 25, y - 25, x -25, y + blockSize + 25 , paint);
+                        canvas.drawLine(x - 25, y - 25, x - 25, y + blockSize + 25, paint);
                     } else {
 
                         canvas.drawLine(x, y, x, y + blockSize - 1, paint);
@@ -314,8 +317,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 if ((leveldata1[i][j] & 2) != 0) { // dibuja arriba
                     if ((leveldata1[i][j] & 256) != 0) {
 
-                        canvas.drawLine(x - 25 + offset , y - 25, x + blockSize + offset, y - 25, paint);
-                        offset = (offset == 25)? 0 : 25;
+                        canvas.drawLine(x - 25 + offset, y - 25, x + blockSize + offset, y - 25, paint);
+                        offset = (offset == 25) ? 0 : 25;
 
                     } else {
 
@@ -350,12 +353,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 if ((leveldata1[i][j] & 512) != 0) {
                     paint.setColor(Color.YELLOW);
                     canvas.drawLine(
-                            x, y + (blockSize / 4), x + blockSize , y + (blockSize / 4), paint);
+                            x, y + (blockSize / 4), x + blockSize, y + (blockSize / 4), paint);
                     paint.setColor(Color.BLUE);
                     canvas.drawLine(
-                            x, y , x, y + blockSize - 25, paint);
+                            x, y, x, y + blockSize - 25, paint);
                     canvas.drawLine(
-                            x + blockSize, y , x + blockSize, y + blockSize - 25, paint);
+                            x + blockSize, y, x + blockSize, y + blockSize - 25, paint);
                 }
             }
         }
@@ -421,9 +424,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             getContext().startActivity(pauseIntent);
         }
     };
+
     public int getPacmanDirection() {
         return viewDirection;
     }
+
     // Methodo para captar touchEvents
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -520,6 +525,28 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     final short leveldata1[][] = new short[][]{
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {67, 26, 26, 1042, 26, 26, 26, 22, 0, 19, 26, 26, 26, 1042, 26, 26, 70},
+            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
+            {1041, 26, 26, 1040, 26,1042, 26, 1048, 26, 1048, 26,1042, 26, 1040, 26, 26, 20},
+            {25, 26, 26, 20, 0, 25, 26, 22, 0, 19, 26, 28, 0, 17, 26, 26, 28},
+            {0, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 19, 26, 1048,1042, 1048, 26, 22, 0, 21, 0, 0, 0},
+            {26, 26, 26, 1040, 26, 20, 0, 0, 512, 0, 0, 17, 26, 1040, 26, 26, 26},
+            {0, 0, 0, 21, 0, 21, 0, 267, 264, 270, 0, 21, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0},
+            {19, 26, 26, 1040, 26, 1048, 26, 22, 0, 19, 26, 1048, 26, 1040, 26, 26, 22},
+            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
+            {25, 22, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
+            {0, 21, 0, 17, 26, 26,1042, 1048, 26, 1048,1042, 26, 26, 20, 0, 21, 0}, // pacman's spawn
+            {19, 1048, 26, 28, 0, 0, 25,1042, 26,1042, 28, 0, 0, 25, 26, 1048, 22},
+            {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
+            {73, 26, 26, 26, 26, 26, 26, 1048, 26, 1048, 26, 26, 26, 26, 26, 26, 76},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+
+    /*
+    final short leveldata1[][] = new short[][]{
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
             {67, 26, 26, 18, 26, 26, 26, 22, 0, 19, 26, 26, 26, 18, 26, 26, 70},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
             {17, 26, 26, 16, 26, 18, 26, 24, 26, 24, 26, 18, 26, 16, 26, 26, 20},
@@ -527,38 +554,16 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             {0, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 0},
             {0, 0, 0, 21, 0, 19, 26, 24, 18, 24, 26, 22, 0, 21, 0, 0, 0},
             {26, 26, 26, 16, 26, 20, 0, 0, 512, 0, 0, 17, 26, 16, 26, 26, 26},
-            {0, 0, 0, 21, 0, 21, 0, 267, 264, 270, 0, 21, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 21, 0, 267, 1288, 270, 0, 21, 0, 21, 0, 0, 0},
             {0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0},
             {19, 26, 26, 16, 26, 24, 26, 22, 0, 19, 26, 24, 26, 16, 26, 26, 22},
             {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
-            {25, 22, 0, 21, 0, 0, 0, 17, 2, 20, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
-            {0, 21, 0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20, 0, 21, 0}, // pacman's spawn
+            {25, 22, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
+            {0, 21, 0, 17, 26, 26, 18, 24, 26, 24, 18, 26, 26, 20, 0, 21, 0}, // pacman's spawn
             {19, 24, 26, 28, 0, 0, 25, 18, 26, 18, 28, 0, 0, 25, 26, 24, 22},
             {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
             {73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
             {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
-
-    /*
-    final short leveldata1[][] = new short[][]{
-            { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0},
-            { 0, 67, 26, 26, 18, 26, 26, 26, 22,  0, 19, 26, 26, 26, 18, 26, 26, 70},
-            { 0, 21,  0,  0, 21,  0,  0,  0, 21,  0, 21,  0,  0,  0, 21,  0,  0, 21},
-            { 0, 17, 26, 26, 16, 26, 18, 26, 24, 26, 24, 26, 18, 26, 16, 26, 26, 20},
-            { 0, 25, 26, 26, 20,  0, 25, 26, 22,  0, 19, 26, 28,  0, 17, 26, 26, 28},
-            { 0,  0,  0,  0, 21,  0,  0,  0, 21,  0, 21,  0,  0,  0, 21,  0,  0, 0},
-            { 0,  0,  0,  0, 21,  0, 19, 26, 24, 26, 24, 26, 22,  0, 21,  0,  0, 0},
-            { 0, 26, 26, 26, 16, 26, 20,  0,  0,  0,  0,  0, 17, 26, 16, 26, 26, 26},
-            { 0,  0,  0,  0, 21,  0, 17, 26, 26, 26, 26, 26, 20,  0, 21,  0,  0, 0},
-            { 0,  0,  0,  0, 21,  0, 21,  0,  0,  0,  0,  0, 21,  0, 21,  0,  0, 0},
-            { 0, 19, 26, 26, 16, 26, 24, 26, 22,  0, 19, 26, 24, 26, 16, 26, 26, 22},
-            { 0, 21,  0,  0, 21,  0,  0,  0, 21,  0, 21,  0,  0,  0, 21,  0,  0, 21},
-            { 0, 25, 22,  0, 21,  0,  0,  0, 17,  2, 20,  0,  0,  0, 21,  0, 19, 28}, // "2" es el spawn de pacman
-            { 0, 0, 21,  0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20,  0, 21, 0},
-            { 0, 19, 24, 26, 28,  0,  0, 25, 18, 26, 18, 28,  0,  0, 25, 26, 24, 22},
-            { 0, 21,  0,  0,  0,  0,  0,  0, 21,  0, 21,  0,  0,  0,  0,  0,  0, 21},
-            { 0, 73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
-            { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0}
     };
 
      */
@@ -583,7 +588,25 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public void surfaceDestroyed(SurfaceHolder holder) {
 
     }
+    public void scatterGhosts(){
 
+        blinky.setScattering(true);
+        pinky.setScattering(true);
+        inky.setScattering(true);
+        clyde.setScattering(true);
+    }
+    public void frightenGhosts(){
+        blinky.setFrightened(true);
+        pinky.setFrightened(true);
+        inky.setFrightened(true);
+        clyde.setFrightened(true);
+    }
+    public void resetGhosts(){
+        blinky.resetState();
+        pinky.resetState();
+        inky.resetState();
+        clyde.resetState();
+    }
     public int getScreenWidth() {
         return screenWidth;
     }
@@ -613,9 +636,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
     }
-    public int getBlinkyDirection(){
+
+    public int getBlinkyDirection() {
         return blinky.getGhostDirection();
     }
+
     public int getxPosPacman() {
         return xPosPacman;
     }
