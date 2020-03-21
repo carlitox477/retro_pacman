@@ -18,7 +18,7 @@ import android.view.SurfaceView;
 
 import java.util.Random;
 
-public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
+public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     //SurfaceView actualiza lo que tiene mediante hilo
     private Thread thread;
     private Thread bonusCounter;
@@ -54,7 +54,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public static int LONG_PRESS_TIME = 750;  // Time in milliseconds
     final Handler handler = new Handler();
 
-    public DrawingView(Context context) {
+    public GameView(Context context) {
         super(context);
         setFocusable(true);
         holder = getHolder();
