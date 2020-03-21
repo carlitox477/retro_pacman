@@ -28,7 +28,7 @@ public class PlayActivity extends AppCompatActivity {
         playerNickname=(TextView) this.findViewById(R.id.tv_player);
         score=(TextView) this.findViewById(R.id.tv_current_score);
         maxScore=(TextView) this.findViewById(R.id.tv_current_max_score);
-        gameSurfaceView=(SurfaceView) this.findViewById(R.id.game_view);
+        gameSurfaceView= (GameView) this.findViewById(R.id.game_view);
 
         //set text view initial values
         playerNickname.setText(getIntent().getExtras().getString("playerNickname"));

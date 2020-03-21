@@ -10,6 +10,7 @@ import android.graphics.Paint;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -96,19 +97,68 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         loadBitmapImages();
 
     }
+    public GameView(Context context, AttributeSet attrs)
+    {
+        super(context, attrs);
 
+        setFocusable(true);
+        holder = getHolder();
+        holder.addCallback(this);
+        frameTicker = 1000 / totalFrame;
+
+
+        paint = new Paint();
+        paint.setColor(Color.WHITE);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        screenWidth = metrics.widthPixels;
+
+
+        blockSize = screenWidth / 18;
+        blockSize = (blockSize / 9) * 9;
+
+        xPosPacman = 9 * blockSize;
+        yPosPacman = 15 * blockSize;
+
+        bonusCounter = new CountdownBonusThread(this);
+        bonusCounter.start();
+
+        loadBitmapImages();
+    }
+    public GameView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        setFocusable(true);
+        holder = getHolder();
+        holder.addCallback(this);
+        frameTicker = 1000 / totalFrame;
+
+
+        paint = new Paint();
+        paint.setColor(Color.WHITE);
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        screenWidth = metrics.widthPixels;
+
+
+        blockSize = screenWidth / 18;
+        blockSize = (blockSize / 9) * 9;
+
+        xPosPacman = 9 * blockSize;
+        yPosPacman = 15 * blockSize;
+
+        bonusCounter = new CountdownBonusThread(this);
+        bonusCounter.start();
+
+        loadBitmapImages();
+
+    }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void run() {
-
-
         while (canDraw) {
             if (!holder.getSurface().isValid()) {
                 continue;
             }
             Canvas canvas = holder.lockCanvas();
-
             if (canvas != null) {
                 canvas.drawColor(Color.BLACK);
                 drawMap(canvas);
@@ -120,12 +170,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
     }
-
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void movePacman(Canvas canvas) {
-
         int value;
-
         if (xPosPacman >= blockSize * 19) {
             xPosPacman = 0;
         }
@@ -351,7 +398,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
     };
 
-
+    public void begin(){
+        thread = new Thread(this);
+        canDraw = true;
+        thread.start();
+    }
     // Methodo para captar touchEvents
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -511,9 +562,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
      *     */
 
     //Callback methods
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
+        canDraw = true;
+        Thread t = new Thread(this);
+        t.start();
     }
 
     @Override
