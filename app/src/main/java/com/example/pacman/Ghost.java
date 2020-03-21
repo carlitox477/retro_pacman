@@ -11,7 +11,7 @@ public class Ghost{
 
     private Bitmap bitmap;
 
-    private DrawingView dv;
+    private GameView dv;
 
 
 
@@ -88,26 +88,7 @@ public class Ghost{
     }
 
     public void move() {
-        int[] nextPos;
 
-        if(insideBase){
-            nextPos = scatterBehaviour.moveOutOfBase(dv,ghostDirection,xPos,yPos);
-            if((dv.getLevelData()[yPos/dv.getBlockSize()][xPos / dv.getBlockSize()] & 1024) != 0){
-                insideBase = false;
-            }
-        }else{
-            if(frightened){
-                nextPos = frightenedBehaviour.runaway(dv,ghostDirection, xPos, yPos);
-            }else if(scattering){
-                nextPos = scatterBehaviour.scatter(dv,ghostDirection, xPos, yPos);
-            }else{
-                nextPos = chaseBehaviour.chase(dv,ghostDirection, xPos, yPos);
-            }
-        }
-
-        xPos = nextPos[0];
-        yPos = nextPos[1];
-        ghostDirection = nextPos[2];
     }
 
     public Bitmap getBitmap() {

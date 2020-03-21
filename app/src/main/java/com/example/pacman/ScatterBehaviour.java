@@ -1,7 +1,7 @@
 package com.example.pacman;
 
 interface ScatterBehaviour {
-    void scatter(DrawingView dv, int ghostDirection, int xPos, int yPos);
-    void moveOutOfBase(DrawingView dv, int ghostDirection, int xPos, int yPos);
+    void scatter(GameView dv, int ghostDirection, int xPos, int yPos);
+    void moveOutOfBase(GameView dv, int ghostDirection, int xPos, int yPos);
 }
 

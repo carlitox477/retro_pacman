@@ -15,10 +15,10 @@ public class CountdownBonusThread extends Thread {
 
 
     private int time;
-    private DrawingView dv;
+    private GameView dv;
 
 
-    public CountdownBonusThread(DrawingView dv) {
+    public CountdownBonusThread(GameView dv) {
         this.dv = dv;
         this.time = dv.getBonusResetTime();
     }

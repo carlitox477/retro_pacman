@@ -29,12 +29,12 @@ public class AStar {
 
 
 
-    DrawingView dv;
+    GameView dv;
     int[][] map;
 
     private Node[][] nodes;
 
-    public AStar(DrawingView dv, int sx, int sy){
+    public AStar(GameView dv, int sx, int sy){
         this.open = new ArrayList<>();
         this.closed = new ArrayList<>();
         this.path = new ArrayList<>();

@@ -4,7 +4,7 @@ public class ChasePatrol implements ChaseBehaviour {
 
 
     @Override
-    public void chase(DrawingView dv, int currentGhostDirection, int currentX, int currentY) {
+    public void chase(GameView dv, int currentGhostDirection, int currentX, int currentY) {
 
     }
 }

@@ -22,24 +22,6 @@ public class CountdownGhostsState extends Thread {
 
     public void run(){
 
-        if(state == "Scatter")
-            dv.scatterGhosts();
-        else if(state == "Frighten")
-            dv.frightenGhosts();
-
-        Looper.prepare();
-        new CountDownTimer(time, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            public void onFinish() {
-
-                dv.resetGhosts();
-            }
-        }.start();
-        Looper.loop();
 
     }
 }
