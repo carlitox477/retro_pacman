@@ -36,6 +36,7 @@ public class Score {
         this.score = score;
     }
 
+
     public ContentValues toContentValues() {
         //Creates an instance of ContentValues storing all the information of the score
         ContentValues values = new ContentValues();

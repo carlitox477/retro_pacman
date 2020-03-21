@@ -37,6 +37,15 @@ public class DBManager extends SQLiteOpenHelper implements Serializable {
         return getReadableDatabase().query(ScoreContract.ScoreEntry.TABLE_NAME, null, null, null, null, null, ScoreContract.ScoreEntry.MAX_SCORE + " DESC");
     }
 
+    public long updateScore(Score s){
+        //We only update the score if the same is higher than once before
+        long row;
+        SQLiteDatabase sqLiteDatabase=getWritableDatabase();
+        row=sqLiteDatabase.update(ScoreContract.ScoreEntry.TABLE_NAME, s.toContentValues(), ScoreContract.ScoreEntry.NICKNAME+"="+s.getNickname()+" AND "+ScoreContract.ScoreEntry.MAX_SCORE+"<"+s.getScore(),null);
+        sqLiteDatabase.close();
+        return row;
+    }
+
     public long saveScore(Score s){
         long row;
         SQLiteDatabase sqLiteDatabase = getWritableDatabase();
@@ -44,6 +53,19 @@ public class DBManager extends SQLiteOpenHelper implements Serializable {
 
         sqLiteDatabase.close();
         return row;
+    }
+
+    public String getMaxScore(){
+        String sal;
+        return "";
+    }
+
+    public Score getMyPreviousMaxScore(String nickname){
+        Score result;
+        int iNickname,iMaxScore;
+        Cursor scoreQuery;
+
+        return null;
     }
 
     public Cursor getScoresByNickname(){

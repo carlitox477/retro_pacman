@@ -15,9 +15,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends ActivityWithBackGroundMusic {
     private boolean mIsBound = false;
-    private BackgroundMusicService mServ;
-    private ServiceConnection serCon;
-    private HomeWatcher mHomeWatcher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,7 +36,11 @@ public class MainActivity extends ActivityWithBackGroundMusic {
 
     public void onClickPlay(View view){
         //To start to play
+
+        //we sent the backgroundService to stop it when We really start playind
+
         PreviousPlayFragment fragmentToPlay=new PreviousPlayFragment();
+        fragmentToPlay.setMusic(this.mServ);
         fragmentToPlay.show(getSupportFragmentManager(),"ToPlay");
     }
 

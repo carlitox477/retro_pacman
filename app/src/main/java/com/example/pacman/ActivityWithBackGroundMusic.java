@@ -10,11 +10,11 @@ import android.os.PowerManager;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public abstract class ActivityWithBackGroundMusic extends AppCompatActivity {
-    private boolean mIsBound = false;
-    private BackgroundMusicService mServ;
-    private ServiceConnection serCon;
-    private HomeWatcher mHomeWatcher;
+public class ActivityWithBackGroundMusic extends AppCompatActivity {
+    protected boolean mIsBound = false;
+    protected BackgroundMusicService mServ;
+    protected ServiceConnection serCon;
+    protected HomeWatcher mHomeWatcher;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

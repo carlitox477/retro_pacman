@@ -129,15 +129,15 @@
         android:layout_marginVertical="4dp"
         android:layout_marginHorizontal="8dp"
         >
-        <RelativeLayout
-            android:id="@+id/rv_game_view"
+        <SurfaceView
+            android:id="@+id/game_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rv_game_view"
+            android:layout_below="@id/game_view"
             android:layout_margin="4dp"
             >
             <LinearLayout

@@ -20,6 +20,7 @@ import androidx.fragment.app.DialogFragment;
 public class PreviousPlayFragment extends DialogFragment {
     private Button btnPlay;
     private EditText nickname;
+    private BackgroundMusicService music;
 
     @Override
     @Nullable
@@ -66,19 +67,21 @@ public class PreviousPlayFragment extends DialogFragment {
                         public void onClick(View view){
                             //create score for test
                             Score score=new Score(nickname.getText().toString(),Math.random()*1000);
-                            String scoreAsString=String.valueOf(score.getScore());
-                            int indexPoint=scoreAsString.indexOf(".");
-                            String integerScore=scoreAsString.substring(0,indexPoint);
+                            String integerScore=score.getScoreString();
 
                             //We register the score in the DB
-
-                            Toast.makeText(getContext(),"Register "+score.getNickname()+" with a "+integerScore+" score",Toast.LENGTH_SHORT).show();
+                            //new DBManager(getContext()).saveScore(score);
 
                             //Finish test code
+
+
                             Intent intent = new Intent(getActivity(), PlayActivity.class);
                             intent.putExtra("playerNickname",nickname.getText().toString());
                             //We close the fragment and star the play activity
                             getDialog().dismiss();
+                            //we stop background music
+                            music.pauseMusic();
+                            //we start the game
                             startActivity(intent);
 
                         }
@@ -92,5 +95,8 @@ public class PreviousPlayFragment extends DialogFragment {
         return view;
     }
 
+    public void setMusic(BackgroundMusicService music){
+        this.music=music;
+    }
 
 }
