@@ -2,10 +2,6 @@ package com.example.pacman;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.util.Log;
 
 public class Ghost{
 
@@ -36,7 +32,7 @@ public class Ghost{
 
     private int ghostDirection = 0;
 
-    public Ghost(DrawingView dv, String name){
+    public Ghost(GameView dv, String name){
 
         this.name = name;
         this.dv = dv;

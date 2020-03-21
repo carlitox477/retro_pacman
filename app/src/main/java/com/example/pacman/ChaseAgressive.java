@@ -9,7 +9,7 @@ public class ChaseAgressive implements ChaseBehaviour {
 
 
     @Override
-    public int[] chase(DrawingView dv, int currentGhostDirection, int currentX, int currentY) {
+    public int[] chase(GameView dv, int currentGhostDirection, int currentX, int currentY) {
 
         int xDistance = dv.getxPosPacman() - currentX;
         int yDistance = dv.getyPosPacman() - currentY;

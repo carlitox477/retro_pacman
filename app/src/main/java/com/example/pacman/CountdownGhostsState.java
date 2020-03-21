@@ -8,8 +8,8 @@ public class CountdownGhostsState extends Thread {
 
     int time;
     String state;
-    DrawingView dv;
-    public CountdownGhostsState(DrawingView dv, String state){
+    GameView dv;
+    public CountdownGhostsState(GameView dv, String state){
         this.dv = dv;
         this.state = state;
         switch (state){

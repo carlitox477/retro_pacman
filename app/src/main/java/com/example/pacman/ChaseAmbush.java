@@ -4,7 +4,7 @@ public class ChaseAmbush implements ChaseBehaviour {
 
 
     @Override
-    public int[] chase(DrawingView dv, int currentGhostDirection, int currentX, int currentY) {
+    public int[] chase(GameView dv, int currentGhostDirection, int currentX, int currentY) {
 
         int xDistance = 0;
         int yDistance = 0;

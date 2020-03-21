@@ -7,7 +7,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -26,13 +25,23 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private SurfaceHolder holder;
     private boolean canDraw = false;
 
-    private Paint paint = new Paint();
+    private Paint paint;
+
+
     private int screenWidth;                // Ancho de la pantalla
+
+
     private int blockSize;
 
+    private Ghost blinky;
+    private Ghost pinky;
+    private Ghost inky;
+    private Ghost clyde;
+
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
-    private Bitmap ghostBitmap;
     private Bitmap cherryBitmap;
+
+
     private int xPosPacman;
     private int yPosPacman;
     private int totalFrame = 4;             // Cantidad total de animation frames por direccion
@@ -42,19 +51,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private int bonusResetTime = 5;
     private boolean bonusAvailable = false;
-    private CountDownTimer bonusTimer;
     private int xPosBonus;
     private int yPosBonus;
 
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
     private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
+
+
     private int viewDirection = 2;          // Direccion en la que pacman esta mirando
 
     public static int LONG_PRESS_TIME = 750;  // Time in milliseconds
     final Handler handler = new Handler();
 
     public GameView(Context context) {
+
         super(context);
         setFocusable(true);
         holder = getHolder();
@@ -68,18 +79,22 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         blockSize = (blockSize / 5) * 5;
         xPosPacman = 8 * blockSize;
         yPosPacman = 13 * blockSize;
-        xPosBonus = 9 ;
-        yPosBonus = 14 ;
+        xPosBonus = 9;
+        yPosBonus = 14;
         bonusCounter = new CountdownBonusThread(this);
         bonusCounter.start();
         loadBitmapImages();
-
+        blinky = new Ghost(this, "Blinky");
+        pinky = new Ghost(this, "Pinky");
+        inky = new Ghost(this, "Inky");
+        clyde = new Ghost(this, "Clyde");
     }
 
 
     @Override
     public void run() {
-        Log.i("info", "Run");
+
+
         while (canDraw) {
             if (!holder.getSurface().isValid()) {
                 continue;
@@ -90,18 +105,30 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 canvas.drawColor(Color.BLACK);
                 drawMap(canvas);
                 updateFrame(System.currentTimeMillis());
-                //moveGhosts(canvas)
                 movePacman(canvas);
                 drawPellets(canvas);
                 drawSuperPellets(canvas);
-
+                moveGhosts(canvas);
                 drawBonus(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
         }
     }
 
+    private void moveGhosts(Canvas canvas) {
+        blinky.move();
+        pinky.move();
+        inky.move();
+        clyde.move();
+        drawGhost(blinky, canvas);
+        drawGhost(pinky, canvas);
+        drawGhost(inky, canvas);
+        drawGhost(clyde, canvas);
+    }
 
+    private void drawGhost(Ghost ghost, Canvas canvas) {
+        canvas.drawBitmap(ghost.getBitmap(), ghost.getxPos(), ghost.getyPos(), paint);
+    }
 
 
     public void movePacman(Canvas canvas) {
@@ -211,6 +238,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
     }
+
     private void drawSuperPellets(Canvas canvas) {
         float x;
         float y;
@@ -224,25 +252,29 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
     }
+
     private void drawBonus(Canvas canvas) {
 
         short ch = leveldata1[yPosBonus][xPosBonus];
-        if ((ch & 32) != 0  && bonusAvailable) {
+        if ((ch & 32) != 0 && bonusAvailable) {
             canvas.drawBitmap(cherryBitmap, xPosBonus * blockSize, yPosBonus * blockSize, null);
         }
 
     }
+
     public void setBonusAvailable() {
-    //Se determina en que posicion del mapa se generara el bonus
+        //Se determina en que posicion del mapa se generara el bonus
         int[] spawn = generateMapSpawn();
         int y = spawn[0];
         int x = spawn[1];
         int ch = leveldata1[y][x];
         leveldata1[y][x] = (short) (ch ^ 32);
         this.bonusAvailable = true;
-        Log.i("info", "bonus now available at" + xPosBonus +" , " + yPosBonus);
+
+
     }
-    public int[] generateMapSpawn(){
+
+    public int[] generateMapSpawn() {
         //Se genera una posicion aleatoria valida en la cual pacman pueda moverse
         int[] spawn = new int[2];
         xPosBonus = new Random().nextInt(17);
@@ -250,39 +282,83 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         short ch = leveldata1[yPosBonus][xPosBonus];
 
         //Si la posicion generada no es posible moverse
-        if(ch == 0)
+        if (ch == 0)
             spawn = generateMapSpawn();
-        else{
+        else {
             spawn[0] = yPosBonus;
             spawn[1] = xPosBonus;
         }
 
         return spawn;
     }
+
     public void drawMap(Canvas canvas) {
         Log.i("info", "Drawing map");
-        paint.setColor(Color.BLUE);
+        int offset = 0;
         paint.setStrokeWidth(2.5f);
         int x;
         int y;
         for (int i = 0; i < 18; i++) {
             for (int j = 0; j < 17; j++) {
+                paint.setColor(Color.BLUE);
                 x = j * blockSize;
                 y = i * blockSize;
                 if ((leveldata1[i][j] & 1) != 0) { // dibuja izquierda
-                    canvas.drawLine(x, y, x, y + blockSize - 1, paint);
+                    if ((leveldata1[i][j] & 256) != 0) {
+
+                        canvas.drawLine(x - 25, y - 25, x - 25, y + blockSize + 25, paint);
+                    } else {
+
+                        canvas.drawLine(x, y, x, y + blockSize - 1, paint);
+                    }
+
                     Log.i("info", "Drawing map");
                 }
                 if ((leveldata1[i][j] & 2) != 0) { // dibuja arriba
-                    canvas.drawLine(x, y, x + blockSize - 1, y, paint);
+                    if ((leveldata1[i][j] & 256) != 0) {
+
+                        canvas.drawLine(x - 25 + offset, y - 25, x + blockSize + offset, y - 25, paint);
+                        offset = (offset == 25) ? 0 : 25;
+
+                    } else {
+
+                        canvas.drawLine(x, y, x + blockSize - 1, y, paint);
+                    }
+
                 }
                 if ((leveldata1[i][j] & 4) != 0) { // dibuja derecha
-                    canvas.drawLine(
-                            x + blockSize, y, x + blockSize, y + blockSize - 1, paint);
+                    if ((leveldata1[i][j] & 256) != 0) {
+
+                        canvas.drawLine(
+                                x + blockSize + 25, y - 25, x + blockSize + 25, y + blockSize + 25, paint);
+                    } else {
+
+                        canvas.drawLine(
+                                x + blockSize, y, x + blockSize, y + blockSize - 1, paint);
+                    }
+
                 }
                 if ((leveldata1[i][j] & 8) != 0) { // dibuja abajo
+                    if ((leveldata1[i][j] & 256) != 0) {
+
+                        canvas.drawLine(
+                                x - 25, y + blockSize + 25, x + blockSize + 25, y + blockSize + 25, paint);
+                    } else {
+                        canvas.drawLine(
+                                x, y + blockSize, x + blockSize - 1, y + blockSize, paint);
+                    }
+
+                }
+                //Dibujamos la puerta a la base de los fantasmas
+                if ((leveldata1[i][j] & 512) != 0) {
+                    paint.setColor(Color.YELLOW);
                     canvas.drawLine(
-                            x, y + blockSize, x + blockSize - 1, y + blockSize, paint);
+                            x, y + (blockSize / 4), x + blockSize, y + (blockSize / 4), paint);
+                    paint.setColor(Color.BLUE);
+                    canvas.drawLine(
+                            x, y, x, y + blockSize - 25, paint);
+                    canvas.drawLine(
+                            x + blockSize, y, x + blockSize, y + blockSize - 25, paint);
                 }
             }
         }
@@ -335,9 +411,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         pacmanUp[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_up), spriteSize, spriteSize, false);
 
-        //Añadir bitmap de fantasma
-        ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.ghost), spriteSize, spriteSize, false);
 
         //Añadir bitmap de cerezas bonus
         cherryBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
@@ -351,6 +424,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             getContext().startActivity(pauseIntent);
         }
     };
+
+    public int getPacmanDirection() {
+        return viewDirection;
+    }
 
     // Methodo para captar touchEvents
     @Override
@@ -434,39 +511,67 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // atravesandolo, por eso es necesario descomponer cada uno de estos numeros en la composicion binaria
     //para entender las operaciones que estan ocurriendo a la hora de realizar los chequeos
     /*
-    * 2 ^ 0 : Pared (inferior)
-    * 2 ^ 1 : Pared
-    * 2 ^ 2 : Pared
-    * 2 ^ 3 : Pared
-    * 2 ^ 4 : Pastilla
-    * 2 ^ 5 : Bonus
-    * 2 ^ 6 : Super pastilla
-    * 2 ^ 7 : Fantasma
-    * 2 ^ 8 : Disponible para spawn de bonus
-    * */
+     * 2 ^ 0 : Pared izquierda
+     * 2 ^ 1 : Pared arriba
+     * 2 ^ 2 : Pared derecha
+     * 2 ^ 3 : Pared abajo
+     * 2 ^ 4 : Pastilla
+     * 2 ^ 5 : Bonus
+     * 2 ^ 6 : Super pastilla
+     * 2 ^ 7 : Fantasma
+     * 2 ^ 8 : Pared de base fantasma (Se reduce la anchura de las paredes)
+     * */
+
+
     final short leveldata1[][] = new short[][]{
-            { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0},
-            { 0, 67, 26, 26, 18, 26, 26, 26, 22,  0, 19, 26, 26, 26, 18, 26, 26, 70},
-            { 0, 21,  0,  0, 21,  0,  0,  0, 21,  0, 21,  0,  0,  0, 21,  0,  0, 21},
-            { 0, 17, 26, 26, 16, 26, 18, 26, 24, 26, 24, 26, 18, 26, 16, 26, 26, 20},
-            { 0, 25, 26, 26, 20,  0, 25, 26, 22,  0, 19, 26, 28,  0, 17, 26, 26, 28},
-            { 0,  0,  0,  0, 21,  0,  0,  0, 21,  0, 21,  0,  0,  0, 21,  0,  0, 0},
-            { 0,  0,  0,  0, 21,  0, 19, 26, 24, 26, 24, 26, 22,  0, 21,  0,  0, 0},
-            { 0, 26, 26, 26, 16, 26, 20,  0,  0,  0,  0,  0, 17, 26, 16, 26, 26, 26},
-            { 0,  0,  0,  0, 21,  0, 17, 26, 26, 26, 26, 26, 20,  0, 21,  0,  0, 0},
-            { 0,  0,  0,  0, 21,  0, 21,  0,  0,  0,  0,  0, 21,  0, 21,  0,  0, 0},
-            { 0, 19, 26, 26, 16, 26, 24, 26, 22,  0, 19, 26, 24, 26, 16, 26, 26, 22},
-            { 0, 21,  0,  0, 21,  0,  0,  0, 21,  0, 21,  0,  0,  0, 21,  0,  0, 21},
-            { 0, 25, 22,  0, 21,  0,  0,  0, 17,  2, 20,  0,  0,  0, 21,  0, 19, 28}, // "2" es el spawn de pacman
-            { 0, 0, 21,  0, 17, 26, 26, 18, 24, 24, 24, 18, 26, 26, 20,  0, 21, 0},
-            { 0, 19, 24, 26, 28,  0,  0, 25, 18, 26, 18, 28,  0,  0, 25, 26, 24, 22},
-            { 0, 21,  0,  0,  0,  0,  0,  0, 21,  0, 21,  0,  0,  0,  0,  0,  0, 21},
-            { 0, 73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
-            { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0}
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {67, 26, 26, 1042, 26, 26, 26, 22, 0, 19, 26, 26, 26, 1042, 26, 26, 70},
+            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
+            {1041, 26, 26, 1040, 26,1042, 26, 1048, 26, 1048, 26,1042, 26, 1040, 26, 26, 20},
+            {25, 26, 26, 20, 0, 25, 26, 22, 0, 19, 26, 28, 0, 17, 26, 26, 28},
+            {0, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 19, 26, 1048,1042, 1048, 26, 22, 0, 21, 0, 0, 0},
+            {26, 26, 26, 1040, 26, 20, 0, 0, 512, 0, 0, 17, 26, 1040, 26, 26, 26},
+            {0, 0, 0, 21, 0, 21, 0, 267, 264, 270, 0, 21, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0},
+            {19, 26, 26, 1040, 26, 1048, 26, 22, 0, 19, 26, 1048, 26, 1040, 26, 26, 22},
+            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
+            {25, 22, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
+            {0, 21, 0, 17, 26, 26,1042, 1048, 26, 1048,1042, 26, 26, 20, 0, 21, 0}, // pacman's spawn
+            {19, 1048, 26, 28, 0, 0, 25,1042, 26,1042, 28, 0, 0, 25, 26, 1048, 22},
+            {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
+            {73, 26, 26, 26, 26, 26, 26, 1048, 26, 1048, 26, 26, 26, 26, 26, 26, 76},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     };
 
+    /*
+    final short leveldata1[][] = new short[][]{
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+            {67, 26, 26, 18, 26, 26, 26, 22, 0, 19, 26, 26, 26, 18, 26, 26, 70},
+            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
+            {17, 26, 26, 16, 26, 18, 26, 24, 26, 24, 26, 18, 26, 16, 26, 26, 20},
+            {25, 26, 26, 20, 0, 25, 26, 22, 0, 19, 26, 28, 0, 17, 26, 26, 28},
+            {0, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 19, 26, 24, 18, 24, 26, 22, 0, 21, 0, 0, 0},
+            {26, 26, 26, 16, 26, 20, 0, 0, 512, 0, 0, 17, 26, 16, 26, 26, 26},
+            {0, 0, 0, 21, 0, 21, 0, 267, 1288, 270, 0, 21, 0, 21, 0, 0, 0},
+            {0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0},
+            {19, 26, 26, 16, 26, 24, 26, 22, 0, 19, 26, 24, 26, 16, 26, 26, 22},
+            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
+            {25, 22, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
+            {0, 21, 0, 17, 26, 26, 18, 24, 26, 24, 18, 26, 26, 20, 0, 21, 0}, // pacman's spawn
+            {19, 24, 26, 28, 0, 0, 25, 18, 26, 18, 28, 0, 0, 25, 26, 24, 22},
+            {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
+            {73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
+            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+
+     */
+
+
+
     /* 0 pared inferior
-    *     */
+     *     */
 
     //Callback methods
     @Override
@@ -482,6 +587,36 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
+    }
+    public void scatterGhosts(){
+
+        blinky.setScattering(true);
+        pinky.setScattering(true);
+        inky.setScattering(true);
+        clyde.setScattering(true);
+    }
+    public void frightenGhosts(){
+        blinky.setFrightened(true);
+        pinky.setFrightened(true);
+        inky.setFrightened(true);
+        clyde.setFrightened(true);
+    }
+    public void resetGhosts(){
+        blinky.resetState();
+        pinky.resetState();
+        inky.resetState();
+        clyde.resetState();
+    }
+    public int getScreenWidth() {
+        return screenWidth;
+    }
+
+    public int getBlockSize() {
+        return blockSize;
+    }
+
+    public short[][] getLevelData() {
+        return leveldata1;
     }
 
     public void resume() {
@@ -502,10 +637,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
     }
 
+    public int getBlinkyDirection() {
+        return blinky.getGhostDirection();
+    }
+
+    public int getxPosPacman() {
+        return xPosPacman;
+    }
+
+    public int getyPosPacman() {
+        return yPosPacman;
+    }
+
     public int getBonusResetTime() {
         return bonusResetTime;
     }
-
 
 
     public boolean isBonusAvailable() {

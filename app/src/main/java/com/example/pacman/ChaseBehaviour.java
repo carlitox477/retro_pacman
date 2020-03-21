@@ -2,6 +2,6 @@ package com.example.pacman;
 
 public interface ChaseBehaviour {
 
-    public int[] chase(DrawingView dv, int ghostDirection, int GhostX, int GhostY);
+    public int[] chase(GameView dv, int ghostDirection, int GhostX, int GhostY);
 
 }
