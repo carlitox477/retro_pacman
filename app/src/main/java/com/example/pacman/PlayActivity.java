@@ -34,28 +34,20 @@ public class PlayActivity extends AppCompatActivity {
         playerNickname.setText(getIntent().getExtras().getString("playerNickname"));
         score.setText("0");
         maxScore.setText("To modify");
+        this.gameView=new GameView(gameSurfaceView.getContext());
 
-        //this.gameView=new GameView(gameSurfaceView.getContext());
-        this.gameSurfaceView.getHolder().addCallback(new GameView(gameSurfaceView.getContext()));
-        //this.gameView.surfaceCreated(gameSurfaceView.getHolder());
+        this.gameSurfaceView.getHolder().addCallback(this.gameView);
 
-        //End modified code
-        /*
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        drawingView = new DrawingView(this);
-        setContentView(drawingView);
-         */
+
 
     }
     protected void onResume(){
         super.onResume();
-        //drawingView.resume();
+        this.gameView.resume();
     }
     protected void onPause(){
         super.onPause();
-        //drawingView.pause();
+        this.gameView.pause();
     }
 
     public void onLose(double score){

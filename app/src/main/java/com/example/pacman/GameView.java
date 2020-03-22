@@ -2,13 +2,13 @@ package com.example.pacman;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -21,9 +21,11 @@ import androidx.annotation.RequiresApi;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
     //SurfaceView actualiza lo que tiene mediante hilo
+    private ReentrantLock gameLock; //Lock to draw or pause the game
     private Thread thread;
 
     private Thread bonusCounter;
@@ -71,65 +73,27 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
     public GameView(Context context) {
-
         super(context);
-        setFocusable(true);
-        holder = getHolder();
-        holder.addCallback(this);
-        frameTicker = 1000 / totalFrame;
-
-
-        paint = new Paint();
-        paint.setColor(Color.WHITE);
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        screenWidth = metrics.widthPixels;
-
-
-        blockSize = screenWidth / 18;
-        blockSize = (blockSize / 9) * 9;
-
-        xPosPacman = 9 * blockSize;
-        yPosPacman = 15 * blockSize;
-
-        bonusCounter = new CountdownBonusThread(this);
-        bonusCounter.start();
-
-        loadBitmapImages();
+        this.constructorHelper();
 
     }
-    public GameView(Context context, AttributeSet attrs)
-    {
+    public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        setFocusable(true);
-        holder = getHolder();
-        holder.addCallback(this);
-        frameTicker = 1000 / totalFrame;
-
-
-        paint = new Paint();
-        paint.setColor(Color.WHITE);
-        DisplayMetrics metrics = getResources().getDisplayMetrics();
-        screenWidth = metrics.widthPixels;
-
-
-        blockSize = screenWidth / 18;
-        blockSize = (blockSize / 9) * 9;
-
-        xPosPacman = 9 * blockSize;
-        yPosPacman = 15 * blockSize;
-
-        bonusCounter = new CountdownBonusThread(this);
-        bonusCounter.start();
-
-        loadBitmapImages();
+        this.constructorHelper();
     }
+
     public GameView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        this.constructorHelper();
+
+    }
+
+    private void constructorHelper(){
+        this.gameLock=new ReentrantLock(true);
         setFocusable(true);
         holder = getHolder();
         holder.addCallback(this);
-        frameTicker = 1000 / totalFrame;
+        frameTicker = (long) (1000.0f / totalFrame);
 
 
         paint = new Paint();
@@ -148,13 +112,19 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         bonusCounter.start();
 
         loadBitmapImages();
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void run() {
         while (canDraw) {
+            //this.gameLock.lock();
+            // update
+
+            //draw
+
+            //sleep
+
             if (!holder.getSurface().isValid()) {
                 continue;
             }
@@ -168,6 +138,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 movePacman(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
+            //this.gameLock.unlock();
+
+
         }
     }
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -236,7 +209,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     // Method that draws pacman based on his viewDirection
     public void drawPacman(Canvas canvas) {
-        Log.i("info", "Drawing pacman");
+        //Log.i("info", "Drawing pacman");
         switch (viewDirection) {
             case (0):
                 canvas.drawBitmap(pacmanUp[currentPacmanFrame], xPosPacman, yPosPacman, paint);
@@ -257,7 +230,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
     public void drawMap(Canvas canvas) {
-        Log.i("info", "Drawing map");
+        //Log.i("info", "Drawing map");
         float offset = 0;
         for (int y = 0; y < 21; y++) {
             for (int x = 0; x < 19; x++) {
@@ -337,54 +310,46 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return spawn;
     }
 
+    protected void loadBitmap(int spriteSize, int fpm, String characterName){
+        //fpm: frames per movement
+        String packageName=getContext().getPackageName();
+        Resources res=getResources();
+        int idRight, idLeft, idDown, idUp;
+
+        //We create Bitmap arrays deppending in fpm value
+        //We should
+        pacmanRight=new Bitmap[fpm];
+        pacmanDown=new Bitmap[fpm];
+        pacmanLeft=new Bitmap[fpm];
+        pacmanUp=new Bitmap[fpm];
+
+        // We add pacman's bitmap looking to the right
+        for (int i=0; i<fpm; i++){
+            //pacman movement image should be png with the name as "pacman_direction#
+            // # is a number; direction must be "right", "left", "up" or "down"
+            idRight=res.getIdentifier(characterName+"_right"+i, "drawable", packageName);
+            idLeft=res.getIdentifier(characterName+"_left"+i, "drawable", packageName);
+            idUp=res.getIdentifier(characterName+"_up"+i, "drawable", packageName);
+            idDown=res.getIdentifier(characterName+"_down"+i, "drawable", packageName);
+
+            //we add the bitmaps
+            pacmanRight[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                    res, idRight), spriteSize, spriteSize, false);
+            pacmanLeft[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                    res, idLeft), spriteSize, spriteSize, false);
+            pacmanUp[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                    res, idUp), spriteSize, spriteSize, false);
+            pacmanDown[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                    res, idDown), spriteSize, spriteSize, false);
+        }
+    }
+
     private void loadBitmapImages() {
         // Escala los sprites en base al tamaño de la pantalla
         int spriteSize = screenWidth / 18;
         spriteSize = (spriteSize / 9) * 9;// Tamaño de pacman y fantasmas
 
-
-        // Añadir bitmap de pacman mirando a la derecha
-        pacmanRight = new Bitmap[totalFrame];
-        pacmanRight[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_right1), spriteSize, spriteSize, false);
-        pacmanRight[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_right2), spriteSize, spriteSize, false);
-        pacmanRight[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_right3), spriteSize, spriteSize, false);
-        pacmanRight[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_right), spriteSize, spriteSize, false);
-        // Añadir bitmap de pacman mirando a la abajo
-        pacmanDown = new Bitmap[totalFrame];
-        pacmanDown[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_down1), spriteSize, spriteSize, false);
-        pacmanDown[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_down2), spriteSize, spriteSize, false);
-        pacmanDown[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_down3), spriteSize, spriteSize, false);
-        pacmanDown[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_down), spriteSize, spriteSize, false);
-        // Añadir bitmap de pacman mirando a la izquierda
-        pacmanLeft = new Bitmap[totalFrame];
-        pacmanLeft[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_left1), spriteSize, spriteSize, false);
-        pacmanLeft[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_left2), spriteSize, spriteSize, false);
-        pacmanLeft[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_left3), spriteSize, spriteSize, false);
-        pacmanLeft[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_left), spriteSize, spriteSize, false);
-        // Añadir bitmap de pacman mirando a la arriba
-        pacmanUp = new Bitmap[totalFrame];
-        pacmanUp[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_up1), spriteSize, spriteSize, false);
-        pacmanUp[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_up2), spriteSize, spriteSize, false);
-        pacmanUp[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_up3), spriteSize, spriteSize, false);
-        pacmanUp[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.pacman_up), spriteSize, spriteSize, false);
-
-
+        this.loadBitmap(spriteSize,4,"pacman");
         //Añadir bitmap de cerezas bonus
         cherryBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.cherry), spriteSize, spriteSize, false);
@@ -398,11 +363,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
     };
 
-    public void begin(){
-        thread = new Thread(this);
-        canDraw = true;
-        thread.start();
-    }
+
     // Methodo para captar touchEvents
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -565,6 +526,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        //this.holder=holder;
         canDraw = true;
         Thread t = new Thread(this);
         t.start();
@@ -590,12 +552,25 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
     public void resume() {
+        //Now
+        //this.gameLock.unlock();
+
+        //Previous
+
         canDraw = true;
         thread = new Thread(this);
         thread.start();
+
+
     }
 
     public void pause() {
+        //New code
+        //canDraw=false;
+        //this.gameLock.lock();
+
+        //Previous code
+
         canDraw = false;
         while (true) {
             try {
@@ -605,12 +580,16 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 // retry
             }
         }
+
     }
 
     public int getBonusResetTime() {
         return bonusResetTime;
     }
+
     public int[][] getLevellayout(){
         return levellayout;
     }
+
+
 }

@@ -132,8 +132,11 @@
 
         <com.example.pacman.GameView
             android:id="@+id/game_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:foregroundGravity="center"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -146,16 +149,20 @@
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:orientation="vertical"
-                android:gravity="center"
-                android:layout_gravity="center"
+                android:gravity="left"
                 >
                 <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
                     >
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="20sp"
+                        android:fontFamily="@font/pixelar"
+                        android:text="LIFES: "
                         />
                 </RelativeLayout>
             </LinearLayout>
