@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -23,7 +24,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback {
+public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback, GestureDetector.OnGestureListener {
+    private static final float SWIPE_THRESHOLD = 2;
+    private static final float SWIPE_VELOCITY = 2;
+
+    GestureDetector gestureDetector;
     //SurfaceView actualiza lo que tiene mediante hilo
     private ReentrantLock gameLock; //Lock to draw or pause the game
     private Thread thread;
@@ -60,8 +65,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private int currentArrowFrame = 0;      // animation frame de arrow actual
     private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
 
-
-    private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
     private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
 
@@ -90,6 +93,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private void constructorHelper(){
         this.gameLock=new ReentrantLock(true);
+
+        this.gestureDetector=new GestureDetector(this);
         setFocusable(true);
         holder = getHolder();
         holder.addCallback(this);
@@ -364,58 +369,17 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     };
 
 
-    // Methodo para captar touchEvents
+    // Method to capture touchEvents
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case (MotionEvent.ACTION_DOWN): {
-                x1 = event.getX();
-                y1 = event.getY();
-                handler.postDelayed(longPressed, LONG_PRESS_TIME);
-                break;
-            }
-            case (MotionEvent.ACTION_UP): {
-                x2 = event.getX();
-                y2 = event.getY();
-                calculateSwipeDirection();
-                handler.removeCallbacks(longPressed);
-                break;
-            }
-        }
+        //To swipe
+        //https://www.youtube.com/watch?v=32rSs4tE-mc
+        this.gestureDetector.onTouchEvent(event);
+        super.onTouchEvent(event);
         return true;
     }
 
-    // Calcula la direccion en la que el jugador realiza el swipe
-    // basado en la calculacion de las diferencias en
-    // la posicion inicial y la posicion final del swipe
-    private void calculateSwipeDirection() {
-        float xDiff = (x2 - x1);
-        float yDiff = (y2 - y1);
 
-        // Direcciones
-        // 0 = arriba
-        // 1 = derecha
-        // 2 = abajo
-        // 3 = izquierda
-        // 4 = sin movimiento
-
-        //Chequea que eje tiene la mayor distancia
-        //en orden para saber en que direccion el swipe
-        //va a ser
-        if (Math.abs(yDiff) > Math.abs(xDiff)) {
-            if (yDiff < 0) {
-                nextDirection = 0;
-            } else if (yDiff > 0) {
-                nextDirection = 2;
-            }
-        } else {
-            if (xDiff < 0) {
-                nextDirection = 3;
-            } else if (xDiff > 0) {
-                nextDirection = 1;
-            }
-        }
-    }
 
     //Chequea si se deberia actualizar el frame actual basado en el
     // tiempo que a transcurrido asi la animacion
@@ -592,4 +556,74 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     }
 
 
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        return false;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e) {
+
+    }
+
+    @Override
+    public boolean onFling(MotionEvent downEvent, MotionEvent moveEvent, float velocityX, float velocityY) {
+        //To swipe
+        //https://www.youtube.com/watch?v=32rSs4tE-mc
+        float diffX, diffY;
+
+        diffX=moveEvent.getX()-downEvent.getX();
+        diffY=moveEvent.getY()-downEvent.getY();
+
+        // Directions
+        // 0 = up
+        // 1 = right
+        // 2 = down
+        // 3 = left
+        // 4 = no movement
+
+        if(Math.abs(diffX)>Math.abs(diffY)){
+            //right or left swipe
+            if(Math.abs(diffX)>SWIPE_THRESHOLD && Math.abs(velocityX)>SWIPE_VELOCITY){
+                if(diffX>0){
+                    //right
+                    nextDirection = 1;
+                }else{
+                    //left
+                    nextDirection = 3;
+                }
+            }
+
+        }else{
+            //up or down swipe
+            if(Math.abs(diffY)>SWIPE_THRESHOLD && Math.abs(velocityY)>SWIPE_VELOCITY){
+                if(diffY>0){
+                    //down
+                    nextDirection = 2;
+                }else{
+                    //up
+                    nextDirection = 0;
+                }
+            }
+        }
+        Log.i("Tap","Fling");
+
+
+        return true;
+    }
 }
