@@ -29,8 +29,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private Thread thread;
 
     private Thread bonusCounter;
-    private int xPosBonus;
-    private int yPosBonus;
+    private int xPosBonus; //Added
+    private int yPosBonus; //Added
     private int bonusResetTime = 1000;
     private boolean bonusAvailable;
 
@@ -61,7 +61,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
 
 
-    private float x1, x2, y1, y2;           // Initial/Final positions of swipe
     private int direction = 4;              // direccion del movimiento, movimiento inicial es a la derecha
     private int nextDirection = 4;          // Buffer para la siguiente direccion de movimiento tactil
 
@@ -367,20 +366,28 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // Methodo para captar touchEvents
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        //on touch event we calculate the swipe direction to order the pacman
+        //where to move in next intersection or now if it is possible
+        float[] previousSwipePosition,currentSwipePosition;
+        previousSwipePosition=new float[2];
+        currentSwipePosition=new float[2];
+
+
         switch (event.getAction()) {
-            case (MotionEvent.ACTION_DOWN): {
-                x1 = event.getX();
-                y1 = event.getY();
+            case (MotionEvent.ACTION_DOWN):
+                previousSwipePosition[0] = event.getX();
+                previousSwipePosition[1] = event.getY();
                 handler.postDelayed(longPressed, LONG_PRESS_TIME);
                 break;
-            }
-            case (MotionEvent.ACTION_UP): {
-                x2 = event.getX();
-                y2 = event.getY();
-                calculateSwipeDirection();
+
+            case (MotionEvent.ACTION_UP):
+                currentSwipePosition[0]= event.getX();
+                currentSwipePosition[1] = event.getY();
+                calculateSwipeDirection(previousSwipePosition, currentSwipePosition);
                 handler.removeCallbacks(longPressed);
                 break;
-            }
+            default:
+                break;
         }
         return true;
     }
@@ -388,9 +395,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // Calcula la direccion en la que el jugador realiza el swipe
     // basado en la calculacion de las diferencias en
     // la posicion inicial y la posicion final del swipe
-    private void calculateSwipeDirection() {
-        float xDiff = (x2 - x1);
-        float yDiff = (y2 - y1);
+    private void calculateSwipeDirection(float[]previous, float[]current) {
+        float xDiff = current[0]-previous[0];
+        float yDiff = current[1]-previous[2];
 
         // Direcciones
         // 0 = arriba
