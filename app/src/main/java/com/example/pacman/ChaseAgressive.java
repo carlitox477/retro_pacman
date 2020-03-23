@@ -55,24 +55,35 @@ public class ChaseAgressive implements ChaseBehaviour {
 
         int direction = 4;
 
-        Node nextNode = path.get(1);
-        Node currentNode =  path.get(0);
-        int nextX = nextNode.x;
-        int nextY = nextNode.y;
-        int currentX = currentNode.x;
-        int currentY = currentNode.y;
+        int nextX;
+        int nextY;
+        int currentX;
+        int currentY;
 
-        if(currentX - nextX == -1 && currentY - nextY == 0)
-            direction = 1;
-        else if(currentX - nextX == 0 && currentY - nextY == -1)
-            direction = 2;
-        else if(currentX - nextX == 1 && currentY - nextY == 0)
-            direction = 3;
-        else if(currentX - nextX == 0 && currentY - nextY == 1)
-            direction = 0;
+        Node nextNode;
+        Node currentNode;
 
-        Log.i("info", "getDirection: " + direction);
-        return  direction;
+        if(path.size() > 1){
+            nextNode =  path.get(1);
+            currentNode = path.get(0);
+
+            nextX = nextNode.x;
+            nextY = nextNode.y;
+            currentX = currentNode.x;
+            currentY = currentNode.y;
+
+            if (currentX - nextX == -1 && currentY - nextY == 0)
+                direction = 1;
+            else if (currentX - nextX == 0 && currentY - nextY == -1)
+                direction = 2;
+            else if (currentX - nextX == 1 && currentY - nextY == 0)
+                direction = 3;
+            else if (currentX - nextX == 0 && currentY - nextY == 1)
+                direction = 0;
+        }
+
+
+        return direction;
 
 
     }

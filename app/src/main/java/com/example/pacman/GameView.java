@@ -33,10 +33,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private ReentrantLock gameLock; //Lock to draw or pause the game
     private Thread thread;
 
-    private Thread bonusCounter;
+    private CountdownBonusThread bonusCounter;
     private int xPosBonus; //Added
     private int yPosBonus; //Added
-    private int bonusResetTime = 1000;
+    private int bonusResetTime = 5000;
     private boolean bonusAvailable;
 
     private SurfaceHolder holder;
@@ -51,7 +51,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private int blockSize;
 
+
+    private CountdownGhostsState stateCounter;
     private Ghost blinky;
+    private Ghost pinky;
+    private Ghost inky;
+    private Ghost clyde;
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -143,7 +148,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 drawBonus(canvas);
                 moveGhosts();
                 drawGhosts(canvas);
+
                 movePacman(canvas);
+
                 holder.unlockCanvasAndPost(canvas);
             }
         }
@@ -151,14 +158,15 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private void drawGhosts(Canvas canvas) {
         canvas.drawBitmap(blinky.getBitmap(), blinky.getxPos(), blinky.getyPos(), paint);
-        Log.i("info", "x " + blinky.getxPos() + " Y " + blinky
-        .getyPos());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void moveGhosts() {
-        if(blinky == null)
-            blinky = new Ghost(this,"Blinky");
+        if (blinky == null) {
+            blinky = new Ghost(this, "Blinky");
+            stateCounter = new CountdownGhostsState(this, 1);
+            stateCounter.start();
+        }
         blinky.move();
     }
 
@@ -168,6 +176,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         if (xPosPacman >= blockSize * 19) {
             xPosPacman = 0;
         }
+        checkGhostDetection(canvas);
+
 
         if ((xPosPacman % blockSize == 0) && (yPosPacman % blockSize == 0)) {
 
@@ -181,10 +191,17 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
             if (value == 3) {
                 levellayout[yPosPacman / blockSize][xPosPacman / blockSize] = 0;
-                setGhostsVulnerable();
+                if (stateCounter != null)
+                    stateCounter.cancelTimer();
+
+                stateCounter = new CountdownGhostsState(this, 2);
+                stateCounter.start();
             }
             if (value == 9) {
                 levellayout[yPosPacman / blockSize][xPosPacman / blockSize] = 0;
+                bonusCounter = new CountdownBonusThread(this);
+                bonusCounter.start();
+
             }
 
 
@@ -216,20 +233,41 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         // Depending on the direction move the position of pacman
         if (direction == 0) {
-            yPosPacman += -blockSize / 15;
+            yPosPacman += -blockSize / 9;
         } else if (direction == 1) {
-            xPosPacman += blockSize / 15;
+            xPosPacman += blockSize / 9;
         } else if (direction == 2) {
-            yPosPacman += blockSize / 15;
+            yPosPacman += blockSize / 9;
         } else if (direction == 3) {
-            xPosPacman += -blockSize / 15;
+            xPosPacman += -blockSize / 9;
         }
 
     }
 
-    public void setGhostsVulnerable(){
-        blinky.setFrightenedBehaviour();
+    private void checkGhostDetection(Canvas canvas) {
+        Paint paint = new Paint();
+        paint.setColor(Color.BLUE);
+        canvas.drawLine(blinky.getxPos() , blinky.getyPos() + getBlockSize() / 2, blinky.getxPos() +  blockSize , blinky.getyPos() + getBlockSize() /2, paint);
+        canvas.drawLine(blinky.getxPos() + getBlockSize() /2 , blinky.getyPos(), blinky.getxPos() + getBlockSize() /2 , blinky.getyPos() +  blockSize, paint);
+
+        canvas.drawLine(xPosPacman , yPosPacman + getBlockSize() /2, xPosPacman +  blockSize , yPosPacman + getBlockSize() /2, paint);
+        canvas.drawLine(xPosPacman + getBlockSize() /2 , yPosPacman, xPosPacman + getBlockSize() /2 , yPosPacman +  blockSize, paint);
+
+            if(Math.abs(xPosPacman) <= blinky.getxPos() + 5){
+                if( Math.abs(yPosPacman) <= blinky.getyPos() + 5){
+                    if(Math.abs(xPosPacman) >= blinky.getxPos() - 5){
+                        if( Math.abs(yPosPacman) >= blinky.getyPos() - 5){
+
+                    Log.i("info", "checkGhostDetection: detected");
+                    blinky.setRespawnBehaviour();
+                }}}
+
+
+            }
+
     }
+
+
     // Method that draws pacman based on his viewDirection
     public void drawPacman(Canvas canvas) {
         //Log.i("info", "Drawing pacman");
@@ -285,13 +323,26 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     }
 
+    public void frightenGhosts() {
+        blinky.setFrightenedBehaviour();
+    }
+
+    public void scatterGhosts() {
+        blinky.setScatterBehaviour();
+    }
+
+    public void resetGhosts() {
+        blinky.setChaseBehaviour();
+    }
 
     public void setBonusAvailable() {
         //Se determina en que posicion del mapa se generara el bonus
         int[] spawn = generateMapSpawn();
-        int y = spawn[0];
-        int x = spawn[1];
-        levellayout[y][x] = 9;
+
+        yPosBonus = spawn[0];
+        xPosBonus = spawn[1];
+
+        levellayout[yPosBonus][xPosBonus] = 9;
         this.bonusAvailable = true;
 
 
@@ -314,16 +365,16 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public int[] generateMapSpawn() {
         //Se genera una posicion aleatoria valida en la cual pacman pueda moverse
         int[] spawn = new int[2];
-        xPosBonus = new Random().nextInt(17) + 1;
-        yPosBonus = new Random().nextInt(18) + 1;
-        int value = levellayout[yPosBonus][xPosBonus];
+        int randomX = new Random().nextInt(17) + 1;
+        int randomY = new Random().nextInt(18) + 1;
+        int value = levellayout[randomY][randomX];
 
         //Si en la posicion generada no es posible moverse
         if (value == 1 || value == 5 || value == 6 || value == 7 || value == 8)
             spawn = generateMapSpawn();
         else {
-            spawn[0] = yPosBonus;
-            spawn[1] = xPosBonus;
+            spawn[0] = randomY;
+            spawn[1] = randomX;
         }
 
         return spawn;
@@ -642,7 +693,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 }
             }
         }
-        Log.i("Tap", "Fling");
+
 
 
         return true;

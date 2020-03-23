@@ -15,12 +15,12 @@ public class CountdownBonusThread extends Thread {
 
 
     private int time;
-    private GameView dv;
+    private GameView gv;
 
 
-    public CountdownBonusThread(GameView dv) {
-        this.dv = dv;
-        this.time = dv.getBonusResetTime();
+    public CountdownBonusThread(GameView gv) {
+        this.gv = gv;
+        this.time = gv.getBonusResetTime();
     }
 
     public void run() {
@@ -29,15 +29,13 @@ public class CountdownBonusThread extends Thread {
         new CountDownTimer(time, 1000) {
 
             public void onTick(long millisUntilFinished) {
-                Log.i("info", "Counting bonus ticked");
+
             }
 
 
             public void onFinish() {
                 Log.i("info", "Counting bonus reseted");
-                dv.setBonusAvailable();
-
-
+                gv.setBonusAvailable();
             }
         }.start();
         Looper.loop();

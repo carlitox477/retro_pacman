@@ -44,7 +44,7 @@ public class ScatterTopRightCorner implements ScatterBehaviour {
 
 
         }
-        Log.i("info", "getDirection: " + direction);
+
 
         if (direction == 0) {
             srcY += -gv.getBlockSize() / 15;

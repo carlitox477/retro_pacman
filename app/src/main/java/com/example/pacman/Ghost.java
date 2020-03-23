@@ -14,6 +14,7 @@ public class Ghost {
 
     private Bitmap ghostBitmap;
     private Bitmap vulnerableGhostBitmap;
+    private Bitmap respawningGhostBitmap;
     int spriteSize;
 
     private GameView gv;
@@ -28,6 +29,7 @@ public class Ghost {
     private ChaseBehaviour chaseBehaviour;
     private FrightenedBehaviour frightenedBehaviour;
     private ScatterBehaviour scatterBehaviour;
+    private RespawningBehaviour respawningBehaviour;
 
 
     private int xPos = 0;
@@ -47,10 +49,10 @@ public class Ghost {
 
         switch (name) {
             case "Blinky":
-                state = 1;
                 this.chaseBehaviour = new ChaseAgressive();
                 this.scatterBehaviour = new ScatterTopRightCorner();
                 this.frightenedBehaviour = new FrightenedBehaviour();
+                this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         gv.getContext().getResources(), R.drawable.red_ghost), spriteSize, spriteSize, false);
@@ -86,7 +88,7 @@ public class Ghost {
                 break;
         }
         vulnerableGhostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.vulnerable_ghost), spriteSize, spriteSize, false);
-
+        respawningGhostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.eyes_ghost), spriteSize, spriteSize, false);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -103,6 +105,14 @@ public class Ghost {
             case 2: // Frightened behaviour
                 nextPosition = frightenedBehaviour.escape(gv, xPos, yPos, ghostDirection);
                 break;
+            case 3: // Respawning behaviour
+                if(xPos == 9 * gv.getBlockSize() && yPos == 9 * gv.getBlockSize()){
+                    state = 0;
+                    nextPosition = chaseBehaviour.chase(gv, yPos, yPos, ghostDirection);
+                    Log.i("info", "at home");
+                }
+                else
+                    nextPosition= respawningBehaviour.respawn(gv,xPos,yPos,ghostDirection);
             default:break;
         }
         this.xPos = nextPosition[0];
@@ -114,6 +124,8 @@ public class Ghost {
         Bitmap bitmap = ghostBitmap;
         if(state == 2)
             bitmap = vulnerableGhostBitmap;
+        else if(state ==3)
+            bitmap = respawningGhostBitmap;
         return bitmap;
     }
 
@@ -124,7 +136,18 @@ public class Ghost {
         state = 1;
     }
     public void setFrightenedBehaviour(){
-        state = 2;
+        if(state != 3){
+            frightenedBehaviour = new FrightenedBehaviour();
+            state = 2;
+        }
+
+
+    }
+    public void setRespawnBehaviour(){
+        state = 3;
+    }
+    public int getState(){
+        return state;
     }
 
     public int getGhostDirection() {
