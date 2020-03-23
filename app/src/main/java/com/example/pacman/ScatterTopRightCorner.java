@@ -9,12 +9,12 @@ import java.util.List;
 
 public class ScatterTopRightCorner implements ScatterBehaviour {
 
-    private int[] cornerDirections = {1, 1, 2, 2, 3, 3, 3, 0, 0, 1, 1};
+    private int[] cornerDirections = {1,1,2,2,3,3,3,0,0,1,1};
     private boolean inCorner = false;
     private int step = 0;
-
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
+
     public int[] scatter(GameView gv, int srcX, int srcY, int currentDirection) {
 
 
@@ -27,24 +27,23 @@ public class ScatterTopRightCorner implements ScatterBehaviour {
 
         if ((srcX % gv.getBlockSize() == 0) && (srcY % gv.getBlockSize() == 0)) {
 
-            if (srcX / gv.getBlockSize() == 15 && srcY / gv.getBlockSize() == 1) {
+            if(srcX  / gv.getBlockSize()  == 15 && srcY  / gv.getBlockSize() == 1 ){
                 inCorner = true;
             }
 
-            if (!inCorner) {
+            if(!inCorner) {
                 AStar aStar = new AStar(gv, srcX / gv.getBlockSize(), srcY / gv.getBlockSize());
                 List<Node> path = aStar.findPathTo(15, 1);
                 direction = getDirection(path);
-            } else {
+            }else{
                 direction = cornerDirections[step];
                 step++;
-                if (step == cornerDirections.length - 1)
+                if(step == cornerDirections.length - 1)
                     step = 0;
             }
 
 
         }
-
 
         if (direction == 0) {
             srcY += -gv.getBlockSize() / 15;
@@ -61,7 +60,6 @@ public class ScatterTopRightCorner implements ScatterBehaviour {
         nextPosition[2] = direction;
 
         return nextPosition;
-
     }
 
     private int getDirection(List<Node> path) {
@@ -76,8 +74,8 @@ public class ScatterTopRightCorner implements ScatterBehaviour {
         Node nextNode;
         Node currentNode;
 
-        if (path.size() > 1) {
-            nextNode = path.get(1);
+        if(path.size() > 1){
+            nextNode =  path.get(1);
             currentNode = path.get(0);
 
             nextX = nextNode.x;

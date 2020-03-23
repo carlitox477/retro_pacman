@@ -53,10 +53,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
     private CountdownGhostsState stateCounter;
-    private Ghost blinky;
-    private Ghost pinky;
-    private Ghost inky;
-    private Ghost clyde;
+
+
+    private Ghost[] ghosts = new Ghost[4];
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -123,12 +122,23 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         bonusCounter.start();
 
         loadBitmapImages();
+
+
+    }
+
+    private void initGhosts() {
+        ghosts[0] = new Ghost(this, "Blinky");
+        ghosts[1] = new Ghost(this, "Pinky");
+        ghosts[2] = new Ghost(this, "Inky");
+        ghosts[3] = new Ghost(this, "Clyde");
+        stateCounter = new CountdownGhostsState(this, 1);
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void run() {
-
+        initGhosts();
         while (canDraw) {
             //this.gameLock.lock();
             // update
@@ -148,26 +158,25 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 drawBonus(canvas);
                 moveGhosts();
                 drawGhosts(canvas);
-
                 movePacman(canvas);
-
                 holder.unlockCanvasAndPost(canvas);
             }
         }
     }
 
     private void drawGhosts(Canvas canvas) {
-        canvas.drawBitmap(blinky.getBitmap(), blinky.getxPos(), blinky.getyPos(), paint);
+        for (int i = 0; i < ghosts.length; i++) {
+            canvas.drawBitmap(ghosts[i].getBitmap(), ghosts[i].getxPos(), ghosts[i].getyPos(), paint);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void moveGhosts() {
-        if (blinky == null) {
-            blinky = new Ghost(this, "Blinky");
-            stateCounter = new CountdownGhostsState(this, 1);
-            stateCounter.start();
+        for (int i = 0; i < ghosts.length; i++) {
+            ghosts[i].move();
         }
-        blinky.move();
+
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -176,7 +185,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         if (xPosPacman >= blockSize * 19) {
             xPosPacman = 0;
         }
-        checkGhostDetection(canvas);
+        checkGhostDetection();
 
 
         if ((xPosPacman % blockSize == 0) && (yPosPacman % blockSize == 0)) {
@@ -244,26 +253,26 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     }
 
-    private void checkGhostDetection(Canvas canvas) {
-        Paint paint = new Paint();
-        paint.setColor(Color.BLUE);
-        canvas.drawLine(blinky.getxPos() , blinky.getyPos() + getBlockSize() / 2, blinky.getxPos() +  blockSize , blinky.getyPos() + getBlockSize() /2, paint);
-        canvas.drawLine(blinky.getxPos() + getBlockSize() /2 , blinky.getyPos(), blinky.getxPos() + getBlockSize() /2 , blinky.getyPos() +  blockSize, paint);
-
-        canvas.drawLine(xPosPacman , yPosPacman + getBlockSize() /2, xPosPacman +  blockSize , yPosPacman + getBlockSize() /2, paint);
-        canvas.drawLine(xPosPacman + getBlockSize() /2 , yPosPacman, xPosPacman + getBlockSize() /2 , yPosPacman +  blockSize, paint);
-
-            if(Math.abs(xPosPacman) <= blinky.getxPos() + 5){
-                if( Math.abs(yPosPacman) <= blinky.getyPos() + 5){
-                    if(Math.abs(xPosPacman) >= blinky.getxPos() - 5){
-                        if( Math.abs(yPosPacman) >= blinky.getyPos() - 5){
-
-                    Log.i("info", "checkGhostDetection: detected");
-                    blinky.setRespawnBehaviour();
-                }}}
+    private void checkGhostDetection() {
 
 
+        for (int i = 0; i < ghosts.length; i++) {
+            if (ghosts[i].getState() == 2) {
+                if (Math.abs(xPosPacman) <= ghosts[i].getxPos() + 5) {
+                    if (Math.abs(yPosPacman) <= ghosts[i].getyPos() + 5) {
+                        if (Math.abs(xPosPacman) >= ghosts[i].getxPos() - 5) {
+                            if (Math.abs(yPosPacman) >= ghosts[i].getyPos() - 5) {
+                                ghosts[i].setRespawnBehaviour();
+                            }
+                        }
+                    }
+
+
+                }
             }
+
+        }
+
 
     }
 
@@ -315,24 +324,29 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     }
 
     private void drawBonus(Canvas canvas) {
-
         int value = levellayout[yPosBonus][xPosBonus];
         if ((value == 9) && bonusAvailable) {
             canvas.drawBitmap(cherryBitmap, xPosBonus * blockSize, yPosBonus * blockSize, null);
         }
-
     }
 
     public void frightenGhosts() {
-        blinky.setFrightenedBehaviour();
+        for (int i = 0; i < ghosts.length; i++) {
+            ghosts[i].setFrightenedBehaviour();
+        }
     }
 
     public void scatterGhosts() {
-        blinky.setScatterBehaviour();
+        for (int i = 0; i < ghosts.length; i++) {
+            ghosts[i].setScatterBehaviour();
+        }
     }
 
     public void resetGhosts() {
-        blinky.setChaseBehaviour();
+        for (int i = 0; i < ghosts.length; i++) {
+            if(!(ghosts[i].getState() == 3))
+                ghosts[i].setChaseBehaviour();
+        }
     }
 
     public void setBonusAvailable() {
@@ -693,7 +707,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 }
             }
         }
-
 
 
         return true;

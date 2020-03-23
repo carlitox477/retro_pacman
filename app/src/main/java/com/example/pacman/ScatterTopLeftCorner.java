@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ScatterTopLeftCorner implements ScatterBehaviour {
 
-    private int[] cornerDirections = {1,1,2,2,3,3,3,0,0,1,1};
+    private int[] cornerDirections = {3,3,2,2,1,1,1,0,0,3,3};
     private boolean inCorner = false;
     private int step = 0;
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -19,21 +19,21 @@ public class ScatterTopLeftCorner implements ScatterBehaviour {
 
 
         int direction = currentDirection;
-        float nextX;
-        float nextY;
+
+
 
         int[] nextPosition = new int[3];
 
 
         if ((srcX % gv.getBlockSize() == 0) && (srcY % gv.getBlockSize() == 0)) {
 
-            if(srcX  / gv.getBlockSize()  == 15 && srcY  / gv.getBlockSize() == 1 ){
+            if(srcX  / gv.getBlockSize()  == 3 && srcY  / gv.getBlockSize() == 1 ){
                 inCorner = true;
             }
 
             if(!inCorner) {
                 AStar aStar = new AStar(gv, srcX / gv.getBlockSize(), srcY / gv.getBlockSize());
-                List<Node> path = aStar.findPathTo(15, 1);
+                List<Node> path = aStar.findPathTo(3, 1);
                 direction = getDirection(path);
             }else{
                 direction = cornerDirections[step];

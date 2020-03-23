@@ -33,11 +33,8 @@ public class CountdownGhostsState extends Thread {
 
 
         new CountDownTimer(time, 1000) {
-
             public void onTick(long millisUntilFinished) {
-
                 if(cancel){
-
                     this.cancel();
                 }
             }

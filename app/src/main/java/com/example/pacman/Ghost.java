@@ -57,28 +57,33 @@ public class Ghost {
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         gv.getContext().getResources(), R.drawable.red_ghost), spriteSize, spriteSize, false);
                 spawnX = xPos = 9 * gv.getBlockSize();
-                spawnY = yPos =  8 * gv.getBlockSize();
+                spawnY = yPos = 8 * gv.getBlockSize();
                 break;
             case "Pinky":
                 this.chaseBehaviour = new ChaseAmbush();
-                this.scatterBehaviour = new ScatterTopRightCorner();
+                this.scatterBehaviour = new ScatterTopLeftCorner();
+                this.frightenedBehaviour = new FrightenedBehaviour();
+                this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.pink_ghost), spriteSize, spriteSize, false);
-                spawnX = 7 * gv.getBlockSize();
-                spawnY = 9 * gv.getBlockSize();
+                spawnX = xPos = 9 * gv.getBlockSize();
+                spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             case "Inky":
                 this.chaseBehaviour = new ChasePatrol();
                 this.scatterBehaviour = new ScatterBottomLeftCorner();
+                this.frightenedBehaviour = new FrightenedBehaviour();
+                this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.blue_ghost), spriteSize, spriteSize, false);
                 spawnX = xPos = 8 * gv.getBlockSize();
-                spawnY = yPos =  9 * gv.getBlockSize();
+                spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             case "Clyde":
                 this.chaseBehaviour = new ChasePatrol();
                 this.scatterBehaviour = new ScatterBottomRightCorner();
                 this.frightenedBehaviour = new FrightenedBehaviour();
+                this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.yellow_ghost), spriteSize, spriteSize, false);
                 spawnX = xPos = 9 * gv.getBlockSize();
@@ -106,14 +111,14 @@ public class Ghost {
                 nextPosition = frightenedBehaviour.escape(gv, xPos, yPos, ghostDirection);
                 break;
             case 3: // Respawning behaviour
-                if(xPos == 9 * gv.getBlockSize() && yPos == 9 * gv.getBlockSize()){
+                if (xPos == 9 * gv.getBlockSize() && yPos == 9 * gv.getBlockSize()) {
                     state = 0;
                     nextPosition = chaseBehaviour.chase(gv, yPos, yPos, ghostDirection);
                     Log.i("info", "at home");
-                }
-                else
-                    nextPosition= respawningBehaviour.respawn(gv,xPos,yPos,ghostDirection);
-            default:break;
+                } else
+                    nextPosition = respawningBehaviour.respawn(gv, xPos, yPos, ghostDirection);
+            default:
+                break;
         }
         this.xPos = nextPosition[0];
         this.yPos = nextPosition[1];
@@ -122,31 +127,35 @@ public class Ghost {
 
     public Bitmap getBitmap() {
         Bitmap bitmap = ghostBitmap;
-        if(state == 2)
+        if (state == 2)
             bitmap = vulnerableGhostBitmap;
-        else if(state ==3)
+        else if (state == 3)
             bitmap = respawningGhostBitmap;
         return bitmap;
     }
 
-    public void setChaseBehaviour(){
+    public void setChaseBehaviour() {
         state = 0;
     }
-    public void setScatterBehaviour(){
+
+    public void setScatterBehaviour() {
         state = 1;
     }
-    public void setFrightenedBehaviour(){
-        if(state != 3){
+
+    public void setFrightenedBehaviour() {
+        if (state != 3) {
             frightenedBehaviour = new FrightenedBehaviour();
             state = 2;
         }
 
 
     }
-    public void setRespawnBehaviour(){
+
+    public void setRespawnBehaviour() {
         state = 3;
     }
-    public int getState(){
+
+    public int getState() {
         return state;
     }
 
