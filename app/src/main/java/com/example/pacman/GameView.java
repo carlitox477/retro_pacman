@@ -49,10 +49,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private int screenWidth;                // Ancho de la pantalla
 
 
-
     private int blockSize;
 
-
+    private Ghost blinky;
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -80,6 +79,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.constructorHelper();
 
     }
+
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.constructorHelper();
@@ -91,10 +91,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     }
 
-    private void constructorHelper(){
-        this.gameLock=new ReentrantLock(true);
+    private void constructorHelper() {
+        this.gameLock = new ReentrantLock(true);
 
-        this.gestureDetector=new GestureDetector(this);
+        this.gestureDetector = new GestureDetector(this);
         setFocusable(true);
         holder = getHolder();
         holder.addCallback(this);
@@ -113,6 +113,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         xPosPacman = 9 * blockSize;
         yPosPacman = 15 * blockSize;
 
+
         bonusCounter = new CountdownBonusThread(this);
         bonusCounter.start();
 
@@ -122,6 +123,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void run() {
+
         while (canDraw) {
             //this.gameLock.lock();
             // update
@@ -139,15 +141,27 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 drawMap(canvas);
                 updateFrame(System.currentTimeMillis());
                 drawBonus(canvas);
-                drawPath(canvas);
+                moveGhosts();
+                drawGhosts(canvas);
                 movePacman(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
-            //this.gameLock.unlock();
-
-
         }
     }
+
+    private void drawGhosts(Canvas canvas) {
+        canvas.drawBitmap(blinky.getBitmap(), blinky.getxPos(), blinky.getyPos(), paint);
+        Log.i("info", "x " + blinky.getxPos() + " Y " + blinky
+        .getyPos());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void moveGhosts() {
+        if(blinky == null)
+            blinky = new Ghost(this,"Blinky");
+        blinky.move();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void movePacman(Canvas canvas) {
         int value;
@@ -157,9 +171,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         if ((xPosPacman % blockSize == 0) && (yPosPacman % blockSize == 0)) {
 
-            AStar a = new AStar(this, 1,1);
-            path = a.findPathTo(xPosPacman / blockSize,yPosPacman / blockSize);
-
+           /* AStar a = new AStar(this, 9, 8);
+            path = a.findPathTo(xPosPacman / blockSize, yPosPacman / blockSize);
+            */
             value = levellayout[yPosPacman / blockSize][xPosPacman / blockSize];
 
             if (value == 2) {
@@ -167,6 +181,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
             if (value == 3) {
                 levellayout[yPosPacman / blockSize][xPosPacman / blockSize] = 0;
+                setGhostsVulnerable();
             }
             if (value == 9) {
                 levellayout[yPosPacman / blockSize][xPosPacman / blockSize] = 0;
@@ -212,6 +227,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     }
 
+    public void setGhostsVulnerable(){
+        blinky.setFrightenedBehaviour();
+    }
     // Method that draws pacman based on his viewDirection
     public void drawPacman(Canvas canvas) {
         //Log.i("info", "Drawing pacman");
@@ -230,8 +248,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 break;
         }
     }
-
-
 
 
     public void drawMap(Canvas canvas) {
@@ -269,22 +285,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
+
     public void setBonusAvailable() {
         //Se determina en que posicion del mapa se generara el bonus
         int[] spawn = generateMapSpawn();
         int y = spawn[0];
         int x = spawn[1];
-        int ch = levellayout[y][x];
         levellayout[y][x] = 9;
         this.bonusAvailable = true;
 
 
-
-
     }
-    public void drawPath(Canvas canvas){
-        if(path != null){
+
+    /*
+    public void drawPath(Canvas canvas) {
+        if (path != null) {
             paint = new Paint();
             paint.setColor(Color.RED);
             for (int i = 0; i < path.size() - 1; i++) {
@@ -293,10 +308,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 canvas.drawLine(currentNode.x * blockSize, currentNode.y * blockSize, nextNode.x * blockSize, nextNode.y * blockSize, paint);
             }
         }
-
-
-
     }
+     */
+
     public int[] generateMapSpawn() {
         //Se genera una posicion aleatoria valida en la cual pacman pueda moverse
         int[] spawn = new int[2];
@@ -305,7 +319,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         int value = levellayout[yPosBonus][xPosBonus];
 
         //Si en la posicion generada no es posible moverse
-        if (value == 1 || value == 2 || value == 5 || value == 6 || value == 7 || value == 8)
+        if (value == 1 || value == 5 || value == 6 || value == 7 || value == 8)
             spawn = generateMapSpawn();
         else {
             spawn[0] = yPosBonus;
@@ -315,36 +329,36 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return spawn;
     }
 
-    protected void loadBitmap(int spriteSize, int fpm, String characterName){
+    protected void loadBitmap(int spriteSize, int fpm, String characterName) {
         //fpm: frames per movement
-        String packageName=getContext().getPackageName();
-        Resources res=getResources();
+        String packageName = getContext().getPackageName();
+        Resources res = getResources();
         int idRight, idLeft, idDown, idUp;
 
         //We create Bitmap arrays deppending in fpm value
         //We should
-        pacmanRight=new Bitmap[fpm];
-        pacmanDown=new Bitmap[fpm];
-        pacmanLeft=new Bitmap[fpm];
-        pacmanUp=new Bitmap[fpm];
+        pacmanRight = new Bitmap[fpm];
+        pacmanDown = new Bitmap[fpm];
+        pacmanLeft = new Bitmap[fpm];
+        pacmanUp = new Bitmap[fpm];
 
         // We add pacman's bitmap looking to the right
-        for (int i=0; i<fpm; i++){
+        for (int i = 0; i < fpm; i++) {
             //pacman movement image should be png with the name as "pacman_direction#
             // # is a number; direction must be "right", "left", "up" or "down"
-            idRight=res.getIdentifier(characterName+"_right"+i, "drawable", packageName);
-            idLeft=res.getIdentifier(characterName+"_left"+i, "drawable", packageName);
-            idUp=res.getIdentifier(characterName+"_up"+i, "drawable", packageName);
-            idDown=res.getIdentifier(characterName+"_down"+i, "drawable", packageName);
+            idRight = res.getIdentifier(characterName + "_right" + i, "drawable", packageName);
+            idLeft = res.getIdentifier(characterName + "_left" + i, "drawable", packageName);
+            idUp = res.getIdentifier(characterName + "_up" + i, "drawable", packageName);
+            idDown = res.getIdentifier(characterName + "_down" + i, "drawable", packageName);
 
             //we add the bitmaps
-            pacmanRight[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+            pacmanRight[i] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                     res, idRight), spriteSize, spriteSize, false);
-            pacmanLeft[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+            pacmanLeft[i] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                     res, idLeft), spriteSize, spriteSize, false);
-            pacmanUp[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+            pacmanUp[i] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                     res, idUp), spriteSize, spriteSize, false);
-            pacmanDown[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+            pacmanDown[i] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                     res, idDown), spriteSize, spriteSize, false);
         }
     }
@@ -354,7 +368,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         int spriteSize = screenWidth / 18;
         spriteSize = (spriteSize / 9) * 9;// Tamaño de pacman y fantasmas
 
-        this.loadBitmap(spriteSize,4,"pacman");
+        this.loadBitmap(spriteSize, 4, "pacman");
         //Añadir bitmap de cerezas bonus
         cherryBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.cherry), spriteSize, spriteSize, false);
@@ -378,7 +392,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         super.onTouchEvent(event);
         return true;
     }
-
 
 
     //Chequea si se deberia actualizar el frame actual basado en el
@@ -431,7 +444,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // 7 inky spawn
     // 8 clyde spawn
     // 9 bonus
-    final int[][] levellayout= new int[][]{
+    final int[][] levellayout = new int[][]{
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
             {1, 3, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 3, 1},
             {1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1},
@@ -551,10 +564,18 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return bonusResetTime;
     }
 
-    public int[][] getLevellayout(){
+    public int[][] getLevellayout() {
         return levellayout;
     }
 
+
+    public int getxPosPacman() {
+        return xPosPacman;
+    }
+
+    public int getyPosPacman() {
+        return yPosPacman;
+    }
 
     @Override
     public boolean onDown(MotionEvent e) {
@@ -587,8 +608,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         //https://www.youtube.com/watch?v=32rSs4tE-mc
         float diffX, diffY;
 
-        diffX=moveEvent.getX()-downEvent.getX();
-        diffY=moveEvent.getY()-downEvent.getY();
+        diffX = moveEvent.getX() - downEvent.getX();
+        diffY = moveEvent.getY() - downEvent.getY();
 
         // Directions
         // 0 = up
@@ -597,31 +618,31 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         // 3 = left
         // 4 = no movement
 
-        if(Math.abs(diffX)>Math.abs(diffY)){
+        if (Math.abs(diffX) > Math.abs(diffY)) {
             //right or left swipe
-            if(Math.abs(diffX)>SWIPE_THRESHOLD && Math.abs(velocityX)>SWIPE_VELOCITY){
-                if(diffX>0){
+            if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY) {
+                if (diffX > 0) {
                     //right
                     nextDirection = 1;
-                }else{
+                } else {
                     //left
                     nextDirection = 3;
                 }
             }
 
-        }else{
+        } else {
             //up or down swipe
-            if(Math.abs(diffY)>SWIPE_THRESHOLD && Math.abs(velocityY)>SWIPE_VELOCITY){
-                if(diffY>0){
+            if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY) {
+                if (diffY > 0) {
                     //down
                     nextDirection = 2;
-                }else{
+                } else {
                     //up
                     nextDirection = 0;
                 }
             }
         }
-        Log.i("Tap","Fling");
+        Log.i("Tap", "Fling");
 
 
         return true;

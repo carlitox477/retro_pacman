@@ -29,19 +29,19 @@ public class AStar {
 
 
 
-    GameView dv;
+    GameView gv;
     int[][] map;
 
     private Node[][] nodes;
 
-    public AStar(GameView dv, int sx, int sy){
+    public AStar(GameView gv, int sx, int sy){
         this.open = new ArrayList<>();
         this.closed = new ArrayList<>();
         this.path = new ArrayList<>();
         this.startX = sx;
         this.startY = sy;
-        this.dv = dv;
-        this.map = dv.getLevellayout();
+        this.gv = gv;
+        this.map = gv.getLevellayout();
         this.now = new Node(null, sx,sy,0,0);
     }
 

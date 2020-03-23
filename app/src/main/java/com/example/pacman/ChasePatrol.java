@@ -3,8 +3,10 @@ package com.example.pacman;
 public class ChasePatrol implements ChaseBehaviour {
 
 
-    @Override
-    public void chase(GameView dv, int currentGhostDirection, int currentX, int currentY) {
 
+
+    @Override
+    public int[] chase(GameView dv, int srcX, int srcY, int currentDirection) {
+        return new int[0];
     }
 }

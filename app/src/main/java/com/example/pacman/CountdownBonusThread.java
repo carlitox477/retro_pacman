@@ -32,7 +32,7 @@ public class CountdownBonusThread extends Thread {
                 Log.i("info", "Counting bonus ticked");
             }
 
-            @RequiresApi(api = Build.VERSION_CODES.N)
+
             public void onFinish() {
                 Log.i("info", "Counting bonus reseted");
                 dv.setBonusAvailable();
