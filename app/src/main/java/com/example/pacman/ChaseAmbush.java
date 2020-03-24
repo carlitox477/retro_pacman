@@ -113,7 +113,6 @@ public class ChaseAmbush implements ChaseBehaviour {
         Node currentNode;
 
         if (path != null) {
-            Log.i("asds", "chase: asd");
             if (path.size() > 1) {
                 nextNode = path.get(1);
                 currentNode = path.get(0);

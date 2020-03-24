@@ -55,7 +55,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private CountdownGhostsState stateCounter;
 
 
-    private Ghost[] ghosts = new Ghost[2];
+    private Ghost[] ghosts = new Ghost[3];
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -129,7 +129,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private void initGhosts() {
         ghosts[0] = new Ghost(this, "Blinky");
         ghosts[1] = new Ghost(this, "Pinky");
-        //ghosts[2] = new Ghost(this, "Inky");
+        ghosts[2] = new Ghost(this, "Inky");
         //ghosts[3] = new Ghost(this, "Clyde");
         stateCounter = new CountdownGhostsState(this, 0);
         stateCounter.start();
@@ -207,8 +207,13 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             y = yPosPacman;
         }
 
+        int blinkyX = getGhost(1).getxPos();
+        int blinkyY = getGhost(1).getyPos();
 
-        canvas.drawCircle(x, y, 7, paint );
+        int vectorX = ( x - blinkyX ) * 2;
+        int vectorY = ( y -blinkyY ) * 2 ;
+
+        canvas.drawCircle(x+ vectorX,y + vectorY, 7, paint );
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -328,6 +333,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
     }
 
+    public Ghost getGhost(int i) {
+        return ghosts[i];
+    }
 
     public void drawMap(Canvas canvas) {
         //Log.i("info", "Drawing map");
