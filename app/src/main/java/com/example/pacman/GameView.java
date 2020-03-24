@@ -439,14 +439,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 getResources(), R.drawable.cherry), spriteSize, spriteSize, false);
     }
 
-    Runnable longPressed = new Runnable() {
-        public void run() {
-            Log.i("info", "LongPress");
-            Intent pauseIntent = new Intent(getContext(), PauseActivity.class);
-            getContext().startActivity(pauseIntent);
-        }
-    };
-
 
     // Method to capture touchEvents
     @Override
@@ -533,36 +525,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
     };
 
-
-    /*
-    final short leveldata1[][] = new short[][]{
-
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-            {67, 26, 26, 18, 26, 26, 26, 22, 0, 19, 26, 26, 26, 18, 26, 26, 70},
-            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
-            {17, 26, 26, 16, 26, 18, 26, 24, 26, 24, 26, 18, 26, 16, 26, 26, 20},
-            {25, 26, 26, 20, 0, 25, 26, 22, 0, 19, 26, 28, 0, 17, 26, 26, 28},
-            {0, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 0},
-            {0, 0, 0, 21, 0, 19, 26, 24, 18, 24, 26, 22, 0, 21, 0, 0, 0},
-            {26, 26, 26, 16, 26, 20, 0, 0, 512, 0, 0, 17, 26, 16, 26, 26, 26},
-            {0, 0, 0, 21, 0, 21, 0, 267, 1288, 270, 0, 21, 0, 21, 0, 0, 0},
-            {0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0},
-            {19, 26, 26, 16, 26, 24, 26, 22, 0, 19, 26, 24, 26, 16, 26, 26, 22},
-            {21, 0, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 0, 21},
-            {25, 22, 0, 21, 0, 0, 0, 21, 0, 21, 0, 0, 0, 21, 0, 19, 28}, // "2" in this line is for
-            {0, 21, 0, 17, 26, 26, 18, 24, 26, 24, 18, 26, 26, 20, 0, 21, 0}, // pacman's spawn
-            {19, 24, 26, 28, 0, 0, 25, 18, 26, 18, 28, 0, 0, 25, 26, 24, 22},
-            {21, 0, 0, 0, 0, 0, 0, 21, 0, 21, 0, 0, 0, 0, 0, 0, 21},
-            {73, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 76},
-            {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
-
-     */
-
-
-
-    /* 0 pared inferior
-     *     */
 
     //Callback methods
     @RequiresApi(api = Build.VERSION_CODES.N)
