@@ -46,7 +46,6 @@ public class Ghost {
         this.gv = gv;
         spriteSize = gv.getScreenWidth() / 18;
         spriteSize = (spriteSize / 9) * 9;
-
         switch (name) {
             case "Blinky":
                 this.chaseBehaviour = new ChaseAgressive();

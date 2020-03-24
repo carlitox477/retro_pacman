@@ -55,7 +55,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private CountdownGhostsState stateCounter;
 
 
-    private Ghost[] ghosts = new Ghost[4];
+    private Ghost[] ghosts = new Ghost[2];
 
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap cherryBitmap;
@@ -129,9 +129,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private void initGhosts() {
         ghosts[0] = new Ghost(this, "Blinky");
         ghosts[1] = new Ghost(this, "Pinky");
-        ghosts[2] = new Ghost(this, "Inky");
-        ghosts[3] = new Ghost(this, "Clyde");
-        stateCounter = new CountdownGhostsState(this, 1);
+        //ghosts[2] = new Ghost(this, "Inky");
+        //ghosts[3] = new Ghost(this, "Clyde");
+        stateCounter = new CountdownGhostsState(this, 0);
+        stateCounter.start();
 
     }
 
@@ -159,6 +160,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 moveGhosts();
                 drawGhosts(canvas);
                 movePacman(canvas);
+                drawCircleFrontPacman(canvas);
                 holder.unlockCanvasAndPost(canvas);
             }
         }
@@ -177,6 +179,36 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
 
 
+    }
+    public void drawCircleFrontPacman(Canvas canvas){
+        paint.setColor(Color.RED);
+
+        int x = 0;
+        int y = 0;
+
+        if(direction == 0){
+            x = xPosPacman + blockSize / 2;
+            y = yPosPacman - 2 * blockSize - blockSize / 2;
+        }
+        else if(direction == 1) {
+            x = xPosPacman + 3 * blockSize + blockSize / 2;
+            y = yPosPacman + blockSize / 2;
+        }
+        else if(direction == 2){
+            x = xPosPacman + blockSize / 2;
+            y = yPosPacman + 3 * blockSize + blockSize / 2;
+        }
+        else if(direction == 3){
+            x = xPosPacman - 2 * blockSize - blockSize / 2;
+            y = yPosPacman + blockSize / 2;
+        }
+        else if(direction == 4){
+            x = xPosPacman;
+            y = yPosPacman;
+        }
+
+
+        canvas.drawCircle(x, y, 7, paint );
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -633,7 +665,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return levellayout;
     }
 
-
+    public int getPacmanDirection(){
+        return direction;
+    }
     public int getxPosPacman() {
         return xPosPacman;
     }
