@@ -79,7 +79,7 @@ public class Ghost {
                 spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             case "Clyde":
-                this.chaseBehaviour = new ChasePatrol();
+                this.chaseBehaviour = new ChaseRandom();
                 this.scatterBehaviour = new ScatterBottomRightCorner();
                 this.frightenedBehaviour = new FrightenedBehaviour();
                 this.respawningBehaviour = new RespawningBehaviour();
