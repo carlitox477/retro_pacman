@@ -46,7 +46,6 @@ public class Ghost {
         this.gv = gv;
         spriteSize = gv.getScreenWidth() / 18;
         spriteSize = (spriteSize / 9) * 9;
-
         switch (name) {
             case "Blinky":
                 this.chaseBehaviour = new ChaseAgressive();
@@ -80,7 +79,7 @@ public class Ghost {
                 spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             case "Clyde":
-                this.chaseBehaviour = new ChasePatrol();
+                this.chaseBehaviour = new ChaseRandom();
                 this.scatterBehaviour = new ScatterBottomRightCorner();
                 this.frightenedBehaviour = new FrightenedBehaviour();
                 this.respawningBehaviour = new RespawningBehaviour();

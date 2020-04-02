@@ -10,7 +10,7 @@ import java.util.List;
 public class ChaseAgressive implements ChaseBehaviour {
 
 
-
+    List<Node> path;
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int[] chase(GameView gv, int srcX, int srcY, int currentDirection) {
@@ -19,6 +19,8 @@ public class ChaseAgressive implements ChaseBehaviour {
         float nextX;
         float nextY;
 
+        List<Node> newPath;
+
         int[] nextPosition = new int[3];
 
 
@@ -26,8 +28,14 @@ public class ChaseAgressive implements ChaseBehaviour {
         if ((srcX % gv.getBlockSize() == 0) && (srcY % gv.getBlockSize() == 0)) {
 
             AStar aStar = new AStar(gv, srcX / gv.getBlockSize(),srcY/ gv.getBlockSize());
-            List<Node> path = aStar.findPathTo(gv.getxPosPacman() / gv.getBlockSize(),gv.getyPosPacman() / gv.getBlockSize());
-            direction = getDirection(path);
+            newPath = aStar.findPathTo(gv.getxPosPacman() / gv.getBlockSize(),gv.getyPosPacman() / gv.getBlockSize());
+
+            if(newPath == null)
+                direction = getDirection(path);
+            else
+                direction = getDirection(newPath);
+
+
 
         }
 
@@ -80,6 +88,8 @@ public class ChaseAgressive implements ChaseBehaviour {
                 direction = 3;
             else if (currentX - nextX == 0 && currentY - nextY == 1)
                 direction = 0;
+
+            path.remove(0);
         }
 
 

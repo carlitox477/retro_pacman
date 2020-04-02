@@ -131,7 +131,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         ghosts[1] = new Ghost(this, "Pinky");
         ghosts[2] = new Ghost(this, "Inky");
         ghosts[3] = new Ghost(this, "Clyde");
-        stateCounter = new CountdownGhostsState(this, 1);
+        stateCounter = new CountdownGhostsState(this, 0);
+        stateCounter.start();
 
     }
 
@@ -296,6 +297,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
     }
 
+    public Ghost getGhost(int i) {
+        return ghosts[i];
+    }
 
     public void drawMap(Canvas canvas) {
         //Log.i("info", "Drawing map");
@@ -595,7 +599,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return levellayout;
     }
 
-
+    public int getPacmanDirection(){
+        return direction;
+    }
     public int getxPosPacman() {
         return xPosPacman;
     }
