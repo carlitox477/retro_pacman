@@ -7,15 +7,24 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import Behaviour.FrightenedBehaviour;
+import Behaviour.RespawningBehaviour;
+import Behaviour_Chase.ChaseAgressive;
+import Behaviour_Chase.ChaseAmbush;
+import Behaviour_Chase.ChaseBehaviour;
+import Behaviour_Chase.ChasePatrol;
+import Behaviour_Chase.ChaseRandom;
+import Behaviour_Scatter.ScatterBehaviour;
+import Behaviour_Scatter.ScatterBottomLeftCorner;
+import Behaviour_Scatter.ScatterBottomRightCorner;
+import Behaviour_Scatter.ScatterTopLeftCorner;
+import Behaviour_Scatter.ScatterTopRightCorner;
+
 public class Ghost {
-
     private String name;
-
-
-    private Bitmap ghostBitmap;
-    private Bitmap vulnerableGhostBitmap;
-    private Bitmap respawningGhostBitmap;
-    int spriteSize;
+    private Bitmap ghostBitmap,vulnerableGhostBitmap,respawningGhostBitmap;
+    private int[] spawnPosition, currentPosition;
+    private int spriteSize;
 
     private GameView gv;
 
@@ -35,17 +44,22 @@ public class Ghost {
     private int xPos = 0;
     private int yPos = 0;
 
-    private int spawnX;
-    private int spawnY;
 
     private int ghostDirection = 4;
 
-    public Ghost(GameView gv, String name) {
+    public Ghost(GameView gv, String name, int spriteSize,int[]spawnPosition) {
 
         this.name = name;
         this.gv = gv;
-        spriteSize = gv.getScreenWidth() / 18;
-        spriteSize = (spriteSize / 9) * 9;
+        this.currentPosition=new int[2];
+        this.spawnPosition=spawnPosition;
+        this.spriteSize = spriteSize;
+
+        this.spawnPosition[0]=this.spawnPosition[0]*spriteSize;
+        this.spawnPosition[1]=this.spawnPosition[1]*spriteSize;
+        this.currentPosition[0]=this.spawnPosition[0];
+        this.currentPosition[1]=this.spawnPosition[1];
+
         switch (name) {
             case "Blinky":
                 this.chaseBehaviour = new ChaseAgressive();
@@ -55,8 +69,7 @@ public class Ghost {
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         gv.getContext().getResources(), R.drawable.red_ghost), spriteSize, spriteSize, false);
-                spawnX = xPos = 9 * gv.getBlockSize();
-                spawnY = yPos = 8 * gv.getBlockSize();
+
                 break;
             case "Pinky":
                 this.chaseBehaviour = new ChaseAmbush();
@@ -65,8 +78,6 @@ public class Ghost {
                 this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.pink_ghost), spriteSize, spriteSize, false);
-                spawnX = xPos = 9 * gv.getBlockSize();
-                spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             case "Inky":
                 this.chaseBehaviour = new ChasePatrol();
@@ -75,8 +86,6 @@ public class Ghost {
                 this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.blue_ghost), spriteSize, spriteSize, false);
-                spawnX = xPos = 8 * gv.getBlockSize();
-                spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             case "Clyde":
                 this.chaseBehaviour = new ChaseRandom();
@@ -85,8 +94,6 @@ public class Ghost {
                 this.respawningBehaviour = new RespawningBehaviour();
                 //Añadir bitmap de fantasma
                 ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(gv.getContext().getResources(), R.drawable.yellow_ghost), spriteSize, spriteSize, false);
-                spawnX = xPos = 9 * gv.getBlockSize();
-                spawnY = yPos = 9 * gv.getBlockSize();
                 break;
             default:
                 break;
@@ -101,18 +108,18 @@ public class Ghost {
         int[] nextPosition = new int[2];
         switch (state) {
             case 0: //Chase behavior
-                nextPosition = chaseBehaviour.chase(gv, xPos, yPos, ghostDirection);
+                nextPosition = chaseBehaviour.chase(gv, this.currentPosition[1], this.currentPosition[0], ghostDirection);
                 break;
             case 1: // Scattering behaviour
-                nextPosition = scatterBehaviour.scatter(gv, xPos, yPos, ghostDirection);
+                nextPosition = scatterBehaviour.scatter(gv, this.currentPosition[1], this.currentPosition[0], ghostDirection);
                 break;
             case 2: // Frightened behaviour
-                nextPosition = frightenedBehaviour.escape(gv, xPos, yPos, ghostDirection);
+                nextPosition = frightenedBehaviour.escape(gv, this.currentPosition[1], this.currentPosition[0], ghostDirection);
                 break;
             case 3: // Respawning behaviour
                 if (xPos == 9 * gv.getBlockSize() && yPos == 9 * gv.getBlockSize()) {
                     state = 0;
-                    nextPosition = chaseBehaviour.chase(gv, yPos, yPos, ghostDirection);
+                    nextPosition = chaseBehaviour.chase(gv,this.currentPosition[1] , yPos, ghostDirection);
                     Log.i("info", "at home");
                 } else
                     nextPosition = respawningBehaviour.respawn(gv, xPos, yPos, ghostDirection);
@@ -156,10 +163,6 @@ public class Ghost {
 
     public int getState() {
         return state;
-    }
-
-    public int getGhostDirection() {
-        return ghostDirection;
     }
 
     public int getxPos() {

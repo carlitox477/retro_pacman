@@ -44,5 +44,14 @@ public class Score {
         values.put(ScoreContract.ScoreEntry.MAX_SCORE, score);
         return values;
     }
+
+    public static String doubleToStringScore(double score){
+        String sal;
+        int posPoint;
+        sal=String.valueOf(score);
+        posPoint=sal.indexOf(".");
+        sal=sal.substring(0,posPoint);
+        return sal;
+    }
 }
 

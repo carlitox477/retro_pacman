@@ -9,19 +9,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".PauseActivity"></activity>
-        <activity android:name=".LandingActivity">
+        <activity android:name="Activities.PauseActivity"></activity>
+        <activity android:name="Activities.LandingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".CreatorsActivity" />
-        <activity android:name=".ScoreActivity" />
-        <activity android:name=".PlayActivity" />
-        <service android:name=".BackgroundMusicService"
+        <activity android:name="Activities.MainActivity" />
+        <activity android:name="Activities.CreatorsActivity" />
+        <activity android:name="Activities.ScoreActivity" />
+        <activity android:name="Activities.PlayActivity" />
+        <service android:name="Activities.BackgroundMusicService"
             android:enabled="true"/>
     </application>
 

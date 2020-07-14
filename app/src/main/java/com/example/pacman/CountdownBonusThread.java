@@ -10,10 +10,6 @@ import androidx.annotation.RequiresApi;
 import java.util.List;
 
 public class CountdownBonusThread extends Thread {
-
-
-
-
     private int time;
     private GameView gv;
 
