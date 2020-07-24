@@ -6,74 +6,51 @@ import androidx.annotation.RequiresApi;
 
 import path.*;
 
-import Behaviour.Behaviour;
+
 import com.example.pacman.GameView;
 import java.util.List;
 
-public class ChaseRandom implements ChaseBehaviour {
+public class ChaseRandom extends ChaseBehaviour {
     public List<Node> path;
-    private int[] cornerDirections = {2, 2, 3, 3, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1, 0, 0, 3, 3, 0, 0, 3, 3, 3};
-    private boolean inCorner = false;
-    private boolean chasing = false;
-    private int step = 0;
-
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public int[] chase(GameView gv, int srcX, int srcY, int currentDirection) {
-        int direction = defineDirection(gv, srcX, srcY, currentDirection);
-        return Behaviour.getNextPosition(gv,direction,srcX,srcY);
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public int defineDirection(GameView gv, int srcX, int srcY, int currentDirection) {
-        int blockSize,direction,xPacmanPos,yPacmanPos,xDist,yDist;
+    public int defineDirection(GameView gv, int ghostScreenPosX, int ghostScreenPosY, int currentDirection) {
+        int blockSize,direction,xPosMapPacman,yPosMapPacman,xDist,yDist,ghostMapPosX,ghostMapPosY;
         double dist;
         AStar aStar;
 
         blockSize = gv.getBlockSize();
         direction=currentDirection;
 
-        if ((srcX % blockSize == 0) && (srcY % blockSize == 0)) {
-            xPacmanPos = gv.getxPosPacman();
-            yPacmanPos = gv.getyPosPacman();
-            xDist = Math.abs(srcX - xPacmanPos);
-            yDist = Math.abs(srcY - yPacmanPos);
+        if ((ghostScreenPosX % blockSize == 0) && (ghostScreenPosY % blockSize == 0)) {
+            xPosMapPacman=gv.getPacman().getPositionMapX();
+            yPosMapPacman=gv.getPacman().getPositionMapY();
+            ghostMapPosX=ghostScreenPosX /blockSize;
+            ghostMapPosY=ghostScreenPosY /blockSize;
+
+            xDist = Math.abs(ghostScreenPosX - gv.getPacman().getPositionScreenX());
+            yDist = Math.abs(ghostScreenPosY - gv.getPacman().getPositionScreenY());
             dist = Math.hypot(xDist, yDist);
 
             if (dist <= 8 * blockSize) {
-                chasing = true;
-            } else {
-                chasing = false;
+                //Buscar pacman
+                aStar = new AStar(gv,ghostMapPosX,ghostMapPosY);
+                path = aStar.findPathTo(xPosMapPacman, yPosMapPacman);
+                direction = super.getDirection(path);
+            }else{
+                //Buscar esquina
+                aStar = new AStar(gv, ghostMapPosX, ghostMapPosY);
+                path = aStar.findPathTo(4, 15);
+                direction = super.getDirection(path);
             }
-
-            if (chasing) {
-                inCorner = false;
-                step = 0;
-                aStar = new AStar(gv,srcX /blockSize,srcY /blockSize);
-                path = aStar.findPathTo(xPacmanPos / blockSize, yPacmanPos / blockSize);
-                direction = Behaviour.getDirection(path);
-            }
-            else{
-                if(srcX  / blockSize  == 4 && srcY  / blockSize == 15 ){
-                    inCorner = true;
-                }
-                if(!inCorner) {
-                    aStar = new AStar(gv, srcX / blockSize, srcY / blockSize);
-                    path = aStar.findPathTo(4, 15);
-                    direction = Behaviour.getDirection(path);
-                }else{
-                    direction = cornerDirections[step];
-                    step++;
-                    if(step == cornerDirections.length - 1)
-                        step = 0;
-                }
-            }
-
-
-
         }
         return direction;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public int[] behave(GameView gv, int srcX, int srcY, int currentDirection) {
+        return super.chase(gv,srcX,srcY,currentDirection);
+    }
 }

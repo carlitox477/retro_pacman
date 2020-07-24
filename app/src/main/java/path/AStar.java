@@ -24,11 +24,6 @@ public class AStar {
     private int startY;
     private int endX;
     private int endY;
-
-
-
-
-    GameView gv;
     int[][] map;
 
     private Node[][] nodes;
@@ -39,8 +34,7 @@ public class AStar {
         this.path = new ArrayList<>();
         this.startX = sx;
         this.startY = sy;
-        this.gv = gv;
-        this.map = gv.getMap();
+        this.map = gv.getGameMap().getMap();
         this.now = new Node(null, sx,sy,0,0);
     }
 

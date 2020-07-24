@@ -6,32 +6,28 @@ import android.os.Looper;
 import android.util.Log;
 
 public class CountdownGhostsState extends Thread {
-
+    //Cambiar thread por runnable
     int time;
     int state;
-    GameView gv;
-
+    private Ghost[] ghosts;
     boolean cancel = false;
 
-    public Handler mHandler;
 
-    public CountdownGhostsState(GameView gv, int state){
-        this.gv = gv;
+    public CountdownGhostsState(Ghost[] ghosts, int state){
+        this.ghosts = ghosts;
         this.state = state;
         if(state == 1){ // Scattering state
             time = 12000;
-            gv.scatterGhosts();
+            this.scatterGhosts();
         }else if(state == 2){
             time = 10000;
-            gv.frightenGhosts();
+            this.frightenGhosts();
         } // Frightened state
 
     }
 
     public void run(){
         Looper.prepare();
-
-
         new CountDownTimer(time, 1000) {
             public void onTick(long millisUntilFinished) {
                 if(cancel){
@@ -39,9 +35,8 @@ public class CountdownGhostsState extends Thread {
                 }
             }
 
-
             public void onFinish() {
-               gv.resetGhosts();
+               resetGhosts();
             }
         }.start();
         Looper.loop();
@@ -50,5 +45,25 @@ public class CountdownGhostsState extends Thread {
     public void cancelTimer(){
         cancel = true;
     }
+
+    private void resetGhosts() {
+        for (int i = 0; i < ghosts.length; i++) {
+            if(!ghosts[i].getState().isRespawning())
+                ghosts[i].setChaseBehaviour();
+        }
+    }
+
+    private void frightenGhosts() {
+        for (int i = 0; i < ghosts.length; i++) {
+            ghosts[i].setFrightenedBehaviour();
+        }
+    }
+
+    private void scatterGhosts() {
+        for (int i = 0; i < ghosts.length; i++) {
+            ghosts[i].setScatterBehaviour();
+        }
+    }
+
 
 }

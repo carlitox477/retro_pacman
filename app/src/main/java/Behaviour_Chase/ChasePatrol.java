@@ -4,71 +4,62 @@ import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+import Character_package.Pacman;
 import path.*;
 
 import Behaviour.Behaviour;
 import com.example.pacman.GameView;
 import java.util.List;
 
-public class ChasePatrol implements ChaseBehaviour {
+public class ChasePatrol extends ChaseBehaviour {
     public List<Node> path;
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public int[] chase(GameView gv, int srcX, int srcY, int currentDirection) {
-        int direction = defineDirection(gv,srcX, srcY,currentDirection);
-        return Behaviour.getNextPosition(gv,direction,srcX,srcY);
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int defineDirection(GameView gv, int srcX, int srcY, int currentDirection) {
-        int direction,pacmanDirection,blockSize,xPosPacman,yPosPacman,blinkyX,blinkyY,vectorX,vectorY;
+        Pacman pacman;
+        int direction,blockSize,xPosMapPacman,yPosMapPacman,blinkyX,blinkyY,ghostMapPosX,ghostMapPosY;
         int[] target;
         int[][] map;
+        boolean isOutOfBounds;
 
-        pacmanDirection = gv.getPacmanDirection();
+        pacman=gv.getPacman();
         blockSize = gv.getBlockSize();
-        xPosPacman = gv.getxPosPacman();
-        yPosPacman = gv.getyPosPacman();
-        map = gv.getMap();
+        xPosMapPacman = pacman.getPositionMapX();
+        yPosMapPacman = pacman.getPositionMapY();
+        ghostMapPosX=srcX/blockSize;
+        ghostMapPosY=srcY/blockSize;
+        map = gv.getGameMap().getMap();
         direction = currentDirection;
 
-        target=new int[2];
-        target[0] = 0; //X target
-        target[1] = 0; //Y target
-
-
-
         if ((srcX % gv.getBlockSize() == 0) && (srcY % gv.getBlockSize() == 0)) {
-            Behaviour.getPacmanNextPosition(pacmanDirection,target,blockSize,xPosPacman,yPosPacman);
+            target=pacman.getNextPositionScreen();
 
             blinkyX = gv.getGhost(1).getxPos();
             blinkyY = gv.getGhost(1).getyPos();
 
-            vectorX = (target[0]  - blinkyX) * 2;
-            vectorY = (target[1] - blinkyY) * 2;
+            target[0] += ((target[0]  - blinkyX) * 2);
+            target[1] += ((target[1] - blinkyY) * 2);
 
-            target[0] += vectorX;
-            target[1] += vectorY;
+            isOutOfBounds=super.outOfBounds(target[0] / blockSize, target[1] / blockSize);
+            AStar aStar = new AStar(gv,ghostMapPosX,ghostMapPosY);
 
-            AStar aStar = new AStar(gv,srcX / blockSize,srcY / blockSize);
-            if (!Behaviour.outOfBounds(target[0] / blockSize, target[1] / blockSize)) {
-                if(map[target[1] / blockSize][target[0] / blockSize] != 1){
-                    path = aStar.findPathTo(target[0] / blockSize,target[1] / blockSize);
-                }
-                else
-                    path = aStar.findPathTo(xPosPacman / blockSize ,yPosPacman / blockSize );
-            }else
-                path = aStar.findPathTo(xPosPacman / blockSize ,yPosPacman/ blockSize );
+            if (!isOutOfBounds && map[target[1] / blockSize][target[0] / blockSize] != 1) {
+                path = aStar.findPathTo(target[0] / blockSize,target[1] / blockSize);
+            }else {
+                path = aStar.findPathTo(xPosMapPacman, yPosMapPacman);
+            }
 
-            if(path.isEmpty())
-                path = aStar.findPathTo(xPosPacman/ blockSize ,yPosPacman/ blockSize );
-
-            direction = Behaviour.getDirection(path);
+            direction = super.getDirection(path);
         }
         return direction;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public int[] behave(GameView gv, int srcX, int srcY, int currentDirection) {
+        return super.chase(gv,srcX,srcY,currentDirection);
+    }
 }
 
 

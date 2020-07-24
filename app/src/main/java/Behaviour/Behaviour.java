@@ -7,16 +7,30 @@ import java.util.List;
 import path.Node;
 
 public abstract class Behaviour {
-    public static int[] getNextPosition(GameView gv, int direction, int srcX, int srcY){
+    public abstract int[] behave(GameView gv, int srcX, int srcY, int currentDirection);
+
+    protected int[] getNextPosition(int blocksize, int direction, int srcX, int srcY){
+        //¿por que 15?
         int[] nextPosition = new int[3];
-        if (direction == 0) {
-            srcY += - gv.getBlockSize() / 15;
-        } else if (direction == 1) {
-            srcX += gv.getBlockSize() / 15;
-        } else if (direction == 2) {
-            srcY += gv.getBlockSize() / 15;
-        } else if (direction == 3) {
-            srcX += -gv.getBlockSize() / 15;
+        switch(direction){
+            case 1:
+                //Up
+                srcY += - blocksize / 15;
+                break;
+            case 2:
+                //Left
+                srcX += blocksize / 15;
+                break;
+            case 3:
+                //Down
+                srcY += blocksize / 15;
+                break;
+            case 4:
+                //Right
+                srcX += -blocksize / 15;
+                break;
+            default:
+                break;
         }
 
         nextPosition[0] = srcX;
@@ -25,10 +39,11 @@ public abstract class Behaviour {
         return nextPosition;
 
     }
-    public static int getDirection(List<Node> path){
-        int nextX,nextY, currentX, currentY,direction;
+    protected char getDirection(List<Node> path){
+        int nextX,nextY, currentX, currentY;
+        char direction;
         Node nextNode,currentNode;
-        direction = 4;
+        direction = '0';
 
         if(path!=null &&path.size()>0){
             nextNode = path.get(1);
@@ -40,26 +55,21 @@ public abstract class Behaviour {
             currentY = currentNode.y;
 
             if (currentX - nextX == -1 && currentY - nextY == 0)
-                direction = 1;
+                direction = 'l'; //1
             else if (currentX - nextX == 0 && currentY - nextY == -1)
-                direction = 2;
+                direction = 'u'; //2
             else if (currentX - nextX == 1 && currentY - nextY == 0)
-                direction = 3;
+                direction = 'r';//3
             else if (currentX - nextX == 0 && currentY - nextY == 1)
-                direction = 0;
+                direction = 'd'; //0
 
             path.remove(0);
         }
         return direction;
     }
 
-    public static boolean outOfBounds(int x, int y) {
-        boolean res = false;
-        if (x < 0 || x > 18 || y < 0 || y > 20)
-            res = true;
-
-        return res;
-
+    protected boolean outOfBounds(int x, int y) {
+        return (x < 0 || x > 18 || y < 0 || y > 20);
     }
 
     public static void getPacmanNextPosition(int pacmanDirection,int[]destPacman, int blockSize, int xPosPacman,int yPosPacman){
@@ -90,5 +100,21 @@ public abstract class Behaviour {
                 break;
         }
 
+    }
+
+    public boolean isFrightened(){
+        return false;
+    }
+
+    public boolean isRespawning(){
+        return false;
+    }
+
+    public boolean isChasing(){
+        return false;
+    }
+
+    public boolean isScattering(){
+        return false;
     }
 }
