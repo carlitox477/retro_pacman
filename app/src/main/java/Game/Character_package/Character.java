@@ -100,8 +100,6 @@ public abstract class Character {
         for (int i=0;i<4;i++){
             for (int j=0;j<fpm;j++){
                 idBm=res.getIdentifier(prefix+name + "_"+positions[i] + j, "drawable", packageName);
-                Log.i("Load Bitmap", "Loading \""+idBm+"\"");
-                Log.i("Load Bitmap", "Package Name \""+packageName+"\"");
                 this.bitmaps[i][j]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         res, idBm), spriteSize, spriteSize, false);
                 Log.i("Load Bitmap", "\""+prefix+name + "_"+positions[i] + j+"\" loaded");

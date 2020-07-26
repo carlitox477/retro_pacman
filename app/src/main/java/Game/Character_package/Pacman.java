@@ -111,7 +111,6 @@ public class Pacman extends Character {
         posXScreen=this.currentPositionScreen[0]/this.blocksize;
         limitWidth=mapLength*this.blocksize;
 
-
         if (posXScreen==-1) {
             //to use left portal
             this.currentPositionScreen[0]=(limitWidth-this.blocksize)-this.movementFluencyLevel;
@@ -146,7 +145,7 @@ public class Pacman extends Character {
                     (this.nextDirection == 'd' && (map[posYinMap + 1][posXinMap] == 1 || map[posYinMap + 1][posXinMap]==10) //check if it is a wall or the door of the ghost spawn point
                     ))) {
                 this.currentDirection=this.nextDirection;
-            }else{
+            }else if (this.currentPositionScreen[0]%blocksize==0 && this.currentPositionScreen[1]%blocksize==0){
                  this.currentDirection = ' ';
             }
 
