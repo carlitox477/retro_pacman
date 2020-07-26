@@ -1,4 +1,4 @@
-package path;
+package Game.Path;
 
 // Node class for convienience
 public class Node implements Comparable {

@@ -1,12 +1,12 @@
-package Behaviour_Chase;
-
+package Game.Behaviour.Chase;
 import android.os.Build;
-
 import androidx.annotation.RequiresApi;
 
-import Behaviour.*;
-import com.example.pacman.GameView;
-import path.*;
+
+import Game.GameManager;
+
+import Game.Character_package.Pacman;
+import Game.Path.*;
 
 import java.util.List;
 
@@ -14,21 +14,22 @@ public class ChaseAgressive extends ChaseBehaviour{
     public List<Node> path;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    protected int defineDirection(GameView gv, int ghostScreenPosX, int ghostScreenPosY, int currentDirection){
+    protected int defineDirection(GameManager gameManager,int blocksize, int ghostScreenPosX, int ghostScreenPosY, int currentDirection){
         List<Node> newPath;
         AStar aStar;
-        int direction,blocksize, xPosMapPacman,yPosMapPacman,ghostMapPosX,ghostMapPosY;
+        Pacman pacman=gameManager.getPacman();
+        int direction, xPosMapPacman,yPosMapPacman,ghostMapPosX,ghostMapPosY;
+        int[][] map;
 
-
-        blocksize=gv.getBlockSize();
+        map=gameManager.getGameMap().getMap();
         direction=currentDirection;
-        xPosMapPacman=gv.getPacman().getPositionMapX();
-        yPosMapPacman=gv.getPacman().getPositionMapY();
+        xPosMapPacman=pacman.getPositionMapX();
+        yPosMapPacman=pacman.getPositionMapY();
         ghostMapPosX=ghostScreenPosX / blocksize;
         ghostMapPosY=ghostScreenPosY / blocksize;
 
         if ((ghostScreenPosX % blocksize == 0) && (ghostScreenPosY % blocksize == 0)) {
-            aStar = new AStar(gv, ghostMapPosX,ghostMapPosY);
+            aStar = new AStar(map, ghostMapPosX,ghostMapPosY);
             newPath = aStar.findPathTo(xPosMapPacman,yPosMapPacman);
 
             if(newPath == null)
@@ -42,8 +43,8 @@ public class ChaseAgressive extends ChaseBehaviour{
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public int[] behave(GameView gv, int srcX, int srcY, int currentDirection) {
-        return super.chase(gv, srcX, srcY, currentDirection);
+    public int[] behave(GameManager gameManager, int blocksize, int srcX, int srcY, int currentDirection) {
+        return super.chase(gameManager,blocksize, srcX, srcY, currentDirection);
     }
 }
 

@@ -1,22 +1,19 @@
-package com.example.pacman;
+package Game.GameCountDown;
 
-import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.annotation.RequiresApi;
-
-import java.util.List;
+import Game.GameMap;
 
 public class CountdownBonusThread extends Thread {
     private int time;
-    private GameView gv;
+    private GameMap gm;
 
 
-    public CountdownBonusThread(GameView gv) {
-        this.gv = gv;
-        this.time = gv.getBonusResetTime();
+    public CountdownBonusThread(GameMap gm, int time) {
+        this.gm = gm;
+        this.time = time;
     }
 
     public void run() {
@@ -31,7 +28,7 @@ public class CountdownBonusThread extends Thread {
 
             public void onFinish() {
                 Log.i("info", "Counting bonus reseted");
-                gv.setBonusAvailable();
+                gm.setBonusAvailable();
             }
         }.start();
         Looper.loop();

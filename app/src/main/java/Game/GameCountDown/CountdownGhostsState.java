@@ -1,9 +1,9 @@
-package com.example.pacman;
+package Game.GameCountDown;
 
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
+
+import Game.Character_package.Ghost;
 
 public class CountdownGhostsState extends Thread {
     //Cambiar thread por runnable

@@ -1,16 +1,11 @@
-package Behaviour;
+package Game.Behaviour;
 
 import android.os.Build;
-
 import androidx.annotation.RequiresApi;
-
-import Behaviour.Behaviour;
-import com.example.pacman.GameView;
-
+import Game.GameManager;
 import java.util.List;
-
-import path.AStar;
-import path.Node;
+import Game.Path.AStar;
+import Game.Path.Node;
 
 public class ScatterBehaviour extends Behaviour{
     protected int[] targetPosition;
@@ -25,21 +20,22 @@ public class ScatterBehaviour extends Behaviour{
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public int[] behave(GameView gv, int srcX, int srcY, int currentDirection) {
+    public int[] behave(GameManager gameManager, int blocksize, int srcX, int srcY, int currentDirection) {
         //scatter
-        int direction,blocksize, posXmap,posYmap;
+        int direction, posXmap,posYmap;
         List<Node> path;
         AStar aStar;
+        int[][]map;
 
         direction=currentDirection;
-        blocksize=gv.getBlockSize();
+        map=gameManager.getGameMap().getMap();
 
         if ((srcX % blocksize == 0) && (srcY % blocksize == 0)) {
             //Si el resto es 0 tengo una posición especifica del mapa
             posXmap=srcX  / blocksize;
             posYmap=srcY  / blocksize;
 
-            aStar = new AStar(gv, posXmap, posYmap);
+            aStar = new AStar(map, posXmap, posYmap);
             path = aStar.findPathTo(targetX, targetY);
             direction = super.getDirection(path);
         }

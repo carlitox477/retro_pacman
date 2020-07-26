@@ -1,9 +1,15 @@
-package com.example.pacman;
+package Game;
+
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 
 import java.util.Random;
 
+import Game.Character_package.Pacman;
+
 public class GameMap {
-    private int[][]ghostsSpawnPositions,ghostsScatterTarget,ghostsSpawnMovements,map, resetMap;
+    private int[][]ghostsSpawnPositions,ghostsScatterTarget,map, resetMap;
     private int[]pacmanSpawnPosition;
     private int initialPallets;
 
@@ -82,6 +88,13 @@ public class GameMap {
         return ghostsScatterTarget;
     }
 
+    public void setBonusAvailable() {
+        //MODIFICAR
+        //Se determina en que posicion del mapa se generara el bonus
+        int[] spawn = this.generateMapSpawn();
+        this.map[spawn[1]][spawn[0]] = 9;
+    }
+
     public int[] generateMapSpawn() {
         //Se genera una posicion aleatoria valida en la cual pacman pueda moverse
         //para ubicar el bonus
@@ -114,6 +127,7 @@ public class GameMap {
     }
 
     public void resetMap(){
+        this.map=new int[this.resetMap.length][this.resetMap[0].length];
         for (int i=0;i<this.resetMap.length;i++){
             for(int j=0;j<this.resetMap[0].length;j++){
                 this.map[i][j]=this.resetMap[i][j];
@@ -139,5 +153,60 @@ public class GameMap {
 
     public int getEatenPallets(){
         return this.initialPallets-this.countPallets();
+    }
+
+    public void draw(Canvas canvas, int colorId, int blockSize) {
+        //Log.i("info", "Drawing map");
+        Paint paint;
+        paint = new Paint();
+        paint.setColor(Color.WHITE);
+
+        for (int x = 0; x < map.length; x++) {
+            for (int y = 0; y < map[0].length; y++) {
+                int value = map[x][y];
+                switch (value){
+                    case 1:
+                        paint.setStrokeWidth(2.5f);
+                        paint.setColor(colorId);
+                        paint.setStyle(Paint.Style.FILL);
+                        canvas.drawRect((y * blockSize),(x * blockSize), (y * blockSize + blockSize),(x * blockSize + blockSize), paint);
+                        break;
+                    case 2:
+                        paint.setColor(Color.WHITE);
+                        canvas.drawCircle((y * blockSize + (blockSize / 2)),(x * blockSize + (blockSize / 2)), (float)0.15*blockSize, paint);
+                        break;
+                    case 3:
+                        paint.setColor(Color.WHITE);
+                        canvas.drawCircle((y * blockSize + (blockSize / 2)),(x * blockSize + (blockSize / 2)), (float)0.35*blockSize, paint);
+                        break;
+                    case 10:
+                        paint.setStrokeWidth(2.5f);
+                        paint.setColor(Color.WHITE);
+                        paint.setStyle(Paint.Style.FILL);
+                        canvas.drawRect((y * blockSize) + blockSize/2, ((x+1) * blockSize),((y+1) * blockSize),(x * blockSize), paint);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        paint.setColor(Color.YELLOW);
+        paint.setStrokeWidth(5f);
+        canvas.drawLine(9 * blockSize, ((8 * blockSize) + (blockSize / 2)), (9 * blockSize) + blockSize, ((8 * blockSize) + (blockSize / 2)), paint);
+    }
+
+
+    private void passLevelAnimation(Canvas c, int blockSize, Pacman pacman) throws InterruptedException {
+        for(int i=0; i<10;i++){
+            this.draw(c, Color.WHITE,blockSize);
+            Thread.sleep(500);
+            this.draw(c, Color.BLUE,blockSize);
+            Thread.sleep(500);
+        }
+        this.resetMap();
+        pacman.respawn();
+
+        //we need to restart sound
+        Thread.sleep(1000);
     }
 }

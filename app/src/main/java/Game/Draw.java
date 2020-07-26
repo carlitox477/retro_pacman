@@ -1,4 +1,4 @@
-package com.example.pacman;
+package Game;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -8,7 +8,10 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.Log;
 
-import Character_package.Pacman;
+import com.example.pacman.R;
+
+import Game.Character_package.Character;
+import Game.Character_package.Ghost;
 
 public abstract class Draw {
     private static Paint paint;
@@ -60,50 +63,23 @@ public abstract class Draw {
         canvas.drawLine(9 * blockSize, ((8 * blockSize) + (blockSize / 2)), (9 * blockSize) + blockSize, ((8 * blockSize) + (blockSize / 2)), paint);
     }
 
-    public static void drawGhosts(Ghost[] ghosts,Canvas canvas) {
+    public static void drawGhosts(Ghost[] ghosts, Canvas canvas) {
         for (int i = 0; i < ghosts.length; i++) {
             Log.i("Draw Ghost "+i,"At "+ghosts[i].getxPos()+" "+ghosts[i].getyPos());
-            canvas.drawBitmap(ghosts[i].getBitmap(), ghosts[i].getyPos(),ghosts[i].getxPos(), paint); //invertir x e y
+            canvas.drawBitmap(ghosts[i].getCurrentBitmap(), ghosts[i].getyPos(),ghosts[i].getxPos(), paint); //invertir x e y
         }
     }
 
-    public static void drawPacman(Pacman pacman, Canvas canvas, char viewDirection) {
-        //mover bitmap al pacman
-        int posX, posY,currentPacmanFrame;
-        Bitmap[][] pacmanBM;
+    public static void drawCharacter(Character character, Canvas canvas){
+        Bitmap bMap;
+        int xPosScreen,yPosScreen;
 
-        pacmanBM=pacman.getBitmaps();
-        currentPacmanFrame=pacman.getCurrentFrame();
-        posX=pacman.getPositionScreenX();
-        posY=pacman.getPositionScreenY();
-
-        Log.i("Draw pacman", "position ["+posX+", "+posY+"]");
-        switch (viewDirection) {
-            case 'u':
-                Log.i("Pacman draw", "draw up frame");
-                canvas.drawBitmap(pacmanBM[0][currentPacmanFrame], posX, posY, paint);
-                break;
-            case 'r':
-                Log.i("Pacman draw", "draw right frame");
-                canvas.drawBitmap(pacmanBM[1][currentPacmanFrame], posX, posY, paint);
-                break;
-            case 'l':
-                Log.i("Pacman draw", "draw left frame");
-                canvas.drawBitmap(pacmanBM[2][currentPacmanFrame], posX, posY, paint);
-                break;
-            case 'd':
-                Log.i("Pacman draw", "draw down frame");
-                canvas.drawBitmap(pacmanBM[3][currentPacmanFrame], posX, posY, paint);
-                break;
-            case ' ':
-                canvas.drawBitmap(pacmanBM[1][currentPacmanFrame], posX, posY, paint);
-                break;
-            default:
-                break;
-        }
-
+        bMap=character.getCurrentBitmap();
+        xPosScreen=character.getPositionScreenX();
+        yPosScreen=character.getPositionScreenY();
+        canvas.drawBitmap(bMap,xPosScreen,yPosScreen,paint);
     }
-
+    
     public static void drawBonus(Canvas canvas, int[][]map, int[] bonusPos,boolean bonusAvailable) {
         int value = map[bonusPos[1]][bonusPos[0]];
         if ((value == 9) && bonusAvailable) {

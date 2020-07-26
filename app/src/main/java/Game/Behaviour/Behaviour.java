@@ -1,13 +1,11 @@
-package Behaviour;
+package Game.Behaviour;
 
-import com.example.pacman.GameView;
-
+import Game.GameManager;
 import java.util.List;
-
-import path.Node;
+import Game.Path.Node;
 
 public abstract class Behaviour {
-    public abstract int[] behave(GameView gv, int srcX, int srcY, int currentDirection);
+    public abstract int[] behave(GameManager gameManager, int blocksize,int srcX, int srcY, int currentDirection);
 
     protected int[] getNextPosition(int blocksize, int direction, int srcX, int srcY){
         //¿por que 15?

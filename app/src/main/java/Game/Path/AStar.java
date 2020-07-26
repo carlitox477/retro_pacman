@@ -1,11 +1,9 @@
-package path;
+package Game.Path;
 
 
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
-
-import com.example.pacman.GameView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,13 +26,13 @@ public class AStar {
 
     private Node[][] nodes;
 
-    public AStar(GameView gv, int sx, int sy){
+    public AStar(int[][] map, int sx, int sy){
         this.open = new ArrayList<>();
         this.closed = new ArrayList<>();
         this.path = new ArrayList<>();
         this.startX = sx;
         this.startY = sy;
-        this.map = gv.getGameMap().getMap();
+        this.map = map;
         this.now = new Node(null, sx,sy,0,0);
     }
 

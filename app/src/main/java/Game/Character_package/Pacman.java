@@ -1,18 +1,17 @@
-package Character_package;
+package Game.Character_package;
 
 import android.graphics.Canvas;
 import android.util.Log;
 
-import com.example.pacman.Draw;
-import com.example.pacman.GameView;
-import com.example.pacman.Ghost;
+import Game.GameManager;
+import Game.GameView;
 
-public class Pacman extends Character{
+public class Pacman extends Character {
     private int movementFluencyLevel;
-    private char nextDirection, viewDirection;
+    private char nextDirection;
 
-    public Pacman(String characterName, String prefix, GameView gv, int movementFluencyLevel, int blocksize) {
-        super(characterName,prefix,gv,4,blocksize);
+    public Pacman(String characterName, String prefix, GameView gv, int movementFluencyLevel) {
+        super(characterName,prefix,gv,4,gv.getGameManager().getGameMap().getPacmanSpawnPosition());
         this.movementFluencyLevel=movementFluencyLevel;
     }
 
@@ -57,43 +56,48 @@ public class Pacman extends Character{
         this.nextDirection=nextDirection;
     }
 
-    public void move(int[][] map, Ghost[] ghosts, GameView gv, Canvas canvas){
+    public void move(GameManager gm, Canvas canvas){
         int posXMap, posYMap;
+        Ghost[] ghosts;
+        int[][]map;
+
+        map=gm.getGameMap().getMap();
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         posYMap=this.currentPositionScreen[1]/this.blocksize;
+        ghosts=gm.getGhosts();
 
         this.usePortal(map[0].length);
-        this.eatGhosts(ghosts);
+        //this.eatGhosts(ghosts);
 
         if(this.currentPositionScreen[0]%this.blocksize==0&&this.currentPositionScreen[1]%this.blocksize==0){
             //New map position
             switch (map[posYMap][posXMap]){
                 case 2:
-                    gv.eatPallet(posXMap,posYMap);
+                    gm.eatPallet(posXMap,posYMap);
                     break;
                 case 3:
-                    gv.eatSuperPallet(posXMap,posYMap);
+                    gm.eatSuperPallet(posXMap,posYMap);
                     break;
                 case 9:
-                    gv.eatBonus(posXMap,posYMap);
+                    gm.eatBonus(posXMap,posYMap);
                     break;
                 default:
                     break;
             }
 
         }
-        gv.tryCreateBonus();
-        this.changeDirection(posXMap,posYMap,gv.getGameMap().getMap());
+        gm.tryCreateBonus();
+        this.changeDirection(posXMap,posYMap,gm.getGameMap().getMap());
         if (this.currentPositionScreen[0] < 0) {
             //if we move previously and the position is out of range
             this.currentPositionScreen[0]= this.blocksize * map[0].length;
         }
-        Draw.drawPacman(this,canvas,this.viewDirection);
-        this.changePosition(this.currentDirection);
+        this.draw(canvas);
+        this.changePositionScreen(this.currentDirection);
     }
 
 
-    private void changePosition(char direction){
+    private void changePositionScreen(char direction){
         switch (direction){
             case 'u':
                 this.currentPositionScreen[1] -= movementFluencyLevel;
@@ -152,7 +156,6 @@ public class Pacman extends Character{
                     (this.nextDirection == 'd' && (map[posYinMap + 1][posXinMap] == 1 || map[posYinMap + 1][posXinMap]==10) //check if it is a wall or the door of the ghost spawn point
                     ))) {
                 this.currentDirection=this.nextDirection;
-                this.viewDirection = this.nextDirection;
             }else{
                  this.currentDirection = ' ';
             }
