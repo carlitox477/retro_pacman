@@ -18,34 +18,24 @@ public class Pacman extends Character {
     public int[] getNextPositionScreen(){
         int destX,destY;
         switch (this.currentDirection){
-            case 0:
-                //destX = xPosPacman + blockSize / 2;
+            case 'u':
                 destX=this.currentPositionScreen[0] + this.blocksize / 2;
-                //destY = yPosPacman - 2 * blockSize - blockSize / 2;
                 destY=this.currentPositionScreen[1] - (int)(2.5*this.blocksize);
                 break;
-            case 1:
-                //destX = xPosPacman + 3 * blockSize + blockSize / 2;
+            case 'r':
                 destX= this.currentPositionScreen[0]=(int)(3.5*this.blocksize);
-                //destY = yPosPacman + blockSize / 2;
                 destY=this.currentPositionScreen[1]+this.blocksize / 2;
                 break;
-            case 2:
-                //destX = xPosPacman + blockSize / 2;
+            case 'd':
                 destX=this.currentPositionScreen[0]+this.blocksize/2;
-                //destY = yPosPacman + 3 * blockSize + blockSize / 2;
                 destY=this.currentPositionScreen[1]+(int)(3.5*this.blocksize);
                 break;
-            case 3:
-                //destX = xPosPacman - 2 * blockSize - blockSize / 2;
+            case 'l':
                 destX=this.currentPositionScreen[0]-(int)(2.5*this.blocksize);
-                //destY = yPosPacman + blockSize / 2;
                 destY=this.currentPositionScreen[1];
                 break;
             default:
-                //destX = xPosPacman;
                 destX=this.currentPositionScreen[0];
-                //destY = yPosPacman;
                 destY=this.currentPositionScreen[1];
                 break;
         }

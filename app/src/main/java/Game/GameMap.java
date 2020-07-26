@@ -183,7 +183,7 @@ public class GameMap {
                         paint.setStrokeWidth(2.5f);
                         paint.setColor(Color.WHITE);
                         paint.setStyle(Paint.Style.FILL);
-                        canvas.drawRect((y * blockSize) + blockSize/2, ((x+1) * blockSize),((y+1) * blockSize),(x * blockSize), paint);
+                        canvas.drawRect((y * blockSize), ((x+1) * blockSize),((y+1) * blockSize),(x * blockSize+blockSize/2), paint);
                         break;
                     default:
                         break;
