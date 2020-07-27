@@ -65,6 +65,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.blockSize = ((screenWidth/this.gameManager.getGameMap().getMapWidth())/movementFluencyLevel)*movementFluencyLevel;
         this.holder.setFixedSize(blockSize*this.gameManager.getGameMap().getMapWidth(),blockSize*this.gameManager.getGameMap().getMapHeight());
 
+        this.gameManager.getGameMap().loadBonusBitmaps(this);
         this.gameManager.setPacman(new Pacman("pacman","",this,this.movementFluencyLevel));
 
         //Draw.inicialize(this.blockSize,super.getResources());
@@ -93,7 +94,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             canvas = holder.lockCanvas();
             if (canvas != null) {
                 canvas.drawColor(Color.BLACK);
-                this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize);
+                this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
                 updateFrame(System.currentTimeMillis());
                 //Draw.drawBonus(canvas,this,gameMap.getMap(),this.bonusPos,this.bonusAvailable);
                 //moveGhosts();

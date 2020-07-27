@@ -13,7 +13,6 @@ import Game.Behaviour.RespawningBehaviour;
 import Game.Behaviour.ScatterBehaviour;
 import Game.GameManager;
 import Game.GameView;
-import com.example.pacman.R;
 
 import Game.Behaviour.Chase.ChaseBehaviour;
 
@@ -31,13 +30,14 @@ public class Ghost extends Character {
         vulnerableGhostBitmap=new Bitmap[2];
         respawningGhostBitmap=new Bitmap[4];
 
-        vulnerableGhostBitmap[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.vulnerable_ghost), blockSize, blockSize, false);
-        vulnerableGhostBitmap[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.vulnerable_ghost), blockSize, blockSize, false);
+        //vulnerableGhostBitmap[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.vulnerable_ghost), blockSize, blockSize, false);
+        //vulnerableGhostBitmap[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.vulnerable_ghost), blockSize, blockSize, false);
 
-        respawningGhostBitmap[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
-        respawningGhostBitmap[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
-        respawningGhostBitmap[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
-        respawningGhostBitmap[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);    }
+        //respawningGhostBitmap[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
+        //respawningGhostBitmap[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
+        //respawningGhostBitmap[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
+        //respawningGhostBitmap[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
+        }
 
     public Ghost(String name,GameView gv,int[]mapSpawnPosition,int[]scatterTarget, ChaseBehaviour chaseBehaviour) {
         super(name,"ghost_",gv,2,mapSpawnPosition);

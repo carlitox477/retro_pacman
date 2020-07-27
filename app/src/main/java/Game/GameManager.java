@@ -1,12 +1,9 @@
 package Game;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.util.Log;
-
 import androidx.annotation.RequiresApi;
-
 import Game.Behaviour.Chase.*;
 import Game.Character_package.Ghost;
 import Game.Character_package.Pacman;
@@ -21,7 +18,6 @@ public class GameManager {
     private Pacman pacman;
     private Ghost[] ghosts;
     boolean fruitHasBeenInTheLevel;
-    private Bitmap cherryBitmap;
 
     public GameManager(){
         this.fruitHasBeenInTheLevel=false;
@@ -35,6 +31,9 @@ public class GameManager {
 
     public int getScore() {
         return this.score;
+    }
+    public int getLevel() {
+        return this.level;
     }
     public GameMap getGameMap() {
         return this.gameMap;
@@ -54,20 +53,20 @@ public class GameManager {
 
 
     public void eatPallet(int posXMap, int posYMap){
-        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.score+=10;
+        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
     }
 
     public void eatBonus(int posXMap,int posYMap){
+        this.score+=500;
         Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
-        this.score+=200;
         this.gameMap.getMap()[posYMap][posXMap]=0;
     }
 
     public void eatSuperPallet(int posXMap,int posYMap){
-        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.score+=50;
+        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
 
         //Si hay un timer andando lo cancelo y ejecuto otro
@@ -80,7 +79,7 @@ public class GameManager {
 
     public void tryCreateBonus(){
         //only if pacman has eaten 20 pallets we should allow the fruit appear
-        if(!this.fruitHasBeenInTheLevel && this.gameMap.getEatenPallets()>=20){
+        if(!this.fruitHasBeenInTheLevel /*&& this.gameMap.getEatenPallets()>=20*/){
             //to not allow the fruit be again in the level
             this.fruitHasBeenInTheLevel=true;
             new CountdownBonusThread(this.gameMap,this.bonusResetTime).start();
@@ -103,33 +102,27 @@ public class GameManager {
         // 6 pinky spawn [15,11]
         // 7 inky spawn [13,16]
         // 8 clyde spawn [15,16]
-        ghosts[0] = new Ghost("Blinky",gv,spawnPositions[0], new int[]{0, this.gameMap.getMapWidth()-1},new ChaseAgressive());
-        ghosts[1] = new Ghost("Pinky",gv,spawnPositions[1],new int[]{0,0},new ChaseAmbush());
-        ghosts[2] = new Ghost("Inky",gv,spawnPositions[2],new int[]{this.gameMap.getMapHeight()-1,0},new ChasePatrol());
-        ghosts[3] = new Ghost("Clyde",gv,spawnPositions[3],new int[]{this.gameMap.getMapHeight()-1,this.gameMap.getMapWidth()-1},new ChaseRandom());
+        ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], new int[]{0, this.gameMap.getMapWidth()-1},new ChaseAgressive());
+        ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],new int[]{0,0},new ChaseAmbush());
+        ghosts[2] = new Ghost("inky",gv,spawnPositions[2],new int[]{this.gameMap.getMapHeight()-1,0},new ChasePatrol());
+        ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],new int[]{this.gameMap.getMapHeight()-1,this.gameMap.getMapWidth()-1},new ChaseRandom());
         stateCounter = new CountdownGhostsState(this.ghosts, 0);
         stateCounter.start();
     }
 
-    public void checkWinLevel(){
+    public void checkWinLevel(Canvas c, int blocksize) throws InterruptedException {
         //player win the level if he has eaten all the pallet
         if(this.gameMap.countPallets()==0){
             Log.i("Game","WIN");
             this.level++;
-
             if(this.level<=TOTAL_LEVELS){
+                this.gameMap.passLevelAnimation(c,blocksize,this.pacman,level);
+                this.gameMap.resetMap();
                 //if it isn't the final level reboot
             }else{
                 //Start new level
             }
 
-        }
-    }
-
-    public void drawBonus(Canvas canvas, int[] bonusPos, int blockSize) {
-        int value = this.gameMap.getMap()[bonusPos[1]][bonusPos[0]];
-        if (value == 9) {
-            canvas.drawBitmap(cherryBitmap, bonusPos[0] * blockSize, bonusPos[1] * blockSize, null);
         }
     }
 

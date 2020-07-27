@@ -1,8 +1,12 @@
 package Game;
 
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -12,6 +16,7 @@ public class GameMap {
     private int[][]ghostsSpawnPositions,ghostsScatterTarget,map, resetMap;
     private int[]pacmanSpawnPosition;
     private int initialPallets;
+    private Bitmap[] bonusBitmaps;
 
     public void loadMap1(){
         //31 * 28
@@ -89,15 +94,13 @@ public class GameMap {
     }
 
     public void setBonusAvailable() {
-        //MODIFICAR
         //Se determina en que posicion del mapa se generara el bonus
         int[] spawn = this.generateMapSpawn();
+        Log.i("info", "CountDown available");
         this.map[spawn[1]][spawn[0]] = 9;
     }
 
     public int[] generateMapSpawn() {
-        //Se genera una posicion aleatoria valida en la cual pacman pueda moverse
-        //para ubicar el bonus
         int[] spawn;
         int randomX, randomY;
 
@@ -155,7 +158,7 @@ public class GameMap {
         return this.initialPallets-this.countPallets();
     }
 
-    public void draw(Canvas canvas, int colorId, int blockSize) {
+    public void draw(Canvas canvas, int colorId, int blockSize, int level) {
         //Log.i("info", "Drawing map");
         Paint paint;
         paint = new Paint();
@@ -179,6 +182,9 @@ public class GameMap {
                         paint.setColor(Color.WHITE);
                         canvas.drawCircle((y * blockSize + (blockSize / 2)),(x * blockSize + (blockSize / 2)), (float)0.35*blockSize, paint);
                         break;
+                    case 9:
+                        this.drawBonus(canvas,new int[]{x,y},blockSize,level);
+                        break;
                     case 10:
                         paint.setStrokeWidth(2.5f);
                         paint.setColor(Color.WHITE);
@@ -192,12 +198,44 @@ public class GameMap {
         }
     }
 
+    public void loadBonusBitmaps(GameView gv){
+        int idBm,spriteSize, totalBonusBitmaps;
+        String packageName;
+        Resources res;
 
-    private void passLevelAnimation(Canvas c, int blockSize, Pacman pacman) throws InterruptedException {
+        totalBonusBitmaps=7; //Cambiar esto si se agregan más bitmaps para otros niveles
+        spriteSize=gv.getBlockSize();
+        res = gv.getResources();
+        packageName = gv.getContext().getPackageName();
+        this.bonusBitmaps=new Bitmap[totalBonusBitmaps];
+
+        for (int i=0;i<this.bonusBitmaps.length;i++){
+            if(i<8){
+                idBm=res.getIdentifier("bonus_0"+(i+1), "drawable", packageName);
+            }else{
+                idBm=res.getIdentifier("bonus_"+(i+1), "drawable", packageName);
+            }
+            this.bonusBitmaps[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                    res, idBm), spriteSize, spriteSize, false);
+        }
+    }
+
+    private void drawBonus(Canvas canvas, int[] bonusPos, int blockSize, int level) {
+        int bitmapId;
+        if(level<=this.bonusBitmaps.length){
+            bitmapId=level-1;
+        }else{
+            bitmapId=this.bonusBitmaps.length-1;
+        }
+        canvas.drawBitmap(this.bonusBitmaps[bitmapId], (bonusPos[0]) * blockSize, (bonusPos[1]) * blockSize, null);
+    }
+
+
+    public void passLevelAnimation(Canvas c, int blockSize, Pacman pacman, int level) throws InterruptedException {
         for(int i=0; i<10;i++){
-            this.draw(c, Color.WHITE,blockSize);
+            this.draw(c, Color.WHITE,blockSize,level);
             Thread.sleep(500);
-            this.draw(c, Color.BLUE,blockSize);
+            this.draw(c, Color.BLUE,blockSize,level);
             Thread.sleep(500);
         }
         this.resetMap();

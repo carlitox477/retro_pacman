@@ -17,17 +17,13 @@ public class CountdownBonusThread extends Thread {
     }
 
     public void run() {
-        Log.i("info", "Counting bonus started");
+        Log.i("info", "CountDown bonus started");
         Looper.prepare();
         new CountDownTimer(time, 1000) {
-
             public void onTick(long millisUntilFinished) {
-
             }
 
-
             public void onFinish() {
-                Log.i("info", "Counting bonus reseted");
                 gm.setBonusAvailable();
             }
         }.start();

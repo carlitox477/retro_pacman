@@ -52,11 +52,11 @@ public class Pacman extends Character {
         int[][]map;
 
         map=gm.getGameMap().getMap();
-        posXMap=this.currentPositionScreen[0]/this.blocksize;
-        posYMap=this.currentPositionScreen[1]/this.blocksize;
         ghosts=gm.getGhosts();
 
         this.usePortal(map[0].length);
+        posXMap=this.currentPositionScreen[0]/this.blocksize;
+        posYMap=this.currentPositionScreen[1]/this.blocksize;
         //this.eatGhosts(ghosts);
 
         if(this.currentPositionScreen[0]%this.blocksize==0&&this.currentPositionScreen[1]%this.blocksize==0){
@@ -106,17 +106,19 @@ public class Pacman extends Character {
     }
 
     private void usePortal(int mapLength){
-        int posXScreen, limitWidth;
-        posXScreen=this.currentPositionScreen[0]/this.blocksize;
+        int posXMap, limitWidth;
+        posXMap=this.currentPositionScreen[0]/this.blocksize;
         limitWidth=mapLength*this.blocksize;
 
-        if (posXScreen==-1) {
+        if (posXMap==-1) {
             //to use left portal
             this.currentPositionScreen[0]=(limitWidth-this.blocksize)-this.movementFluencyLevel;
-        }else if(posXScreen==limitWidth){
+        }else if(posXMap==mapLength){
+            //Use right portal
+            Log.i("Pacman position","["+posXMap+", "+this.currentPositionScreen[1]/blocksize+"]");
             this.currentPositionScreen[0]=0;
         }
-        Log.i("Pacman position","["+this.currentPositionScreen[0]/blocksize+", "+this.currentPositionScreen[1]/blocksize+"]");
+        //Log.i("Pacman position","["+this.currentPositionScreen[0]/blocksize+", "+this.currentPositionScreen[1]/blocksize+"]");
     }
 
     private void eatGhosts(Ghost[] ghosts){
