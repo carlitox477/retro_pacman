@@ -74,10 +74,9 @@ public class Pacman extends Character {
                 default:
                     break;
             }
-
+            gm.tryCreateBonus();
+            this.changeDirection(posXMap,posYMap,gm.getGameMap().getMap());
         }
-        gm.tryCreateBonus();
-        this.changeDirection(posXMap,posYMap,gm.getGameMap().getMap());
         if (this.currentPositionScreen[0] < 0) {
             //if we move previously and the position is out of range
             this.currentPositionScreen[0]= this.blocksize * map[0].length;
@@ -145,7 +144,8 @@ public class Pacman extends Character {
                     (this.nextDirection == 'd' && (map[posYinMap + 1][posXinMap] == 1 || map[posYinMap + 1][posXinMap]==10) //check if it is a wall or the door of the ghost spawn point
                     ))) {
                 this.currentDirection=this.nextDirection;
-            }else if (this.currentPositionScreen[0]%blocksize==0 && this.currentPositionScreen[1]%blocksize==0){
+            }else{
+                 //Para que el pacman no se cambie de posicion
                  this.currentDirection = ' ';
             }
 
