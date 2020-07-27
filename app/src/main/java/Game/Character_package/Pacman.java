@@ -144,7 +144,11 @@ public class Pacman extends Character {
                     (this.nextDirection == 'd' && (map[posYinMap + 1][posXinMap] == 1 || map[posYinMap + 1][posXinMap]==10) //check if it is a wall or the door of the ghost spawn point
                     ))) {
                 this.currentDirection=this.nextDirection;
-            }else{
+            }else if (((this.currentDirection == 'l' && (map[posYinMap][(posXinMap - 1)]) == 1) || //check if it is a wall
+                     (this.currentDirection == 'r' && (map[posYinMap][(posXinMap + 1)%map[1].length]) == 1) || //check if it is a wall
+                     (this.currentDirection == 'u' && (map[posYinMap - 1][posXinMap]) == 1) || //check if it is a wall
+                     (this.currentDirection == 'd' && (map[posYinMap + 1][posXinMap] == 1 || map[posYinMap + 1][posXinMap]==10) //check if it is a wall or the door of the ghost spawn point
+                     ))){
                  //Para que el pacman no se cambie de posicion
                  this.currentDirection = ' ';
             }
