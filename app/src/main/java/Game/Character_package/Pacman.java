@@ -136,7 +136,7 @@ public class Pacman extends Character {
     }
 
     private void changeDirection(int posXinMap,int posYinMap, int[][] map){
-        if (posXinMap > 0 && posXinMap < map[0].length * this.blocksize) {
+        if (posXinMap > 0 && posXinMap <= map[0].length) {
             //Log.i("Move pacman","try");
              if (!((this.nextDirection == 'l' && (map[posYinMap][(posXinMap - 1)]) == 1) || //check if it is a wall
                     (this.nextDirection == 'r' && (map[posYinMap][(posXinMap + 1)%map[1].length]) == 1) || //check if it is a wall
