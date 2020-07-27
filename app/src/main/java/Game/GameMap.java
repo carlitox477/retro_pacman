@@ -190,9 +190,6 @@ public class GameMap {
                 }
             }
         }
-        paint.setColor(Color.YELLOW);
-        paint.setStrokeWidth(5f);
-        canvas.drawLine(9 * blockSize, ((8 * blockSize) + (blockSize / 2)), (9 * blockSize) + blockSize, ((8 * blockSize) + (blockSize / 2)), paint);
     }
 
 
