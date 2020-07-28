@@ -87,12 +87,12 @@ public abstract class Character {
 
     protected void loadBitmaps(GameView gv){
         //fpm: frames per movement; pacman 4; ghosts 2
-        int idBm,spriteSize;
+        int idBm,blocksize;
         String packageName;
         Resources res;
         String[] positions;
 
-        spriteSize=gv.getBlockSize();
+        blocksize=gv.getBlockSize();
         res = gv.getResources();
         packageName = gv.getContext().getPackageName();
         positions=new String[]{"up","right","left","down"};
@@ -101,7 +101,7 @@ public abstract class Character {
             for (int j=0;j<fpm;j++){
                 idBm=res.getIdentifier(prefix+name + "_"+positions[i] + j, "drawable", packageName);
                 this.bitmaps[i][j]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                        res, idBm), spriteSize, spriteSize, false);
+                        res, idBm), blocksize, blocksize, false);
                 Log.i("Load Bitmap", "\""+prefix+name + "_"+positions[i] + j+"\" loaded");
             }
         }
@@ -129,9 +129,6 @@ public abstract class Character {
             default:
                 break;
         }
-        //frame=this.currentFrame;
-        //this.currentFrame++;
-        //return this.currentBitmapArray[frame];
         return this.currentBitmapArray[this.currentFrame];
     }
 

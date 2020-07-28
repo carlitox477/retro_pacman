@@ -79,7 +79,7 @@ public class GameManager {
 
     public void tryCreateBonus(){
         //only if pacman has eaten 20 pallets we should allow the fruit appear
-        if(!this.fruitHasBeenInTheLevel /*&& this.gameMap.getEatenPallets()>=20*/){
+        if(!this.fruitHasBeenInTheLevel && this.gameMap.getEatenPallets()>=20){
             //to not allow the fruit be again in the level
             this.fruitHasBeenInTheLevel=true;
             new CountdownBonusThread(this.gameMap,this.bonusResetTime).start();

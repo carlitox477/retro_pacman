@@ -69,7 +69,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.gameManager.setPacman(new Pacman("pacman","",this,this.movementFluencyLevel));
 
         //Draw.inicialize(this.blockSize,super.getResources());
-        //Ghost.loadCommonBitmaps(super.getContext().getResources(),this.blockSize);
+        Ghost.loadCommonBitmaps(this);
     }
     //----------------------------------------------------------------------------------------------
     //Getters and setters
@@ -96,11 +96,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 canvas.drawColor(Color.BLACK);
                 this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
                 updateFrame(System.currentTimeMillis());
-                //Draw.drawBonus(canvas,this,gameMap.getMap(),this.bonusPos,this.bonusAvailable);
                 //moveGhosts();
                 //Draw.drawGhosts(this.ghosts,canvas);
                 this.gameManager.getPacman().move(this.gameManager,canvas);
-                //this.pacman.move(this.gameManager,canvas);
                 holder.unlockCanvasAndPost(canvas);
 
                 //For test
@@ -157,11 +155,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         // Si el tiempo suficiente a transcurrido, pasar al siguiente frame
         if (gameTime > frameTicker + (totalFrame * 30)) {
             frameTicker = gameTime;
-
             // incrementar el frame
             pacman.changeFrame();
             for(int i=0; i<ghosts.length;i++){
-                //this.ghosts[i].changeFrame();
+                //ghosts[i].changeFrame();
             }
         }
         if (gameTime > frameTicker + (50)) {

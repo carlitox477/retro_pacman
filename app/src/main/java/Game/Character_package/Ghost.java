@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -26,18 +27,35 @@ public class Ghost extends Character {
     private ScatterBehaviour scatterBehaviour;
     private RespawningBehaviour respawningBehaviour;
 
-    public static void loadCommonBitmaps(Resources resources,int blockSize){
-        vulnerableGhostBitmap=new Bitmap[2];
+    public static void loadCommonBitmaps(GameView gv){
+        int idBm,blockSize;
+        String packageName,pngName;
+        String[] positions;
+        Resources res;
+
+        res=gv.getResources();
+        blockSize=gv.getBlockSize();
+        packageName = gv.getContext().getPackageName();
+
+        positions=new String[]{"up","right","left","down"};
         respawningGhostBitmap=new Bitmap[4];
+        vulnerableGhostBitmap=new Bitmap[4];
 
-        //vulnerableGhostBitmap[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.vulnerable_ghost), blockSize, blockSize, false);
-        //vulnerableGhostBitmap[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.vulnerable_ghost), blockSize, blockSize, false);
-
-        //respawningGhostBitmap[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
-        //respawningGhostBitmap[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
-        //respawningGhostBitmap[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
-        //respawningGhostBitmap[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(resources, R.drawable.eyes_ghost), blockSize, blockSize, false);
+        for(int i=0;i<vulnerableGhostBitmap.length;i++){
+            pngName="ghost_respawn_"+positions[i];
+            idBm=res.getIdentifier(pngName,"drawable",packageName);
+            respawningGhostBitmap[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
+            Log.i("Load Bitmap",pngName+" loaded" );
         }
+
+        for(int i=0;i<vulnerableGhostBitmap.length;i++){
+            pngName="ghost_frighten"+i;
+            idBm=res.getIdentifier(pngName,"drawable",packageName);
+            vulnerableGhostBitmap[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
+            Log.i("Load Bitmap",pngName+" loaded" );
+        }
+
+    }
 
     public Ghost(String name,GameView gv,int[]mapSpawnPosition,int[]scatterTarget, ChaseBehaviour chaseBehaviour) {
         super(name,"ghost_",gv,2,mapSpawnPosition);
@@ -67,7 +85,6 @@ public class Ghost extends Character {
     public void setScatterBehaviour() {
         //Change current bitmap
         this.currentBehaviour=this.scatterBehaviour;
-        this.getCurrentBitmap();
     }
 
     public void setFrightenedBehaviour() {
@@ -75,7 +92,6 @@ public class Ghost extends Character {
         if (!this.currentBehaviour.isRespawning()) {
             this.currentBitmapArray=Ghost.vulnerableGhostBitmap;
             this.currentBehaviour=this.frightenedBehaviour;
-            this.getCurrentBitmap();
         }
     }
 
@@ -102,16 +118,16 @@ public class Ghost extends Character {
         if(this.currentBehaviour.isRespawning()){
             switch (this.currentDirection){
                 case 'u':
-                    currentBM=Ghost.vulnerableGhostBitmap[0];
+                    currentBM=Ghost.respawningGhostBitmap[0];
                     break;
                 case 'r':
-                    currentBM=Ghost.vulnerableGhostBitmap[1];
+                    currentBM=Ghost.respawningGhostBitmap[1];
                     break;
                 case 'l':
-                    currentBM=Ghost.vulnerableGhostBitmap[2];
+                    currentBM=Ghost.respawningGhostBitmap[2];
                     break;
                 case 'd':
-                    currentBM=Ghost.vulnerableGhostBitmap[3];
+                    currentBM=Ghost.respawningGhostBitmap[3];
                     break;
                 default:
                     currentBM=null;
@@ -124,4 +140,6 @@ public class Ghost extends Character {
         }
         return currentBM;
     }
+
+
 }
