@@ -96,25 +96,20 @@ public class GameMap {
     public void setBonusAvailable() {
         //Se determina en que posicion del mapa se generara el bonus
         int[] spawn = this.generateMapSpawn();
-        Log.i("info", "CountDown available");
-        this.map[spawn[1]][spawn[0]] = 9;
+        Log.i("info", "CountDown available ["+spawn[0]+","+spawn[1]+"]");
+        this.map[spawn[0]][spawn[1]] = 9;
     }
 
     public int[] generateMapSpawn() {
-        int[] spawn;
         int randomX, randomY;
-
-        spawn = new int[2];
 
         do{
             randomX = new Random().nextInt(this.map[0].length);
             randomY = new Random().nextInt(this.map.length);
-        }while (this.map[randomY][randomX] != 0);
+        }while (this.map[randomY][randomX]!= 0);
+        Log.i("Value ["+randomY+","+randomX+"]",""+this.map[randomY][randomX] );
 
-        spawn[0] = randomY;
-        spawn[1] = randomX;
-
-        return spawn;
+        return new int[]{randomY,randomX};
     }
 
     public int[][]getMap(){
@@ -227,7 +222,7 @@ public class GameMap {
         }else{
             bitmapId=this.bonusBitmaps.length-1;
         }
-        canvas.drawBitmap(this.bonusBitmaps[bitmapId], (bonusPos[0]) * blockSize, (bonusPos[1]) * blockSize, null);
+        canvas.drawBitmap(this.bonusBitmaps[bitmapId], (bonusPos[1]) * blockSize, (bonusPos[0]) * blockSize, null);
     }
 
 

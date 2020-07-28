@@ -115,7 +115,6 @@ public class Pacman extends Character {
             this.currentPositionScreen[0]=(limitWidth-this.blocksize)-this.movementFluencyLevel;
         }else if(posXMap==mapLength){
             //Use right portal
-            Log.i("Pacman position","["+posXMap+", "+this.currentPositionScreen[1]/blocksize+"]");
             this.currentPositionScreen[0]=0;
         }
         //Log.i("Pacman position","["+this.currentPositionScreen[0]/blocksize+", "+this.currentPositionScreen[1]/blocksize+"]");
