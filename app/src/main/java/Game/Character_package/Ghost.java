@@ -8,26 +8,26 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import Game.Behaviour.Behaviour;
-import Game.Behaviour.FrightenedBehaviour;
-import Game.Behaviour.RespawningBehaviour;
-import Game.Behaviour.ScatterBehaviour;
-import Game.GameManager;
+import org.jetbrains.annotations.NotNull;
+
+import Game.Behavior.*;
+import Game.Behavior.ChaseBehavior.*;
+import Game.GameCountDown.CountdownGhostsState;
 import Game.GameView;
 
-import Game.Behaviour.Chase.ChaseBehaviour;
 
 
 public class Ghost extends Character {
     private static Bitmap[] vulnerableGhostBitmap,respawningGhostBitmap;
-    private Behaviour currentBehaviour;
+    private Behavior currentBehaviour;
 
-    private ChaseBehaviour chaseBehaviour; //set bitmap
-    private FrightenedBehaviour frightenedBehaviour;
-    private ScatterBehaviour scatterBehaviour;
-    private RespawningBehaviour respawningBehaviour;
+    private BehaviorChase behaviorChaseBehaviour; //set bitmap
+    private BehaviorFrighten frightenedBehaviour;
+    private BehaviorScatter scatterBehaviour;
+    private BehaviorRespawn respawningBehaviour;
+    private CountdownGhostsState countdownGhostsState;
 
-    public static void loadCommonBitmaps(GameView gv){
+    public static void loadCommonBitmaps(@NotNull GameView gv){
         int idBm,blockSize;
         String packageName,pngName;
         String[] positions;
@@ -45,72 +45,82 @@ public class Ghost extends Character {
             pngName="ghost_respawn_"+positions[i];
             idBm=res.getIdentifier(pngName,"drawable",packageName);
             respawningGhostBitmap[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
-            Log.i("Load Bitmap",pngName+" loaded" );
+            //Log.i("Load Bitmap",pngName+" loaded" );
         }
 
         for(int i=0;i<vulnerableGhostBitmap.length;i++){
             pngName="ghost_frighten"+i;
             idBm=res.getIdentifier(pngName,"drawable",packageName);
             vulnerableGhostBitmap[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
-            Log.i("Load Bitmap",pngName+" loaded" );
+            //Log.i("Load Bitmap",pngName+" loaded" );
         }
 
     }
 
-    public Ghost(String name,GameView gv,int[]mapSpawnPosition,int[]scatterTarget, ChaseBehaviour chaseBehaviour) {
-        super(name,"ghost_",gv,2,mapSpawnPosition);
+    public Ghost(String name,GameView gv,int[]respawnPosition,int[]scatterTarget, BehaviorChase chaseBehaviour,int movementFluencyLevel,int[][]notUpDownPositions,char spawnDirection,int[]defaultGhostTarget) {
+        super(name,"ghost_",gv,2,respawnPosition);
 
-        this.frightenedBehaviour = new FrightenedBehaviour();
-        this.respawningBehaviour = new RespawningBehaviour();
-        this.scatterBehaviour=new ScatterBehaviour(scatterTarget);
-        this.chaseBehaviour=chaseBehaviour;
+        this.currentDirection = spawnDirection;
+        this.frightenedBehaviour = new BehaviorFrighten(movementFluencyLevel/2,defaultGhostTarget);
+        this.respawningBehaviour = new BehaviorRespawn(respawnPosition,movementFluencyLevel,defaultGhostTarget);
+        this.scatterBehaviour=new BehaviorScatter(scatterTarget,notUpDownPositions,movementFluencyLevel,defaultGhostTarget);
+        this.behaviorChaseBehaviour =chaseBehaviour;
+        //this.currentBehaviour=chaseBehaviour;
+        this.currentBehaviour=this.scatterBehaviour;
         this.getCurrentBitmap();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void move(GameManager gameManager, int blocksize) {
-        int[] nextPosition; //= new int[3]; //{posX,posY,direction}
-        nextPosition=this.currentBehaviour.behave(gameManager,blocksize,this.currentPositionScreen[0], this.currentPositionScreen[1], this.currentDirection);
-        this.currentPositionScreen[0] = nextPosition[0];
-        this.currentPositionScreen[1]= nextPosition[1];
+    public void move(int[][]map,Pacman pacman) {
+        int[] ghostScreenPosition,nextPosition; //= new int[3]; //{posX,posY,direction}
+
+        //Log.i("Ghost current direction",this.currentDirection+"");
+        ghostScreenPosition=new int[]{this.getPositionScreenY(),this.getPositionScreenX()};
+        nextPosition=this.currentBehaviour.behave(map,ghostScreenPosition,pacman,this.currentDirection,this.blocksize);
+        this.changePositionScreen((char)nextPosition[2],nextPosition[3]);
         this.currentDirection = (char)nextPosition[2];
+        this.usePortal(map[0].length,this.getPositionMapX());
+
+        //Log.i("Ghost direction",this.currentDirection+"");
+        //Log.i("Ghost is attacking",this.currentBehaviour.isAttacking()+"");
+        //Log.i("Ghost Draw","["+this.currentPositionScreen[1]%this.blocksize+", "+this.currentPositionScreen[0]%this.blocksize+"]");
     }
 
     public void setChaseBehaviour() {
+        //Log.i("GHOST "+this.name.toUpperCase(),"Chasing");
         //Change current bitmap
-        this.currentBehaviour=this.chaseBehaviour;
+        this.currentBehaviour=this.behaviorChaseBehaviour;
+        this.currentDirection=this.currentBehaviour.getOpositeDirection(this.currentDirection);
         this.getCurrentBitmap();
     }
 
     public void setScatterBehaviour() {
         //Change current bitmap
+        //Log.i("GHOST "+this.name.toUpperCase(),"Scatter");
         this.currentBehaviour=this.scatterBehaviour;
+        this.currentDirection=this.currentBehaviour.getOpositeDirection(this.currentDirection);
     }
 
     public void setFrightenedBehaviour() {
         //Change current bitmap
+        //Log.i("GHOST "+this.name.toUpperCase(),"Afraid");
         if (!this.currentBehaviour.isRespawning()) {
             this.currentBitmapArray=Ghost.vulnerableGhostBitmap;
             this.currentBehaviour=this.frightenedBehaviour;
+            this.currentDirection=this.currentBehaviour.getOpositeDirection(this.currentDirection);
         }
     }
 
     public void setRespawnBehaviour() {
         //Change current bitmap
+        //Log.i("GHOST "+this.name.toUpperCase(),"Respawning");
         this.currentBitmapArray=Ghost.respawningGhostBitmap;
         this.currentBehaviour=this.respawningBehaviour;
+        this.currentDirection=this.currentBehaviour.getOpositeDirection(this.currentDirection);
     }
 
-    public Behaviour getState() {
+    public Behavior getState() {
         return this.currentBehaviour;
-    }
-
-    public int getxPos() {
-        return this.currentPositionScreen[0];
-    }
-
-    public int getyPos() {
-        return this.currentPositionScreen[1];
     }
 
     public Bitmap getCurrentBitmap(){

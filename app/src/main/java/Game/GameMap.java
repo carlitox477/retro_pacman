@@ -13,7 +13,7 @@ import java.util.Random;
 import Game.Character_package.Pacman;
 
 public class GameMap {
-    private int[][]ghostsSpawnPositions,ghostsScatterTarget,map, resetMap;
+    private int[][]ghostsSpawnPositions,ghostsScatterTarget,map, resetMap,notUpDownDecisionPositions,defaultGhostTargets;
     private int[]pacmanSpawnPosition;
     private int initialPallets;
     private Bitmap[] bonusBitmaps;
@@ -45,9 +45,9 @@ public class GameMap {
                 {99, 99, 99, 99, 99,  1,  2,  1,  1,  1,  1,  1,  0,  1,  1,  0,  1,  1,  1,  1,  1,  2,  1, 99, 99, 99, 99, 99}, //11
                 {99, 99, 99, 99, 99,  1,  2,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  2,  1, 99, 99, 99, 99, 99}, //12
                 {99, 99, 99, 99, 99,  1,  2,  1,  1,  0,  1,  1,  1, 10, 10,  1,  1,  1,  0,  1,  1,  2,  1, 99, 99, 99, 99, 99}, //13
-                { 1,  1,  1,  1,  1,  1,  2,  1,  1,  0,  1,  5, 99, 99, 99, 99,  7,  1,  0,  1,  1,  2,  1,  1,  1,  1,  1,  1}, //14
+                { 1,  1,  1,  1,  1,  1,  2,  1,  1,  0,  1, 99, 99, 99, 99, 99, 99,  1,  0,  1,  1,  2,  1,  1,  1,  1,  1,  1}, //14
                 { 0,  0,  0,  0,  0,  0,  2,  0,  0,  0,  1, 99, 99, 99, 99, 99, 99,  1,  0,  0,  0,  2,  0,  0,  0,  0,  0,  0}, //15
-                { 1,  1,  1,  1,  1,  1,  2,  1,  1,  0,  1,  6, 99, 99, 99, 99,  8,  1,  0,  1,  1,  2,  1,  1,  1,  1,  1,  1}, //16
+                { 1,  1,  1,  1,  1,  1,  2,  1,  1,  0,  1, 99, 99, 99, 99, 99, 99,  1,  0,  1,  1,  2,  1,  1,  1,  1,  1,  1}, //16
                 {99, 99, 99, 99, 99,  1,  2,  1,  1,  0,  1,  1,  1,  1,  1,  1,  1,  1,  0,  1,  1,  2,  1, 99, 99, 99, 99, 99}, //17
                 {99, 99, 99, 99, 99,  1,  2,  1,  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1,  1,  2,  1, 99, 99, 99, 99, 99}, //18
                 {99, 99, 99, 99, 99,  1,  2,  1,  1,  0,  1,  1,  1,  1,  1,  1,  1,  1,  0,  1,  1,  2,  1, 99, 99, 99, 99, 99}, //19
@@ -64,39 +64,51 @@ public class GameMap {
                 { 1,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  2,  1}, //30 (GG)
                 { 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1}  //31 (GG)
         };
+        this.notUpDownDecisionPositions=new int[][]{{11,12},{11,13},{11,14},{11,15},{23,12},{23,13},{23,14},{23,15}}; // YX
+        this.defaultGhostTargets=new int[][]{{11,13},{11,14}};//YX
         this.resetMap();
         this.initialPallets=this.countPallets();
-        this.pacmanSpawnPosition=new int[]{14, 23};
+        this.pacmanSpawnPosition=new int[]{14, 23};//XY
         this.ghostsSpawnPositions=new int[][]{
-                {13,11},
-                {15,11},
-                {13,16},
-                {15,13}
+                {11,13},//XY
+                {16,13},//XY
+                {11,15},//XY
+                {16,15}//XY
         };
         this.ghostsScatterTarget =new int[][]{
-                {0,this.map[0].length-1},
-                {0,0},
-                {this.map.length-1,0},
-                {this.map.length-1,this.map[0].length-1}
+                {0,this.map[0].length-1},//YX
+                {0,0},//YX
+                {this.map.length-1,0},//YX
+                {this.map.length-1,this.map[0].length-1}//YX
         };
     }
 
     public int[] getPacmanSpawnPosition() {
         return pacmanSpawnPosition;
     }
-
     public int[][] getGhostsSpawnPositions() {
         return ghostsSpawnPositions;
     }
-
     public int[][] getGhostsScatterTarget() {
         return ghostsScatterTarget;
+    }
+    public int[][]getMap(){
+        return this.map;
+    }
+    public int getMapWidth(){
+        return this.map[0].length;
+    }
+    public int getMapHeight(){
+        return this.map.length;
+    }
+    public int[][] getNotUpDownDecisionPositions(){return this.notUpDownDecisionPositions;}
+    public int[][] getDefaultGhostTarget() {
+        return defaultGhostTargets;
     }
 
     public void setBonusAvailable() {
         //Se determina en que posicion del mapa se generara el bonus
         int[] spawn = this.generateMapSpawn();
-        Log.i("info", "CountDown available ["+spawn[0]+","+spawn[1]+"]");
         this.map[spawn[0]][spawn[1]] = 9;
     }
 
@@ -107,21 +119,9 @@ public class GameMap {
             randomX = new Random().nextInt(this.map[0].length);
             randomY = new Random().nextInt(this.map.length);
         }while (this.map[randomY][randomX]!= 0);
-        Log.i("Value ["+randomY+","+randomX+"]",""+this.map[randomY][randomX] );
+        //Log.i("Value ["+randomY+","+randomX+"]",""+this.map[randomY][randomX] );
 
         return new int[]{randomY,randomX};
-    }
-
-    public int[][]getMap(){
-        return this.map;
-    }
-
-    public int getMapWidth(){
-        return this.map[0].length;
-    }
-
-    public int getMapHeight(){
-        return this.map.length;
     }
 
     public void resetMap(){

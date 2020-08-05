@@ -17,7 +17,6 @@ public class CountdownBonusThread extends Thread {
     }
 
     public void run() {
-        Log.i("info", "CountDown bonus started");
         Looper.prepare();
         new CountDownTimer(time, 1000) {
             public void onTick(long millisUntilFinished) {

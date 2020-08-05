@@ -44,6 +44,11 @@ public class FrightenedBehaviour extends Behaviour{
     }
 
     @Override
+    protected int[] getTarget(GameManager gameManager) {
+        return new int[0];
+    }
+
+    @Override
     public boolean isFrightened() {
         return true;
     }

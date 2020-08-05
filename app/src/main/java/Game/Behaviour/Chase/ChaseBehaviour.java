@@ -16,6 +16,7 @@ public abstract class ChaseBehaviour extends Behaviour {
         return super.getNextPosition(blocksize,direction,srcX,srcY);
         }
 
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     protected abstract int defineDirection(GameManager gameManager,int blocksize, int srcX, int srcY, int currentDirection);
 
@@ -23,4 +24,5 @@ public abstract class ChaseBehaviour extends Behaviour {
     public boolean isChasing() {
         return true;
     }
+
 }

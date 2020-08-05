@@ -44,6 +44,11 @@ public class ScatterBehaviour extends Behaviour{
     }
 
     @Override
+    protected int[] getTarget(GameManager gameManager) {
+        return new int[0];
+    }
+
+    @Override
     public boolean isScattering() {
         return true;
     }

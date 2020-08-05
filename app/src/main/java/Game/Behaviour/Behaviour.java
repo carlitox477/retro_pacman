@@ -1,5 +1,6 @@
 package Game.Behaviour;
 
+import Game.Character_package.Ghost;
 import Game.GameManager;
 import java.util.List;
 import Game.Path.Node;
@@ -99,6 +100,86 @@ public abstract class Behaviour {
         }
 
     }
+
+    protected int[] nextDirection(int[]currentMapPosition, int[][]map, int[] target, Ghost ghost){
+        int left,up,down,right,xDist,yDist;
+        int[][]positions;
+        double[] distances;
+        char[] direction;
+        char opositeDirection=' ';
+        double[] minDistance;
+        int[] nextPosition;
+
+        //opositeDirection=ghost.getOpositeDirection();
+        distances=new double[4];
+        direction=new char[1];
+        minDistance=new double[1];
+        nextPosition=new int[2];
+
+        left=currentMapPosition[1]-1;
+        right=currentMapPosition[1]+1;
+        up=currentMapPosition[0]-1;
+        down=currentMapPosition[0]+1;
+        if(left==-1){
+            left=map[0].length-1;
+        }
+        if(right==map[0].length){
+            right=0;
+        }
+        if(up==-1){
+            up=map.length-1;
+        }
+        if(down==map.length){
+            right=0;
+        }
+
+        positions=new int[][]{
+                {up,currentMapPosition[1]}, //up
+                {currentMapPosition[0],left}, //left
+                {down,currentMapPosition[1]}, //down
+                {currentMapPosition[0],right}, //right
+        };
+
+        for(int i=0;i<distances.length;i++){
+            yDist = Math.abs(positions[i][0]-target[0]);
+            xDist= Math.abs(positions[i][1]-target[1]);
+            distances[i]=Math.hypot(xDist, yDist);
+        }
+
+        minDistance(minDistance,direction,nextPosition,opositeDirection,map,positions[0],'u',distances[0],positions[1],'l',distances[1]);
+        minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],positions[2],'d',distances[2]);
+        minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],positions[3],'r',distances[3]);
+
+        return new int[]{nextPosition[0],nextPosition[1],direction[0]};
+    }
+
+    private void minDistance(double[]minDistance,char[]resultDirection,int[]resPosition,char opositeDirection,int[][] map,int[]position1,char direction1,double distance1,int[]position2,char direction2,double distance2){
+        //La direccion elegida no puede ser la opuesta a la direccion actual la siguiente
+        //posicion debe ser una posición válida (que no sea pared)
+        if(distance1<=distance2){
+            if(map[position1[0]][position1[1]]!=1 && direction1!=opositeDirection){
+                resultDirection[0]=direction1;
+                minDistance[0]=distance1;
+
+                resPosition[0]=position1[0];
+                resPosition[1]=position1[1];
+            }
+        }else if(map[position2[0]][position2[1]]!=1 && direction2!=opositeDirection){
+            resultDirection[0]=direction2;
+            minDistance[0]=distance2;
+
+            resPosition[0]=position2[0];
+            resPosition[1]=position2[1];
+        }else{
+            //0,0 por error, ver si se puede cambiar
+            resPosition[0]=0;
+            resPosition[1]=0;
+            resultDirection[0]=' ';
+            minDistance[0]=Double.MAX_VALUE;
+        }
+    }
+
+    protected abstract int[] getTarget(GameManager gameManager);
 
     public boolean isFrightened(){
         return false;

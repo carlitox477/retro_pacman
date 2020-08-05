@@ -7,8 +7,8 @@ import Game.GameManager;
 import Game.GameView;
 
 public class Pacman extends Character {
-    private int movementFluencyLevel;
     private char nextDirection;
+    protected int movementFluencyLevel;
 
     public Pacman(String characterName, String prefix, GameView gv, int movementFluencyLevel) {
         super(characterName,prefix,gv,4,gv.getGameManager().getGameMap().getPacmanSpawnPosition());
@@ -54,7 +54,7 @@ public class Pacman extends Character {
         map=gm.getGameMap().getMap();
         ghosts=gm.getGhosts();
 
-        this.usePortal(map[0].length);
+        this.usePortal(map[0].length,this.movementFluencyLevel);
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         posYMap=this.currentPositionScreen[1]/this.blocksize;
         //this.eatGhosts(ghosts);
@@ -81,44 +81,10 @@ public class Pacman extends Character {
             //if we move previously and the position is out of range
             this.currentPositionScreen[0]= this.blocksize * map[0].length;
         }
+        this.changePositionScreen(this.currentDirection,this.movementFluencyLevel);
         this.draw(canvas);
-        this.changePositionScreen(this.currentDirection);
     }
 
-
-    private void changePositionScreen(char direction){
-        switch (direction){
-            case 'u':
-                this.currentPositionScreen[1] -= movementFluencyLevel;
-                break;
-            case 'd':
-                this.currentPositionScreen[1]+= movementFluencyLevel;
-                break;
-            case 'r':
-                this.currentPositionScreen[0] += movementFluencyLevel;
-                break;
-            case 'l':
-                this.currentPositionScreen[0] -= movementFluencyLevel;
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void usePortal(int mapLength){
-        int posXMap, limitWidth;
-        posXMap=this.currentPositionScreen[0]/this.blocksize;
-        limitWidth=mapLength*this.blocksize;
-
-        if (posXMap==-1) {
-            //to use left portal
-            this.currentPositionScreen[0]=(limitWidth-this.blocksize)-this.movementFluencyLevel;
-        }else if(posXMap==mapLength){
-            //Use right portal
-            this.currentPositionScreen[0]=0;
-        }
-        //Log.i("Pacman position","["+this.currentPositionScreen[0]/blocksize+", "+this.currentPositionScreen[1]/blocksize+"]");
-    }
 
     private void eatGhosts(Ghost[] ghosts){
         //check if ghosts should respawn
@@ -126,10 +92,10 @@ public class Pacman extends Character {
         boolean shouldRespawn;
         for (int i = 0; i < ghosts.length; i++) {
             shouldRespawn=ghosts[i].getState().isFrightened() &&
-                    (Math.abs(this.currentPositionScreen[0]) <= ghosts[i].getxPos() + 5) &&
-                    (Math.abs(this.currentPositionScreen[1]) <= ghosts[i].getyPos() + 5) &&
-                    (Math.abs(this.currentPositionScreen[0]) >= ghosts[i].getxPos() - 5) &&
-                    (Math.abs(this.currentPositionScreen[1]) >= ghosts[i].getyPos() - 5);
+                    (Math.abs(this.currentPositionScreen[0]) <= ghosts[i].getPositionScreenX() + 5) &&
+                    (Math.abs(this.currentPositionScreen[1]) <= ghosts[i].getPositionScreenY() + 5) &&
+                    (Math.abs(this.currentPositionScreen[0]) >= ghosts[i].getPositionScreenX() - 5) &&
+                    (Math.abs(this.currentPositionScreen[1]) >= ghosts[i].getPositionScreenY() - 5);
             if (shouldRespawn){
                 ghosts[i].setRespawnBehaviour();
             }

@@ -28,7 +28,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private SurfaceHolder holder;
     private boolean canDraw = false;
     private int blockSize;                // Ancho de la pantalla, ancho del bloque
-    private static int movementFluencyLevel=8; //this movement should be a multiple of the blocksize, if note the pacman will pass walls
+    private static int movementFluencyLevel=8; //this movement should be a multiple of the blocksize and multiple of 4, if note the pacman will pass walls
 
     private int totalFrame = 4;             // Cantidad total de animation frames por direccion
     private int currentArrowFrame = 0;      // animation frame de arrow actual
@@ -62,7 +62,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.gameManager=new GameManager();
 
         int screenWidth=getResources().getDisplayMetrics().widthPixels;
-        this.blockSize = ((screenWidth/this.gameManager.getGameMap().getMapWidth())/movementFluencyLevel)*movementFluencyLevel;
+        this.blockSize = ((((screenWidth/this.gameManager.getGameMap().getMapWidth())/movementFluencyLevel)*movementFluencyLevel)/4)*4;
         this.holder.setFixedSize(blockSize*this.gameManager.getGameMap().getMapWidth(),blockSize*this.gameManager.getGameMap().getMapHeight());
 
         this.gameManager.getGameMap().loadBonusBitmaps(this);
@@ -79,6 +79,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public GameManager getGameManager() {
         return gameManager;
     }
+    public int getMovementFluencyLevel(){return movementFluencyLevel;}
     //----------------------------------------------------------------------------------------------
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -86,19 +87,19 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public void run() {
         Canvas canvas;
 
-        //this.gameManager.initGhosts(this);
+        this.gameManager.initGhosts(this);
         while (canDraw) {
             if (!holder.getSurface().isValid()) {
                 continue;
             }
             canvas = holder.lockCanvas();
             if (canvas != null) {
-                canvas.drawColor(Color.BLACK);
-                this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
-                updateFrame(System.currentTimeMillis());
-                //moveGhosts();
+                //canvas.drawColor(Color.BLACK);
+                //this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
+                updateFrame(System.currentTimeMillis(),canvas);
+                //this.gameManager.moveGhosts(canvas,this.blockSize);
                 //Draw.drawGhosts(this.ghosts,canvas);
-                this.gameManager.getPacman().move(this.gameManager,canvas);
+                //this.gameManager.getPacman().move(this.gameManager,canvas);
                 holder.unlockCanvasAndPost(canvas);
 
                 //For test
@@ -146,19 +147,24 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     //Chequea si se deberia actualizar el frame actual basado en el
     // tiempo que a transcurrido asi la animacion
     //no se ve muy rapida y mala
-    private void updateFrame(long gameTime) {
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void updateFrame(long gameTime, Canvas canvas) {
         Pacman pacman;
         Ghost[] ghosts;
 
         pacman=this.gameManager.getPacman();
         ghosts=this.gameManager.getGhosts();
         // Si el tiempo suficiente a transcurrido, pasar al siguiente frame
-        if (gameTime > frameTicker + (totalFrame * 30)) {
+        if (gameTime > frameTicker + (totalFrame * 10)) {
             frameTicker = gameTime;
+            canvas.drawColor(Color.BLACK);
+            this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
+            this.gameManager.moveGhosts(canvas,this.blockSize);
+            pacman.move(this.gameManager,canvas);
             // incrementar el frame
             pacman.changeFrame();
             for(int i=0; i<ghosts.length;i++){
-                //ghosts[i].changeFrame();
+                ghosts[i].changeFrame();
             }
         }
         if (gameTime > frameTicker + (50)) {

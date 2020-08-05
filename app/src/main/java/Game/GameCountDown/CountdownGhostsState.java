@@ -2,6 +2,7 @@ package Game.GameCountDown;
 
 import android.os.CountDownTimer;
 import android.os.Looper;
+import android.util.Log;
 
 import Game.Character_package.Ghost;
 
@@ -36,7 +37,19 @@ public class CountdownGhostsState extends Thread {
             }
 
             public void onFinish() {
-               resetGhosts();
+                switch (state){
+                    case 0:
+                        Log.i("CD GS","End Scattering");
+                        chaseGhosts();
+                        break;
+                    case 1:
+                        Log.i("CD GS","End Chasing");
+                        scatterGhosts();
+                        break;
+                    case 2:
+                        frightenGhosts();
+                        break;
+                }
             }
         }.start();
         Looper.loop();
@@ -46,10 +59,12 @@ public class CountdownGhostsState extends Thread {
         cancel = true;
     }
 
-    private void resetGhosts() {
+    private void chaseGhosts() {
+        Log.i("CD GS","Chasing");
         for (int i = 0; i < ghosts.length; i++) {
-            if(!ghosts[i].getState().isRespawning())
+            if(!ghosts[i].getState().isRespawning()){
                 ghosts[i].setChaseBehaviour();
+            }
         }
     }
 
@@ -60,6 +75,7 @@ public class CountdownGhostsState extends Thread {
     }
 
     private void scatterGhosts() {
+        Log.i("CD GS","Scatter");
         for (int i = 0; i < ghosts.length; i++) {
             ghosts[i].setScatterBehaviour();
         }

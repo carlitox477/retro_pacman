@@ -41,6 +41,15 @@ public class ChaseAgressive extends ChaseBehaviour{
         return direction;
     }
 
+    @Override
+    protected int[] getTarget(GameManager gameManager){
+        //The pacman is the target
+        int xPosPacman,yPosPacman;
+        xPosPacman=gameManager.getPacman().getPositionMapY();
+        yPosPacman=gameManager.getPacman().getPositionMapX();
+        return new int[]{yPosPacman,xPosPacman};
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public int[] behave(GameManager gameManager, int blocksize, int srcX, int srcY, int currentDirection) {

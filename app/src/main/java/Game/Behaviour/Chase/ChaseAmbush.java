@@ -63,6 +63,11 @@ public class ChaseAmbush extends ChaseBehaviour{
     public int[] behave(GameManager gameManager, int blocksize, int srcX, int srcY, int currentDirection) {
         return super.chase(gameManager,blocksize, srcX, srcY, currentDirection);
     }
+
+    @Override
+    protected int[] getTarget(GameManager gameManager) {
+        return new int[0];
+    }
 }
 
 

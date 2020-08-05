@@ -10,8 +10,10 @@ import Game.Path.*;
 import Game.GameManager;
 
 import java.util.List;
+import java.util.Random;
 
 public class ChaseRandom extends ChaseBehaviour {
+    //Clyde Behavior
     public List<Node> path;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -50,6 +52,16 @@ public class ChaseRandom extends ChaseBehaviour {
             direction = super.getDirection(path);
         }
         return direction;
+    }
+
+    @Override
+    protected int[] getTarget(GameManager gameManager){
+        //The pacman is the target
+        int xTarget, yTarget;
+        int[][]map=gameManager.getGameMap().getMap();
+        xTarget=new Random().nextInt(map[0].length);
+        yTarget=new Random().nextInt(map.length);
+        return new int[]{yTarget,xTarget};
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)

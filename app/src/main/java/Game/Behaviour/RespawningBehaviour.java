@@ -32,6 +32,11 @@ public class RespawningBehaviour extends Behaviour{
     }
 
     @Override
+    protected int[] getTarget(GameManager gameManager) {
+        return new int[0];
+    }
+
+    @Override
     public boolean isRespawning() {
         return true;
     }

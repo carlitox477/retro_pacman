@@ -102,7 +102,7 @@ public abstract class Character {
                 idBm=res.getIdentifier(prefix+name + "_"+positions[i] + j, "drawable", packageName);
                 this.bitmaps[i][j]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                         res, idBm), blocksize, blocksize, false);
-                Log.i("Load Bitmap", "\""+prefix+name + "_"+positions[i] + j+"\" loaded");
+                //Log.i("Load Bitmap", "\""+prefix+name + "_"+positions[i] + j+"\" loaded");
             }
         }
     }
@@ -141,6 +141,40 @@ public abstract class Character {
         paint = new Paint();
         paint.setColor(Color.WHITE);
         canvas.drawBitmap(this.getCurrentBitmap(),this.currentPositionScreen[0],this.currentPositionScreen[1],paint);
+    }
+
+
+    protected void changePositionScreen(char direction,int movementFluencyLevel){
+        switch (direction){
+            case 'u':
+                this.currentPositionScreen[1] -= movementFluencyLevel;
+                break;
+            case 'd':
+                this.currentPositionScreen[1]+= movementFluencyLevel;
+                break;
+            case 'r':
+                this.currentPositionScreen[0] += movementFluencyLevel;
+                break;
+            case 'l':
+                this.currentPositionScreen[0] -= movementFluencyLevel;
+                break;
+            default:
+                break;
+        }
+    }
+
+    protected void usePortal(int mapLength,int movementFluencyLevel){
+        int posXMap, limitWidth;
+        posXMap=this.currentPositionScreen[0]/this.blocksize;
+        limitWidth=mapLength*this.blocksize;
+
+        if (posXMap==-1) {
+            //to use left portal
+            this.currentPositionScreen[0]=(limitWidth-this.blocksize);
+        }else if(posXMap==mapLength){
+            //Use right portal
+            this.currentPositionScreen[0]=0;
+        }
     }
 
 }

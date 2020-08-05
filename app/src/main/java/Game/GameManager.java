@@ -4,7 +4,8 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import Game.Behaviour.Chase.*;
+
+import Game.Behavior.ChaseBehavior.*;
 import Game.Character_package.Ghost;
 import Game.Character_package.Pacman;
 import Game.GameCountDown.*;
@@ -54,13 +55,13 @@ public class GameManager {
 
     public void eatPallet(int posXMap, int posYMap){
         this.score+=10;
-        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
+        //Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
     }
 
     public void eatBonus(int posXMap,int posYMap){
         this.score+=500;
-        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
+        //Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
     }
 
@@ -68,6 +69,9 @@ public class GameManager {
         this.score+=50;
         Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
+        for (int i=0;i<ghosts.length;i++){
+            ghosts[i].setFrightenedBehaviour();
+        }
 
         //Si hay un timer andando lo cancelo y ejecuto otro
         /*if (stateCounter != null)
@@ -87,27 +91,38 @@ public class GameManager {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void moveGhosts(int blocksize) {
+    public void moveGhosts(Canvas canvas,int blocksize) {
         for (int i = 0; i < ghosts.length; i++) {
-            ghosts[i].move(this, blocksize);
+            ghosts[i].move(this.gameMap.getMap(),this.pacman);
+            ghosts[i].draw(canvas);
         }
     }
 
     public void initGhosts(GameView gv) {
-        int[][]spawnPositions;
+        int[][]spawnPositions,cornersPositions, notUpDownPositions,defaultTargets;
+        int movementeFluency;
 
+        defaultTargets=this.gameMap.getDefaultGhostTarget();
+        notUpDownPositions=this.gameMap.getNotUpDownDecisionPositions();
         spawnPositions=this.gameMap.getGhostsSpawnPositions();
+        cornersPositions=this.gameMap.getGhostsScatterTarget();
+        movementeFluency=gv.getMovementFluencyLevel();
         //start position
         // 5 blinky spawn [13, 11]
         // 6 pinky spawn [15,11]
         // 7 inky spawn [13,16]
         // 8 clyde spawn [15,16]
-        ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], new int[]{0, this.gameMap.getMapWidth()-1},new ChaseAgressive());
-        ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],new int[]{0,0},new ChaseAmbush());
-        ghosts[2] = new Ghost("inky",gv,spawnPositions[2],new int[]{this.gameMap.getMapHeight()-1,0},new ChasePatrol());
-        ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],new int[]{this.gameMap.getMapHeight()-1,this.gameMap.getMapWidth()-1},new ChaseRandom());
-        stateCounter = new CountdownGhostsState(this.ghosts, 0);
-        stateCounter.start();
+        this.ghosts=new Ghost[1];
+        ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], cornersPositions[0] ,new BehaviorChaseAgressive(notUpDownPositions,movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'r',defaultTargets[0]);
+        //ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],cornersPositions[1],new BehaviorChaseAmbush(notUpDownPositions,movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'l',defaultTargets[1]);
+        //ghosts[2] = new Ghost("inky",gv,spawnPositions[2],cornersPositions[2],new BehaviorChasePatrol(notUpDownPositions,this.ghosts[0],movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'r',defaultTargets[0]);
+        //ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],cornersPositions[3],new BehaviorChaseRandom(notUpDownPositions,cornersPositions[3],movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'l',defaultTargets[1]);
+
+        //try{
+        //    Thread.sleep(1000);
+        //}catch(Exception e){}
+        //stateCounter = new CountdownGhostsState(this.ghosts, 0);
+        //stateCounter.start();
     }
 
     public void checkWinLevel(Canvas c, int blocksize) throws InterruptedException {
