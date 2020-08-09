@@ -7,25 +7,34 @@ import java.util.Random;
 import Game.Character_package.Pacman;
 
 public class BehaviorFrighten extends Behavior {
+    private boolean firstMoveDone;
+
     public BehaviorFrighten(int movementFluency,int[]defaultTarget) {
         super(movementFluency,defaultTarget);
+        this.firstMoveDone=false;
     }
 
     @Override
     public int[] behave(int[][]map, int[] ghostScreenPosition, Pacman pacman,char ghostDirection, int blocksize) {
-        int[][]nearPositions;
+        int[][] nearPositions;
         int[]ghostMapPosition,nextPosition;
         char opositeDirection,nextDirection;
         char[]directions;
         int posDirection,nextPosValue;
+
 
         ghostMapPosition=new int[]{ghostScreenPosition[0]/blocksize,ghostScreenPosition[1]/blocksize};
         opositeDirection=this.getOpositeDirection(ghostDirection);
         nearPositions=this.getNearPositions(map,ghostMapPosition);
         directions=new char[]{'u','l','d','r'};
 
+
         if(this.shouldChangeDirection(ghostScreenPosition,blocksize)){
-            Log.i("Respawn B","Current direction "+ghostDirection+"; Current position ["+ghostMapPosition[1]+";"+ghostMapPosition[0]+"]");
+            if(!this.firstMoveDone){
+                this.firstMoveDone=true;
+                Log.i("Scare Behavior","Change direction "+ghostDirection);
+            }
+            //Log.i("Respawn B","Current direction "+ghostDirection+"; Current position ["+ghostMapPosition[1]+";"+ghostMapPosition[0]+"]");
             do{
                 posDirection=new Random().nextInt(directions.length);
                 nextDirection=directions[posDirection];
@@ -49,12 +58,15 @@ public class BehaviorFrighten extends Behavior {
                 if(nextPosition!=null){
                     nextPosValue=map[nextPosition[0]][nextPosition[1]];
                 }else{
-                    nextPosValue=opositeDirection;
+                    nextPosValue=1;
                 }
             }while(nextPosition!=null && (nextDirection==opositeDirection || nextPosValue==1 || nextPosValue==10));//wall or ghost house wall
-            Log.i("Respawn CD","New direction "+nextDirection+"; Next position ["+nextPosition[1]+";"+nextPosition[0]+"]");
+            //Log.i("Respawn CD","New direction "+nextDirection+"; Next position ["+nextPosition[1]+";"+nextPosition[0]+"]");
         }else{
-            Log.i("Respawn B","Continue direction");
+            if(!this.firstMoveDone){
+                this.firstMoveDone=true;
+                Log.i("Scare Behavior","Continue direction "+ghostDirection);
+            }
             nextPosition=this.getNextDirection(ghostMapPosition,ghostDirection);
             nextDirection=(char)nextPosition[2];
         }

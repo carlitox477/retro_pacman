@@ -5,6 +5,8 @@ import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
 
+import org.jetbrains.annotations.NotNull;
+
 import Game.Behavior.ChaseBehavior.*;
 import Game.Character_package.Ghost;
 import Game.Character_package.Pacman;
@@ -15,7 +17,7 @@ public class GameManager {
     private static final int TOTAL_LEVELS=256;
     private GameMap gameMap;
     private int level,bonusResetTime,score;
-    private CountdownGhostsState stateCounter;
+    private CountDownScareGhosts scareCounter;
     private Pacman pacman;
     private Ghost[] ghosts;
     boolean fruitHasBeenInTheLevel;
@@ -28,6 +30,7 @@ public class GameManager {
         this.level=1;
         this.ghosts=new Ghost[4];
         this.bonusResetTime = 5000;
+        this.scareCounter=null;
     }
 
     public int getScore() {
@@ -69,16 +72,13 @@ public class GameManager {
         this.score+=50;
         Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
-        for (int i=0;i<ghosts.length;i++){
-            ghosts[i].setFrightenedBehaviour();
-        }
 
         //Si hay un timer andando lo cancelo y ejecuto otro
-        /*if (stateCounter != null)
-            stateCounter.cancelTimer();
-
-        stateCounter = new CountdownGhostsState(this, 2);
-        stateCounter.start();*/
+        if (this.scareCounter != null && !this.scareCounter.hasEnded()){
+            this.scareCounter.cancel();
+        }
+        this.scareCounter = new CountDownScareGhosts(this.ghosts,this.gameMap.getMap());
+        this.scareCounter.start();
     }
 
     public void tryCreateBonus(){
@@ -98,7 +98,7 @@ public class GameManager {
         }
     }
 
-    public void initGhosts(GameView gv) {
+    public synchronized void initGhosts(@NotNull GameView gv) {
         int[][]spawnPositions,cornersPositions, notUpDownPositions,defaultTargets;
         int movementeFluency;
 
@@ -113,16 +113,20 @@ public class GameManager {
         // 7 inky spawn [13,16]
         // 8 clyde spawn [15,16]
         this.ghosts=new Ghost[1];
-        ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], cornersPositions[0] ,new BehaviorChaseAgressive(notUpDownPositions,movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'r',defaultTargets[0]);
+        ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], cornersPositions[0] ,new BehaviorChaseAgressive(notUpDownPositions,movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'l',defaultTargets[0]);
         //ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],cornersPositions[1],new BehaviorChaseAmbush(notUpDownPositions,movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'l',defaultTargets[1]);
         //ghosts[2] = new Ghost("inky",gv,spawnPositions[2],cornersPositions[2],new BehaviorChasePatrol(notUpDownPositions,this.ghosts[0],movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'r',defaultTargets[0]);
         //ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],cornersPositions[3],new BehaviorChaseRandom(notUpDownPositions,cornersPositions[3],movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'l',defaultTargets[1]);
 
-        //try{
-        //    Thread.sleep(1000);
-        //}catch(Exception e){}
-        //stateCounter = new CountdownGhostsState(this.ghosts, 0);
-        //stateCounter.start();
+        try{
+            Thread.sleep(200);
+        }catch(Exception e){}
+
+        Log.i("Init","just 1?");
+        for (int i=0;i<ghosts.length;i++){
+            ghosts[i].onLevelStart(1);
+        }
+
     }
 
     public void checkWinLevel(Canvas c, int blocksize) throws InterruptedException {

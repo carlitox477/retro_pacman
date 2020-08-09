@@ -163,7 +163,12 @@ public abstract class Character {
         }
     }
 
-    protected void usePortal(int mapLength,int movementFluencyLevel){
+    public void setFpm(int fpm) {
+        this.fpm = fpm;
+        this.currentFrame=this.currentFrame%fpm;
+    }
+
+    protected void usePortal(int mapLength, int movementFluencyLevel){
         int posXMap, limitWidth;
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         limitWidth=mapLength*this.blocksize;

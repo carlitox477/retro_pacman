@@ -1,11 +1,14 @@
 package Game.GameCountDown;
 
 import android.os.CountDownTimer;
+import android.os.Looper;
 import android.util.Log;
+
+import java.util.concurrent.Semaphore;
 
 import Game.Character_package.Ghost;
 
-public class CountDownGhost implements Runnable {
+public class CountDownGhost extends Thread {
     private static int[][] SCATTER_TIMES=new int[][]{
             {7000, 7000, 5000, 5000},   //L1
             {7000, 7000, 5000, 1000},   //L2-L5
@@ -16,28 +19,84 @@ public class CountDownGhost implements Runnable {
             {20000, 20000, 1033000, 20000}, //L2-L5
             {20000, 20000, 1037000, 20000}, //L+5
     };
-    private int time,level;
+    private CountDownTimer countDownTimer;
+    private int stage,time,level;
     private char state;
     private Ghost ghost;
-    private boolean cancel;
 
-    @Override
-    public void run() {
-        new CountDownTimer(this.time, 1000) {
-            public void onTick(long millisUntilFinished) {
-                if(cancel){
-                    this.cancel();
-                }
-            }
-
-            public void onFinish() {
-                Log.i("CD GS","End Chasing");
-
-            }
-        }.start();
+    public CountDownGhost(long millisInFuture,Ghost ghost,int level,int stage,char state) {
+        this.ghost=ghost;
+        this.level=level;
+        this.stage=stage;
+        this.state=state;
+        this.time=(int)millisInFuture;
     }
 
-    private void changState(){
+    public CountDownGhost(Ghost ghost,int level,int stage, char state) {
+        this.ghost=ghost;
+        this.level=level;
+        this.stage=stage;
+        this.state=state;
+        this.time=getTime(state,level,stage);
+    }
+
+    public void cancel(){
+        try {
+            if(this.countDownTimer!=null){
+                this.countDownTimer.cancel();
+            }
+        }catch (Exception e){}
+    }
+
+    public void onScare(){
+        //The new countDown will be used by the ghost to reestablish the behavior
+        this.ghost.setCountdownGhost(new CountDownGhost(this.time,this.ghost,this.level,this.stage,this.state),false);
+        this.cancel();
+    }
+
+    public void run(){
+        this.ghost.setFpm(2);
+        this.changeState();
+        Looper.prepare();
+        this.countDownTimer=new CountDownTimer(this.time,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                time=(int)millisUntilFinished;
+                //
+            }
+
+            @Override
+            public void onFinish() {
+                if(stage<=3){
+                    if(state=='s'){
+                        stage++;
+                    }
+                    switch (state){
+                        case 's':
+                            state='c';
+                            break;
+                        case 'c':
+                            state='s';
+                            break;
+                        default:
+                            break;
+                    }
+                    try {
+                        ghost.setCountdownGhost(new CountDownGhost(ghost,level,stage,state),true);
+                    }catch (Exception e){}
+
+                }
+            }
+        };
+        Log.i("Count Down", "Started CD on Run");
+        this.countDownTimer.start();
+        Looper.loop();
+    }
+
+
+    private void changeState(){
+        Log.i("CDG","STAGE "+this.stage+"; STATE "+this.state);
+        this.ghost.setFpm(2);
         switch (this.state){
             case 'c':
                 this.ghost.setChaseBehaviour();
@@ -45,14 +104,28 @@ public class CountDownGhost implements Runnable {
             case 's':
                 this.ghost.setScatterBehaviour();
                 break;
-            case 'f':
-                this.ghost.setFrightenedBehaviour();
-                break;
-            case 'r':
-                this.ghost.respawn();
-                break;
             default:
                 break;
         }
     }
+
+    private static int getTime(char state, int level, int stage){
+        int[][] times;
+        int[] times2;
+        if(state=='c'){
+            times=CHASE_TIMES;
+        }else{
+            times=SCATTER_TIMES;
+        }
+        if(level==1){
+            times2=times[0];
+        }else if(level>2&& level<=5){
+            times2=times[1];
+        }else {
+            times2=times[2];
+        }
+        return times2[stage-1];
+    }
+
+
 }

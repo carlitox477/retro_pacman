@@ -1,45 +1,80 @@
 package Game.GameCountDown;
 
 import android.os.CountDownTimer;
+import android.os.Looper;
 import android.util.Log;
 
 import Game.Character_package.Ghost;
 
-public class CountDownScareGhosts implements Runnable{
+public class CountDownScareGhosts extends Thread{
     private static int TIME=6000; //miliseconds
+    private int[][] map;
     private Ghost[] ghosts;
-    private boolean frameChanged, cancel, levelEnded;
+    private boolean frameChanged,ended;
+    private CountDownTimer countDownTimer;
 
-    public CountDownScareGhosts(Ghost[]ghosts,boolean levelEnded){
+
+    public CountDownScareGhosts(Ghost[]ghosts,int[][] map){
+        this.map=map;
         this.ghosts=ghosts;
-        this.cancel=false;
         this.frameChanged=false;
-        this.levelEnded=levelEnded;
+        this.ended=false;
     }
 
-    @Override
-    public void run() {
-        //try to scare ghosts
+    public void cancel(){
+        this.countDownTimer.cancel();
+    }
 
-        new CountDownTimer(TIME, 1000) {
+    public boolean hasEnded(){
+        return this.ended;
+    }
+
+    private void changeFpm(){
+        for (int i=0;i<ghosts.length;i++){
+            if(ghosts[i].getState().isFrightened()){
+                ghosts[i].setFpm(4);
+            }
+        }
+    }
+
+    private void scareGhosts(){
+        int[] ghostPosition;
+        int value;
+        Log.i("Scare timer","Start Scaring");
+        for (int i=0;i<ghosts.length;i++){
+            ghostPosition=new int[]{ghosts[i].getPositionMapY(),ghosts[i].getPositionMapX()};
+            value=map[ghostPosition[0]][ghostPosition[1]];
+            if(value!=10 && value!=99 && !ghosts[i].getState().isRespawning()){
+                ghosts[i].setFpm(2);
+                ghosts[i].setFrightenedBehaviour();
+            }
+        }
+    }
+
+    public void run(){
+        this.scareGhosts();
+        Looper.prepare();
+        this.countDownTimer=new CountDownTimer(TIME,1000) {
+            @Override
             public void onTick(long millisUntilFinished) {
-                if(cancel){
-                    this.cancel();
-                    if(levelEnded){
-                        Log.i("Scare timer","Level ended");
-                    }else{
-                        Log.i("Scare timer","New Super Pallet've been eaten");
-                        new Thread(new CountDownScareGhosts(ghosts,false)).start();
-                    }
-                }else if(millisUntilFinished>=TIME/2 && frameChanged){
-                    //Change frame of ghosts
+                if(!frameChanged && millisUntilFinished<=3000){
+                    frameChanged=true;
+                    changeFpm();
                 }
             }
 
+            @Override
             public void onFinish() {
                 Log.i("Scare timer","End Scaring");
-
+                ended=true;
+                for(int i=0;i<ghosts.length;i++){
+                    if(!ghosts[i].getState().isAttacking()){
+                        ghosts[i].reestablishBehavior();
+                    }
+                }
             }
-        }.start();
+        };
+        this.countDownTimer.start();
+        Looper.loop();
     }
 }

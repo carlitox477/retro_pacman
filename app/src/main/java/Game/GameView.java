@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -20,6 +21,7 @@ import Game.Character_package.Pacman;
 public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback, GestureDetector.OnGestureListener {
     private static final float SWIPE_THRESHOLD = 2;
     private static final float SWIPE_VELOCITY = 2;
+    private boolean GHOST_INICIALIZED=false;
     private GestureDetector gestureDetector;
     private PlayActivity playActivity;
     private GameManager gameManager;
@@ -68,7 +70,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.gameManager.getGameMap().loadBonusBitmaps(this);
         this.gameManager.setPacman(new Pacman("pacman","",this,this.movementFluencyLevel));
 
-        //Draw.inicialize(this.blockSize,super.getResources());
         Ghost.loadCommonBitmaps(this);
     }
     //----------------------------------------------------------------------------------------------
@@ -82,21 +83,27 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public int getMovementFluencyLevel(){return movementFluencyLevel;}
     //----------------------------------------------------------------------------------------------
 
+    private synchronized void initGhost(){
+        if(!GHOST_INICIALIZED){
+            GHOST_INICIALIZED=true;
+            this.gameManager.initGhosts(this);
+        }
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void run() {
         Canvas canvas;
-
-        this.gameManager.initGhosts(this);
         while (canDraw) {
             if (!holder.getSurface().isValid()) {
                 continue;
             }
+            this.initGhost();
             canvas = holder.lockCanvas();
             if (canvas != null) {
                 //canvas.drawColor(Color.BLACK);
                 //this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
-                updateFrame(System.currentTimeMillis(),canvas);
+                updateFrame(System.currentTimeMillis(), canvas);
                 //this.gameManager.moveGhosts(canvas,this.blockSize);
                 //Draw.drawGhosts(this.ghosts,canvas);
                 //this.gameManager.getPacman().move(this.gameManager,canvas);
@@ -105,7 +112,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 //For test
                 //this.canDraw=false;
                 try {
-                    Thread.sleep(200);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -155,7 +162,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         pacman=this.gameManager.getPacman();
         ghosts=this.gameManager.getGhosts();
         // Si el tiempo suficiente a transcurrido, pasar al siguiente frame
-        if (gameTime > frameTicker + (totalFrame * 10)) {
+        if (gameTime > frameTicker + (totalFrame * 15)) {
             frameTicker = gameTime;
             canvas.drawColor(Color.BLACK);
             this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
