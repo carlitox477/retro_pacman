@@ -33,6 +33,10 @@ public class GameManager {
         this.scareCounter=null;
     }
 
+    public void addScore(int s){
+        this.score+=s;
+    }
+
     public int getScore() {
         return this.score;
     }
@@ -122,7 +126,6 @@ public class GameManager {
             Thread.sleep(200);
         }catch(Exception e){}
 
-        Log.i("Init","just 1?");
         for (int i=0;i<ghosts.length;i++){
             ghosts[i].onLevelStart(1);
         }

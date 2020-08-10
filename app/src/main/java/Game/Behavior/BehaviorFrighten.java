@@ -7,11 +7,9 @@ import java.util.Random;
 import Game.Character_package.Pacman;
 
 public class BehaviorFrighten extends Behavior {
-    private boolean firstMoveDone;
 
     public BehaviorFrighten(int movementFluency,int[]defaultTarget) {
         super(movementFluency,defaultTarget);
-        this.firstMoveDone=false;
     }
 
     @Override
@@ -30,10 +28,6 @@ public class BehaviorFrighten extends Behavior {
 
 
         if(this.shouldChangeDirection(ghostScreenPosition,blocksize)){
-            if(!this.firstMoveDone){
-                this.firstMoveDone=true;
-                Log.i("Scare Behavior","Change direction "+ghostDirection);
-            }
             //Log.i("Respawn B","Current direction "+ghostDirection+"; Current position ["+ghostMapPosition[1]+";"+ghostMapPosition[0]+"]");
             do{
                 posDirection=new Random().nextInt(directions.length);
@@ -63,10 +57,6 @@ public class BehaviorFrighten extends Behavior {
             }while(nextPosition!=null && (nextDirection==opositeDirection || nextPosValue==1 || nextPosValue==10));//wall or ghost house wall
             //Log.i("Respawn CD","New direction "+nextDirection+"; Next position ["+nextPosition[1]+";"+nextPosition[0]+"]");
         }else{
-            if(!this.firstMoveDone){
-                this.firstMoveDone=true;
-                Log.i("Scare Behavior","Continue direction "+ghostDirection);
-            }
             nextPosition=this.getNextDirection(ghostMapPosition,ghostDirection);
             nextDirection=(char)nextPosition[2];
         }

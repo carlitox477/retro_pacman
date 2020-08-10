@@ -23,12 +23,14 @@ public class CountDownGhost extends Thread {
     private int stage,time,level;
     private char state;
     private Ghost ghost;
+    private boolean started;
 
     public CountDownGhost(long millisInFuture,Ghost ghost,int level,int stage,char state) {
         this.ghost=ghost;
         this.level=level;
         this.stage=stage;
         this.state=state;
+        this.started=false;
         this.time=(int)millisInFuture;
     }
 
@@ -48,13 +50,14 @@ public class CountDownGhost extends Thread {
         }catch (Exception e){}
     }
 
-    public void onScare(){
+    public void pause(){
         //The new countDown will be used by the ghost to reestablish the behavior
         this.ghost.setCountdownGhost(new CountDownGhost(this.time,this.ghost,this.level,this.stage,this.state),false);
         this.cancel();
     }
 
     public void run(){
+        this.started=true;
         this.ghost.setFpm(2);
         this.changeState();
         Looper.prepare();
@@ -88,14 +91,12 @@ public class CountDownGhost extends Thread {
                 }
             }
         };
-        Log.i("Count Down", "Started CD on Run");
         this.countDownTimer.start();
         Looper.loop();
     }
 
 
     private void changeState(){
-        Log.i("CDG","STAGE "+this.stage+"; STATE "+this.state);
         this.ghost.setFpm(2);
         switch (this.state){
             case 'c':

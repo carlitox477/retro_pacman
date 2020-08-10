@@ -35,7 +35,7 @@ public class Ghost extends Character {
 
         this.currentDirection = spawnDirection;
         this.frightenedBehaviour = new BehaviorFrighten(movementFluencyLevel/2,defaultGhostTarget);
-        this.respawningBehaviour = new BehaviorRespawn(respawnPosition,movementFluencyLevel,defaultGhostTarget);
+        this.respawningBehaviour = new BehaviorRespawn(new int[]{this.getPositionMapY(),this.getPositionMapX()},movementFluencyLevel,defaultGhostTarget);
         this.scatterBehaviour=new BehaviorScatter(scatterTarget,notUpDownPositions,movementFluencyLevel,defaultGhostTarget);
         this.behaviorChaseBehaviour =chaseBehaviour;
         this.currentBehaviour=chaseBehaviour;
@@ -87,6 +87,10 @@ public class Ghost extends Character {
         }else{
             this.changePositionScreen((char)nextPosition[2],nextPosition[3]);
         }
+        if(moduleY==0 &&moduleX==0 &&this.currentBehaviour.isRespawning() && this.getPositionMapY()==this.getSpawnPositionMapY() &&this.getPositionMapX()==this.getSpawnPositionMapX()){
+            this.reestablishBehavior();
+        }
+
         this.currentDirection = (char)nextPosition[2];
         this.usePortal(map[0].length,this.getPositionMapX());
 
@@ -118,13 +122,11 @@ public class Ghost extends Character {
         //Change current bitmap
         //Log.i("GHOST "+this.name.toUpperCase(),"Afraid");
         if (!this.currentBehaviour.isRespawning()) {
-            Log.i("GHOST "+this.name.toUpperCase(),"Current direction "+this.currentDirection);
-            this.countdownGhost.onScare();
+            this.countdownGhost.pause();
             this.currentBehaviour=this.frightenedBehaviour;
             this.currentBitmapArray=Ghost.vulnerableGhostBitmap;
             this.getCurrentBitmap();
             this.currentDirection=this.getOpositeDirection();
-            Log.i("GHOST "+this.name.toUpperCase(),"Current direction 2 "+this.currentDirection);
         }
     }
 
@@ -135,7 +137,7 @@ public class Ghost extends Character {
         this.currentBehaviour=this.respawningBehaviour;
         this.currentDirection=this.getOpositeDirection();
         this.getCurrentBitmap();
-        this.countdownGhost.onScare();//to reestablish behavior later
+        //this.countdownGhost.pause();//to reestablish behavior later
     }
 
     public Behavior getState() {
@@ -189,6 +191,12 @@ public class Ghost extends Character {
         this.countdownGhost.start();
     }
 
+    public synchronized void killPacman(){
+        Log.i("Ghost", "Started CD reestablish behavior");
+        this.countdownGhost.start();
+    }
+
+
     private char getOpositeDirection(){
         char oposite;
         switch (this.currentDirection){
@@ -211,5 +219,11 @@ public class Ghost extends Character {
         return oposite;
     }
 
+    public void respawn(){
+        super.respawn();
+        if(this.currentBehaviour.isAttacking()){
+            this.countdownGhost.pause();
+        }
+    }
 
 }

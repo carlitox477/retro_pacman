@@ -7,7 +7,7 @@ import android.util.Log;
 import Game.Character_package.Ghost;
 
 public class CountDownScareGhosts extends Thread{
-    private static int TIME=6000; //miliseconds
+    private static int TIME=12000; //miliseconds
     private int[][] map;
     private Ghost[] ghosts;
     private boolean frameChanged,ended;
@@ -68,7 +68,7 @@ public class CountDownScareGhosts extends Thread{
                 Log.i("Scare timer","End Scaring");
                 ended=true;
                 for(int i=0;i<ghosts.length;i++){
-                    if(!ghosts[i].getState().isAttacking()){
+                    if(ghosts[i].getState().isFrightened()){
                         ghosts[i].reestablishBehavior();
                     }
                 }

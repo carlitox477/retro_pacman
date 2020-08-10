@@ -101,18 +101,15 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             this.initGhost();
             canvas = holder.lockCanvas();
             if (canvas != null) {
-                //canvas.drawColor(Color.BLACK);
-                //this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
-                updateFrame(System.currentTimeMillis(), canvas);
-                //this.gameManager.moveGhosts(canvas,this.blockSize);
-                //Draw.drawGhosts(this.ghosts,canvas);
-                //this.gameManager.getPacman().move(this.gameManager,canvas);
+                if(updateFrame(System.currentTimeMillis(), canvas)){
+                    try {
+                        Thread.sleep(3000);
+                    }catch (Exception e){}
+                }
                 holder.unlockCanvasAndPost(canvas);
 
-                //For test
-                //this.canDraw=false;
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(80);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -155,29 +152,39 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // tiempo que a transcurrido asi la animacion
     //no se ve muy rapida y mala
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void updateFrame(long gameTime, Canvas canvas) {
+    private boolean updateFrame(long gameTime, Canvas canvas) {
         Pacman pacman;
         Ghost[] ghosts;
+        boolean pacmanIsDeath;
 
+        pacmanIsDeath=false;
         pacman=this.gameManager.getPacman();
         ghosts=this.gameManager.getGhosts();
+
         // Si el tiempo suficiente a transcurrido, pasar al siguiente frame
         if (gameTime > frameTicker + (totalFrame * 15)) {
             frameTicker = gameTime;
             canvas.drawColor(Color.BLACK);
             this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
             this.gameManager.moveGhosts(canvas,this.blockSize);
-            pacman.move(this.gameManager,canvas);
-            // incrementar el frame
-            pacman.changeFrame();
-            for(int i=0; i<ghosts.length;i++){
-                ghosts[i].changeFrame();
+            pacmanIsDeath=pacman.move(this.gameManager,canvas);
+            if(!pacmanIsDeath){
+                // incrementar el frame
+                pacman.changeFrame();
+                for(int i=0; i<ghosts.length;i++){
+                    ghosts[i].changeFrame();
+                }
+                currentArrowFrame++;
+                currentArrowFrame%=7;
+            }else{
+                pacman.setNextDirection(' ');
+                for(int i=0; i<ghosts.length;i++){
+                    ghosts[i].respawn();
+                }
             }
+
         }
-        if (gameTime > frameTicker + (50)) {
-            currentArrowFrame++;
-            currentArrowFrame%=7;
-        }
+        return pacmanIsDeath;
     }
 
     //----------------------------------------------------------------------------------------------

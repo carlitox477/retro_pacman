@@ -50,7 +50,6 @@ public abstract class Behavior {
             minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],nearPositions[3],'r',distances[3],ghostPosition,ghostDirection);
         }else{
             minDistance(minDistance,direction,nextPosition,opositeDirection,map,nearPositions[1],'l',distances[1],nearPositions[3],'r',distances[3],ghostPosition,ghostDirection);
-
         }
 
         return new int[]{nextPosition[0],nextPosition[1],direction[0]};

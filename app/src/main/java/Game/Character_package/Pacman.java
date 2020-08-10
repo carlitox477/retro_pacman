@@ -3,6 +3,8 @@ package Game.Character_package;
 import android.graphics.Canvas;
 import android.util.Log;
 
+import org.jetbrains.annotations.NotNull;
+
 import Game.GameManager;
 import Game.GameView;
 
@@ -15,41 +17,15 @@ public class Pacman extends Character {
         this.movementFluencyLevel=movementFluencyLevel;
     }
 
-    public int[] getNextPositionScreen(){
-        int destX,destY;
-        switch (this.currentDirection){
-            case 'u':
-                destX=this.currentPositionScreen[0] + this.blocksize / 2;
-                destY=this.currentPositionScreen[1] - (int)(2.5*this.blocksize);
-                break;
-            case 'r':
-                destX= this.currentPositionScreen[0]=(int)(3.5*this.blocksize);
-                destY=this.currentPositionScreen[1]+this.blocksize / 2;
-                break;
-            case 'd':
-                destX=this.currentPositionScreen[0]+this.blocksize/2;
-                destY=this.currentPositionScreen[1]+(int)(3.5*this.blocksize);
-                break;
-            case 'l':
-                destX=this.currentPositionScreen[0]-(int)(2.5*this.blocksize);
-                destY=this.currentPositionScreen[1];
-                break;
-            default:
-                destX=this.currentPositionScreen[0];
-                destY=this.currentPositionScreen[1];
-                break;
-        }
-    return new int[]{destX,destY};
-    }
-
     public void setNextDirection(char nextDirection){
         this.nextDirection=nextDirection;
     }
 
-    public void move(GameManager gm, Canvas canvas){
+    public boolean move(@NotNull GameManager gm, Canvas canvas){
         int posXMap, posYMap;
         Ghost[] ghosts;
         int[][]map;
+        boolean shouldRespawn;
 
         map=gm.getGameMap().getMap();
         ghosts=gm.getGhosts();
@@ -57,49 +33,67 @@ public class Pacman extends Character {
         this.usePortal(map[0].length,this.movementFluencyLevel);
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         posYMap=this.currentPositionScreen[1]/this.blocksize;
-        //this.eatGhosts(ghosts);
+        shouldRespawn=!this.successTryingToEatGhosts(ghosts,gm);
 
-        if(this.currentPositionScreen[0]%this.blocksize==0&&this.currentPositionScreen[1]%this.blocksize==0){
-            //New map position
-            switch (map[posYMap][posXMap]){
-                case 2:
-                    gm.eatPallet(posXMap,posYMap);
-                    break;
-                case 3:
-                    gm.eatSuperPallet(posXMap,posYMap);
-                    break;
-                case 9:
-                    gm.eatBonus(posXMap,posYMap);
-                    break;
-                default:
-                    break;
+        if(shouldRespawn){
+            Log.i("Pacman","it was eaten");
+            this.respawn(ghosts);
+        }else{
+            if(this.currentPositionScreen[0]%this.blocksize==0&&this.currentPositionScreen[1]%this.blocksize==0){
+                //New map position
+                switch (map[posYMap][posXMap]){
+                    case 2:
+                        gm.eatPallet(posXMap,posYMap);
+                        break;
+                    case 3:
+                        gm.eatSuperPallet(posXMap,posYMap);
+                        break;
+                    case 9:
+                        gm.eatBonus(posXMap,posYMap);
+                        break;
+                    default:
+                        break;
+                }
+                gm.tryCreateBonus();
+                this.changeDirection(posXMap,posYMap,gm.getGameMap().getMap());
             }
-            gm.tryCreateBonus();
-            this.changeDirection(posXMap,posYMap,gm.getGameMap().getMap());
+            if (this.currentPositionScreen[0] < 0) {
+                //if we move previously and the position is out of range
+                this.currentPositionScreen[0]= this.blocksize * map[0].length;
+            }
+            this.changePositionScreen(this.currentDirection,this.movementFluencyLevel);
+            this.draw(canvas);
         }
-        if (this.currentPositionScreen[0] < 0) {
-            //if we move previously and the position is out of range
-            this.currentPositionScreen[0]= this.blocksize * map[0].length;
-        }
-        this.changePositionScreen(this.currentDirection,this.movementFluencyLevel);
-        this.draw(canvas);
+        return shouldRespawn;
     }
 
 
-    private void eatGhosts(Ghost[] ghosts){
+    private boolean successTryingToEatGhosts(Ghost[] ghosts,GameManager gm){
         //check if ghosts should respawn
-        //¿Por que 5?
-        boolean shouldRespawn;
-        for (int i = 0; i < ghosts.length; i++) {
-            shouldRespawn=ghosts[i].getState().isFrightened() &&
-                    (Math.abs(this.currentPositionScreen[0]) <= ghosts[i].getPositionScreenX() + 5) &&
-                    (Math.abs(this.currentPositionScreen[1]) <= ghosts[i].getPositionScreenY() + 5) &&
-                    (Math.abs(this.currentPositionScreen[0]) >= ghosts[i].getPositionScreenX() - 5) &&
-                    (Math.abs(this.currentPositionScreen[1]) >= ghosts[i].getPositionScreenY() - 5);
-            if (shouldRespawn){
+        //¿Why 5?
+        boolean ghostShouldRespawn,pacmanShouldNotRespawn;
+        int i,score;
+
+        i=0;
+        score=200;
+
+        do{
+            ghostShouldRespawn=ghosts[i].getState().isFrightened() &&
+                    this.getPositionMapX()== ghosts[i].getPositionMapX() &&
+                    this.getPositionMapY()== ghosts[i].getPositionMapY();
+            pacmanShouldNotRespawn=ghosts[i].getState().isAttacking() &&
+                    this.getPositionMapX()== ghosts[i].getSpawnPositionMapX() &&
+                    this.getPositionMapY()== ghosts[i].getSpawnPositionMapY();
+            if (ghostShouldRespawn){
                 ghosts[i].setRespawnBehaviour();
+                gm.addScore(score);
+                score*=2;
             }
-        }
+            i++;
+
+        }while(i<ghosts.length && !pacmanShouldNotRespawn);
+
+        return !pacmanShouldNotRespawn;
     }
 
     private void changeDirection(int posXinMap,int posYinMap, int[][] map){
@@ -119,7 +113,13 @@ public class Pacman extends Character {
                  //Para que el pacman no se cambie de posicion
                  this.currentDirection = ' ';
             }
+        }
+    }
 
+    public void respawn(Ghost[] ghosts){
+        this.respawn();
+        for(int i=0; i<ghosts.length;i++){
+            ghosts[i].respawn();
         }
     }
 
