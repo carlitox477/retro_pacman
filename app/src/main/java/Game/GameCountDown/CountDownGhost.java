@@ -60,39 +60,44 @@ public class CountDownGhost extends Thread {
         this.started=true;
         this.ghost.setFpm(2);
         this.changeState();
-        Looper.prepare();
-        this.countDownTimer=new CountDownTimer(this.time,1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                time=(int)millisUntilFinished;
-                //
-            }
-
-            @Override
-            public void onFinish() {
-                if(stage<=3){
-                    if(state=='s'){
-                        stage++;
-                    }
-                    switch (state){
-                        case 's':
-                            state='c';
-                            break;
-                        case 'c':
-                            state='s';
-                            break;
-                        default:
-                            break;
-                    }
-                    try {
-                        ghost.setCountdownGhost(new CountDownGhost(ghost,level,stage,state),true);
-                    }catch (Exception e){}
-
+        if(this.state!=' '){
+            Looper.prepare();
+            this.countDownTimer=new CountDownTimer(this.time,1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    time=(int)millisUntilFinished;
+                    //
                 }
-            }
-        };
-        this.countDownTimer.start();
-        Looper.loop();
+
+                @Override
+                public void onFinish() {
+                    if(stage<=3){
+                        if(state=='s'){
+                            stage++;
+                        }
+                        switch (state){
+                            case 's':
+                                state='c';
+                                break;
+                            case 'c':
+                                state='s';
+                                break;
+                            default:
+                                break;
+                        }
+                        try {
+                            ghost.setCountdownGhost(new CountDownGhost(ghost,level,stage,state),true);
+                        }catch (Exception e){}
+
+                    }
+                }
+            };
+            this.countDownTimer.start();
+            Looper.loop();
+        }else {
+
+        }
+
     }
 
 
@@ -106,6 +111,7 @@ public class CountDownGhost extends Thread {
                 this.ghost.setScatterBehaviour();
                 break;
             default:
+                this.state=' ';
                 break;
         }
     }

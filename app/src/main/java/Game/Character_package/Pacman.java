@@ -79,15 +79,15 @@ public class Pacman extends Character {
 
         do{
             ghostShouldRespawn=ghosts[i].getState().isFrightened() &&
-                    (this.currentPositionScreen[0] <= ghosts[i].getPositionScreenX() + 5) &&
-                    (this.currentPositionScreen[1] <= ghosts[i].getPositionScreenY() + 5) &&
-                    (this.currentPositionScreen[0] >= ghosts[i].getPositionScreenX() - 5) &&
-                    (this.currentPositionScreen[1] >= ghosts[i].getPositionScreenY() - 5);
+                    (this.currentPositionScreen[0] <= ghosts[i].getPositionScreenX() + this.blocksize/4) &&
+                    (this.currentPositionScreen[1] <= ghosts[i].getPositionScreenY() + this.blocksize/4) &&
+                    (this.currentPositionScreen[0] >= ghosts[i].getPositionScreenX() - this.blocksize/4) &&
+                    (this.currentPositionScreen[1] >= ghosts[i].getPositionScreenY() - this.blocksize/4);
             pacmanShouldNotRespawn=ghosts[i].getState().isAttacking() &&
-                    (this.currentPositionScreen[0] <= ghosts[i].getPositionScreenX() + 5) &&
-                    (this.currentPositionScreen[1] <= ghosts[i].getPositionScreenY() + 5) &&
-                    (this.currentPositionScreen[0] >= ghosts[i].getPositionScreenX() - 5) &&
-                    (this.currentPositionScreen[1] >= ghosts[i].getPositionScreenY() - 5);
+                    (this.currentPositionScreen[0] <= ghosts[i].getPositionScreenX() + this.blocksize/4) &&
+                    (this.currentPositionScreen[1] <= ghosts[i].getPositionScreenY() + this.blocksize/4) &&
+                    (this.currentPositionScreen[0] >= ghosts[i].getPositionScreenX() - this.blocksize/4) &&
+                    (this.currentPositionScreen[1] >= ghosts[i].getPositionScreenY() - this.blocksize/4);
             if (ghostShouldRespawn){
                 ghosts[i].setRespawnBehaviour();
                 gm.addScore(score);

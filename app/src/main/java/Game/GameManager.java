@@ -116,11 +116,11 @@ public class GameManager {
         // 6 pinky spawn [15,11]
         // 7 inky spawn [13,16]
         // 8 clyde spawn [15,16]
-        this.ghosts=new Ghost[1];
+        this.ghosts=new Ghost[4];
         ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], cornersPositions[0] ,new BehaviorChaseAgressive(notUpDownPositions,movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'l',defaultTargets[0]);
-        //ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],cornersPositions[1],new BehaviorChaseAmbush(notUpDownPositions,movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'l',defaultTargets[1]);
-        //ghosts[2] = new Ghost("inky",gv,spawnPositions[2],cornersPositions[2],new BehaviorChasePatrol(notUpDownPositions,this.ghosts[0],movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'r',defaultTargets[0]);
-        //ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],cornersPositions[3],new BehaviorChaseRandom(notUpDownPositions,cornersPositions[3],movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'l',defaultTargets[1]);
+        ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],cornersPositions[1],new BehaviorChaseAmbush(notUpDownPositions,movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'r',defaultTargets[1]);
+        ghosts[2] = new Ghost("inky",gv,spawnPositions[2],cornersPositions[2],new BehaviorChasePatrol(notUpDownPositions,this.ghosts[0],movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'l',defaultTargets[0]);
+        ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],cornersPositions[3],new BehaviorChaseRandom(notUpDownPositions,cornersPositions[3],movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'r',defaultTargets[1]);
 
         try{
             Thread.sleep(200);

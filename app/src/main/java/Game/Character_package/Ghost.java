@@ -220,10 +220,11 @@ public class Ghost extends Character {
     }
 
     public void respawn(){
-        super.respawn();
         if(this.currentBehaviour.isAttacking()){
             this.countdownGhost.pause();
         }
+        super.respawn();
+
     }
 
 }
