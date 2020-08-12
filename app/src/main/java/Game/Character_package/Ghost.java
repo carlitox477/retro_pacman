@@ -140,6 +140,12 @@ public class Ghost extends Character {
         //this.countdownGhost.pause();//to reestablish behavior later
     }
 
+    public void cancelBehavoirThread(){
+        if(this.countdownGhost!=null){
+            this.countdownGhost.cancel();
+        }
+    }
+
     public Behavior getState() {
         return this.currentBehaviour;
     }
@@ -187,11 +193,6 @@ public class Ghost extends Character {
     }
 
     public synchronized void reestablishBehavior(){
-        Log.i("Ghost", "Started CD reestablish behavior");
-        this.countdownGhost.start();
-    }
-
-    public synchronized void killPacman(){
         Log.i("Ghost", "Started CD reestablish behavior");
         this.countdownGhost.start();
     }

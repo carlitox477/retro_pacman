@@ -94,10 +94,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @Override
     public void run() {
         Canvas canvas;
+        while (!holder.getSurface().isValid()) {
+        }
         while (canDraw) {
-            if (!holder.getSurface().isValid()) {
-                continue;
-            }
+            //if (!holder.getSurface().isValid()) {
+            //    continue;
+            //}
             this.initGhost();
             canvas = holder.lockCanvas();
             if (canvas != null) {
@@ -110,31 +112,29 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
                 try {
                     Thread.sleep(80);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException e) {}
+                if(this.gameManager.checkWinLevel()){
+                    canDraw=false;
+                    this.gameManager.cancelThreads();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {}
+                    //animation
+                    Log.i("Game","You win");
+                }else if(!this.gameManager.getPacman().isAlive()){
+                    //we lost
+
+                    canDraw=false;
+                    this.gameManager.cancelThreads();
+
+                    //animation
+                    Log.i("Game","You lose");
                 }
-
-
             }
         }
+
     }
 
-
-    /*
-    public void drawPath(Canvas canvas) {
-        Paint paint;
-        Node currentNode,nextNode;
-        if (path != null) {
-            paint = new Paint();
-            paint.setColor(Color.RED);
-            for (int i = 0; i < path.size() - 1; i++) {
-                currentNode = path.get(i);
-                nextNode = path.get(i + 1);
-                canvas.drawLine(currentNode.x * blockSize, currentNode.y * blockSize, nextNode.x * blockSize, nextNode.y * blockSize, paint);
-            }
-        }
-    }
-     */
 
 
     // Method to capture touchEvents

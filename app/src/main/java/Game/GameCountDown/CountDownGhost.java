@@ -23,7 +23,7 @@ public class CountDownGhost extends Thread {
     private int stage,time,level;
     private char state;
     private Ghost ghost;
-    private boolean started;
+    private boolean started,ended;
 
     public CountDownGhost(long millisInFuture,Ghost ghost,int level,int stage,char state) {
         this.ghost=ghost;
@@ -31,6 +31,7 @@ public class CountDownGhost extends Thread {
         this.stage=stage;
         this.state=state;
         this.started=false;
+        this.ended=false;
         this.time=(int)millisInFuture;
     }
 
@@ -44,7 +45,7 @@ public class CountDownGhost extends Thread {
 
     public void cancel(){
         try {
-            if(this.countDownTimer!=null){
+            if(this.countDownTimer!=null && !this.ended){
                 this.countDownTimer.cancel();
             }
         }catch (Exception e){}
@@ -88,6 +89,7 @@ public class CountDownGhost extends Thread {
                         try {
                             ghost.setCountdownGhost(new CountDownGhost(ghost,level,stage,state),true);
                         }catch (Exception e){}
+                        ended=true;
 
                     }
                 }

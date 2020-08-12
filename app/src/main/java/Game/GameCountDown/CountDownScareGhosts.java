@@ -22,7 +22,9 @@ public class CountDownScareGhosts extends Thread{
     }
 
     public void cancel(){
-        this.countDownTimer.cancel();
+        if(!this.ended){
+            this.countDownTimer.cancel();
+        }
     }
 
     public boolean hasEnded(){

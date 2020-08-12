@@ -10,10 +10,12 @@ import Game.GameView;
 
 public class Pacman extends Character {
     private char nextDirection;
+    private int lives;
     protected int movementFluencyLevel;
 
     public Pacman(String characterName, String prefix, GameView gv, int movementFluencyLevel) {
         super(characterName,prefix,gv,4,gv.getGameManager().getGameMap().getPacmanSpawnPosition());
+        this.lives=3;
         this.movementFluencyLevel=movementFluencyLevel;
     }
 
@@ -37,6 +39,7 @@ public class Pacman extends Character {
 
         if(shouldRespawn){
             Log.i("Pacman","it was eaten");
+            this.lives--;
             this.respawn(ghosts);
         }else{
             if(this.currentPositionScreen[0]%this.blocksize==0&&this.currentPositionScreen[1]%this.blocksize==0){
@@ -65,6 +68,10 @@ public class Pacman extends Character {
             this.draw(canvas);
         }
         return shouldRespawn;
+    }
+
+    public boolean isAlive(){
+        return this.lives>0;
     }
 
 
@@ -99,6 +106,8 @@ public class Pacman extends Character {
 
         return !pacmanShouldNotRespawn;
     }
+
+
 
     private void changeDirection(int posXinMap,int posYinMap, int[][] map){
         if (posXinMap > 0 && posXinMap <= map[0].length) {

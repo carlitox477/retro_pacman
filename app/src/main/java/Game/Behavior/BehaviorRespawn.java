@@ -10,7 +10,6 @@ public class BehaviorRespawn extends Behavior{
     public BehaviorRespawn(int[] respawnTarget, int movementFluency,int[]defaultTarget) {
         super(movementFluency,defaultTarget);
         this.respawnTarget=respawnTarget;
-        //Log.i("RT","["+this.respawnTarget[0]+", "+this.respawnTarget[1]+"]");
     }
 
     @Override
@@ -19,10 +18,14 @@ public class BehaviorRespawn extends Behavior{
         int[] ghostMapPosition;
 
         ghostMapPosition=new int[]{ghostScreenPosition[0]/blocksize,ghostScreenPosition[1]/blocksize};
-        Log.i("RT","["+ghostMapPosition[0]+", "+ghostMapPosition[1]+"]");
+        //Log.i("RT","["+ghostMapPosition[0]+", "+ghostMapPosition[1]+"]");
 
         if(this.shouldChangeDirection(ghostScreenPosition,blocksize)){
-            nextDirection=this.nextDirection(ghostMapPosition,this.respawnTarget,map,ghostDirection,true);
+            if(map[ghostMapPosition[0]][ghostMapPosition[1]]==98){
+                nextDirection=new int[]{ghostMapPosition[0],ghostMapPosition[1],'d',this.movementFluency};
+            }else{
+                nextDirection=this.nextDirection(ghostMapPosition,this.respawnTarget,map,ghostDirection,true);
+            }
         }else{
             nextDirection=this.getNextDirection(ghostMapPosition,ghostDirection);
         }

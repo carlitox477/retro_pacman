@@ -78,7 +78,7 @@ public class GameManager {
         this.gameMap.getMap()[posYMap][posXMap]=0;
 
         //Si hay un timer andando lo cancelo y ejecuto otro
-        if (this.scareCounter != null && !this.scareCounter.hasEnded()){
+        if (this.scareCounter != null){
             this.scareCounter.cancel();
         }
         this.scareCounter = new CountDownScareGhosts(this.ghosts,this.gameMap.getMap());
@@ -132,19 +132,17 @@ public class GameManager {
 
     }
 
-    public void checkWinLevel(Canvas c, int blocksize) throws InterruptedException {
+    public boolean checkWinLevel() {
         //player win the level if he has eaten all the pallet
-        if(this.gameMap.countPallets()==0){
-            Log.i("Game","WIN");
-            this.level++;
-            if(this.level<=TOTAL_LEVELS){
-                this.gameMap.passLevelAnimation(c,blocksize,this.pacman,level);
-                this.gameMap.resetMap();
-                //if it isn't the final level reboot
-            }else{
-                //Start new level
-            }
+        return this.gameMap.countPallets()==0;
+    }
 
+    public void cancelThreads(){
+        for (int i=0 ; i<this.ghosts.length;i++){
+            this.ghosts[i].cancelBehavoirThread();
+        }
+        if(this.scareCounter!=null){
+            this.scareCounter.cancel();
         }
     }
 
