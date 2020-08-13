@@ -1,7 +1,6 @@
 package Game.Behavior;
 
 import android.util.Log;
-
 import Game.Character_package.Pacman;
 
 public class BehaviorRespawn extends Behavior{

@@ -27,6 +27,21 @@ public class CountDownScareGhosts extends Thread{
         }
     }
 
+    public void onResume(){
+        CountDownScareGhosts sal;
+        this.start();
+    }
+
+    public CountDownScareGhosts onPause(){
+        CountDownScareGhosts sal;
+        sal=null;
+        if(!this.ended){
+            this.countDownTimer.cancel();
+            sal=new CountDownScareGhosts(this.ghosts,this.map);
+        }
+        return sal;
+    }
+
     public boolean hasEnded(){
         return this.ended;
     }

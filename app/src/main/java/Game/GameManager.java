@@ -17,7 +17,7 @@ public class GameManager {
     private static final int TOTAL_LEVELS=256;
     private GameMap gameMap;
     private int level,bonusResetTime,score;
-    private CountDownScareGhosts scareCounter;
+    private CountDownScareGhosts scareCountDown;
     private Pacman pacman;
     private Ghost[] ghosts;
     boolean fruitHasBeenInTheLevel;
@@ -30,7 +30,7 @@ public class GameManager {
         this.level=1;
         this.ghosts=new Ghost[4];
         this.bonusResetTime = 5000;
-        this.scareCounter=null;
+        this.scareCountDown=null;
     }
 
     public void addScore(int s){
@@ -78,11 +78,11 @@ public class GameManager {
         this.gameMap.getMap()[posYMap][posXMap]=0;
 
         //Si hay un timer andando lo cancelo y ejecuto otro
-        if (this.scareCounter != null){
-            this.scareCounter.cancel();
+        if (this.scareCountDown != null){
+            this.scareCountDown.cancel();
         }
-        this.scareCounter = new CountDownScareGhosts(this.ghosts,this.gameMap.getMap());
-        this.scareCounter.start();
+        this.scareCountDown = new CountDownScareGhosts(this.ghosts,this.gameMap.getMap());
+        this.scareCountDown.start();
     }
 
     public void tryCreateBonus(){
@@ -137,12 +137,30 @@ public class GameManager {
         return this.gameMap.countPallets()==0;
     }
 
+    public void onResume(){
+        for (int i=0 ; i<this.ghosts.length;i++){
+            this.ghosts[i].cancelBehavoirThread();
+        }
+        if(this.scareCountDown!=null && !this.scareCountDown.hasEnded()){
+            this.scareCountDown.start();
+        }
+    }
+
+    public void onPause(){
+        for (int i=0 ; i<this.ghosts.length;i++){
+            this.ghosts[i].cancelBehavoirThread();
+        }
+        if(this.scareCountDown!=null && !this.scareCountDown.hasEnded()){
+            this.scareCountDown=this.scareCountDown.onPause();
+        }
+    }
+
     public void cancelThreads(){
         for (int i=0 ; i<this.ghosts.length;i++){
             this.ghosts[i].cancelBehavoirThread();
         }
-        if(this.scareCounter!=null){
-            this.scareCounter.cancel();
+        if(this.scareCountDown!=null){
+            this.scareCountDown.cancel();
         }
     }
 

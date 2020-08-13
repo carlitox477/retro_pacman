@@ -178,6 +178,16 @@ public class Ghost extends Character {
         return currentBM;
     }
 
+    public synchronized void onResume(){
+        if(this.currentBehaviour.isAttacking()){
+            this.countdownGhost.start();
+        }
+    }
+
+    public synchronized void onPause(){
+        this.countdownGhost.pause();
+    }
+
     public synchronized void setCountdownGhost(CountDownGhost countdownGhost,boolean run){
         this.countdownGhost=countdownGhost;
         if(run){
@@ -225,7 +235,6 @@ public class Ghost extends Character {
             this.countdownGhost.pause();
         }
         super.respawn();
-
     }
 
 }
