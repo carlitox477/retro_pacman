@@ -93,49 +93,44 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void run() {
+        long gameTime;
         Canvas canvas;
         while (!holder.getSurface().isValid()) {
         }
+        this.initGhost();
         while (canDraw) {
-            //if (!holder.getSurface().isValid()) {
-            //    continue;
-            //}
-            this.initGhost();
-            canvas = holder.lockCanvas();
-            if (canvas != null) {
-                if(updateFrame(System.currentTimeMillis(), canvas)){
-                    try {
-                        Thread.sleep(3000);
-                    }catch (Exception e){}
-                }
-                holder.unlockCanvasAndPost(canvas);
+            gameTime=System.currentTimeMillis();
+            if(gameTime > frameTicker + (totalFrame * 15)){
+                canvas = holder.lockCanvas();
+                if(canvas!=null){
+                    if(this.updateFrame(gameTime,canvas)){
+                        try {
+                            Thread.sleep(3000);
+                        }catch (Exception e){}
+                    }
+                    holder.unlockCanvasAndPost(canvas);
+                    if(this.gameManager.checkWinLevel()){
+                        canDraw=false;
+                        this.gameManager.cancelThreads();
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {}
+                        //animation
+                        Log.i("Game","You win");
+                    }else if(!this.gameManager.getPacman().isAlive()){
+                        //we lost
 
-                try {
-                    Thread.sleep(80);
-                } catch (InterruptedException e) {}
-                if(this.gameManager.checkWinLevel()){
-                    canDraw=false;
-                    this.gameManager.cancelThreads();
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {}
-                    //animation
-                    Log.i("Game","You win");
-                }else if(!this.gameManager.getPacman().isAlive()){
-                    //we lost
+                        canDraw=false;
+                        this.gameManager.cancelThreads();
 
-                    canDraw=false;
-                    this.gameManager.cancelThreads();
-
-                    //animation
-                    Log.i("Game","You lose");
+                        //animation
+                        Log.i("Game","You lose");
+                    }
                 }
             }
         }
 
     }
-
-
 
     // Method to capture touchEvents
     @Override
@@ -147,7 +142,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return true;
     }
 
-
     //Chequea si se deberia actualizar el frame actual basado en el
     // tiempo que a transcurrido asi la animacion
     //no se ve muy rapida y mala
@@ -157,32 +151,29 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         Ghost[] ghosts;
         boolean pacmanIsDeath;
 
-        pacmanIsDeath=false;
         pacman=this.gameManager.getPacman();
         ghosts=this.gameManager.getGhosts();
 
         // Si el tiempo suficiente a transcurrido, pasar al siguiente frame
-        if (gameTime > frameTicker + (totalFrame * 15)) {
-            frameTicker = gameTime;
-            canvas.drawColor(Color.BLACK);
-            this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
-            this.gameManager.moveGhosts(canvas,this.blockSize);
-            pacmanIsDeath=pacman.move(this.gameManager,canvas);
-            if(!pacmanIsDeath){
-                // incrementar el frame
-                pacman.changeFrame();
-                for(int i=0; i<ghosts.length;i++){
-                    ghosts[i].changeFrame();
-                }
-                currentArrowFrame++;
-                currentArrowFrame%=7;
-            }else{
-                pacman.setNextDirection(' ');
-                for(int i=0; i<ghosts.length;i++){
-                    ghosts[i].respawn();
-                }
-            }
+        frameTicker = gameTime;
+        canvas.drawColor(Color.BLACK);
+        this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
+        this.gameManager.moveGhosts(canvas,this.blockSize);
+        pacmanIsDeath=pacman.move(this.gameManager,canvas);
 
+        if(!pacmanIsDeath){
+            // incrementar el frame
+            pacman.changeFrame();
+            for(int i=0; i<ghosts.length;i++){
+                ghosts[i].changeFrame();
+            }
+            currentArrowFrame++;
+            currentArrowFrame%=7;
+        }else{
+            pacman.setNextDirection(' ');
+            for(int i=0; i<ghosts.length;i++){
+                ghosts[i].respawn();
+            }
         }
         return pacmanIsDeath;
     }
@@ -224,7 +215,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
 
     }
-
 
     @Override
     public boolean onDown(MotionEvent e) {
