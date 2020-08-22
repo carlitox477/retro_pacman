@@ -30,8 +30,8 @@ public class Ghost extends Character {
     private BehaviorRespawn respawningBehaviour;
     private CountDownGhost countdownGhost;
 
-    public Ghost(String name,GameView gv,int[]respawnPosition,int[]scatterTarget, BehaviorChase chaseBehaviour,int movementFluencyLevel,int[][]notUpDownPositions,char spawnDirection,int[]defaultGhostTarget) {
-        super(name,"ghost_",gv,2,respawnPosition);
+    public Ghost(String name,int[]respawnPosition,int[]scatterTarget, BehaviorChase chaseBehaviour,int movementFluencyLevel,int[][]notUpDownPositions,char spawnDirection,int[]defaultGhostTarget,int blocksize, Resources res, String packageName) {
+        super(name,"ghost_",2,respawnPosition, blocksize, res, packageName);
 
         this.currentDirection = spawnDirection;
         this.frightenedBehaviour = new BehaviorFrighten(movementFluencyLevel/2,defaultGhostTarget);
@@ -42,15 +42,11 @@ public class Ghost extends Character {
         this.getCurrentBitmap();
     }
 
-    public static void loadCommonBitmaps(@NotNull GameView gv){
-        int idBm,blockSize;
-        String packageName,pngName;
+    public static void loadCommonBitmaps(int blockSize,Resources res ,String packageName){
+        int idBm;
+        String pngName;
         String[] positions;
-        Resources res;
 
-        res=gv.getResources();
-        blockSize=gv.getBlockSize();
-        packageName = gv.getContext().getPackageName();
 
         positions=new String[]{"up","right","left","down"};
         respawningGhostBitmap=new Bitmap[4];

@@ -1,26 +1,32 @@
 package Game.Character_package;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.util.Log;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.Semaphore;
+
 import Game.GameManager;
-import Game.GameView;
 
 public class Pacman extends Character {
     private char nextDirection;
     private int lives;
-    protected int movementFluencyLevel;
+    private int movementFluencyLevel;
+    private Semaphore changeDirectionSemaphore;
 
-    public Pacman(String characterName, String prefix, GameView gv, int movementFluencyLevel) {
-        super(characterName,prefix,gv,4,gv.getGameManager().getGameMap().getPacmanSpawnPosition());
+    public Pacman(String characterName, String prefix, int movementFluencyLevel, int[]spawnPosition, int blocksize, Resources res, String packageName) {
+        super(characterName,prefix,4,spawnPosition, blocksize, res, packageName);
         this.lives=3;
         this.movementFluencyLevel=movementFluencyLevel;
     }
 
     public void setNextDirection(char nextDirection){
         this.nextDirection=nextDirection;
+    }
+    public void setChangeDirectionSemaphore(Semaphore changeDirectionSemaphore){
+        this.changeDirectionSemaphore=changeDirectionSemaphore;
     }
 
     public boolean move(@NotNull GameManager gm, Canvas canvas){
@@ -70,7 +76,7 @@ public class Pacman extends Character {
         return shouldRespawn;
     }
 
-    public boolean isAlive(){
+    public boolean hasLifes(){
         return this.lives>0;
     }
 
@@ -118,6 +124,7 @@ public class Pacman extends Character {
                     (this.nextDirection == 'd' && (map[posYinMap + 1][posXinMap] == 1 || map[posYinMap + 1][posXinMap]==10) //check if it is a wall or the door of the ghost spawn point
                     ))) {
                 this.currentDirection=this.nextDirection;
+                //this.changeDirectionSemaphore.release();
             }else if (((this.currentDirection == 'l' && (map[posYinMap][(posXinMap - 1)]) == 1) || //check if it is a wall
                      (this.currentDirection == 'r' && (map[posYinMap][(posXinMap + 1)%map[1].length]) == 1) || //check if it is a wall
                      (this.currentDirection == 'u' && (map[posYinMap - 1][posXinMap]) == 1) || //check if it is a wall

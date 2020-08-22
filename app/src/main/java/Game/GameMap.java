@@ -195,15 +195,10 @@ public class GameMap {
         }
     }
 
-    public void loadBonusBitmaps(GameView gv){
-        int idBm,spriteSize, totalBonusBitmaps;
-        String packageName;
-        Resources res;
+    public void loadBonusBitmaps(int spriteSize,Resources res, String packageName){
+        int idBm, totalBonusBitmaps;
 
         totalBonusBitmaps=7; //Cambiar esto si se agregan más bitmaps para otros niveles
-        spriteSize=gv.getBlockSize();
-        res = gv.getResources();
-        packageName = gv.getContext().getPackageName();
         this.bonusBitmaps=new Bitmap[totalBonusBitmaps];
 
         for (int i=0;i<this.bonusBitmaps.length;i++){

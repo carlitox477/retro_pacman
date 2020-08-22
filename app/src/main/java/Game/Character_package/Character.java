@@ -18,10 +18,10 @@ public abstract class Character {
     protected int fpm, blocksize, currentFrame;
     protected int[] spawnPositionScreen,currentPositionScreen;
 
-    public Character(String name,String prefix, GameView gv, int fpm,int[]spawnPosition){
+    public Character(String name,String prefix, int fpm,int[]spawnPosition,int blocksize, Resources res, String packageName){
         this.name=name;
         this.prefix=prefix;
-        this.blocksize=gv.getBlockSize();
+        this.blocksize=blocksize;
         this.fpm=fpm;
 
         this.currentFrame=0;
@@ -29,7 +29,7 @@ public abstract class Character {
         this.currentPositionScreen=new int[]{spawnPosition[0]*blocksize,spawnPosition[1]*blocksize};
         this.spawnPositionScreen=new int[]{this.currentPositionScreen[0],this.currentPositionScreen[1]};
         this.bitmaps=new Bitmap[4][fpm];
-        this.loadBitmaps(gv);
+        this.loadBitmaps(blocksize,res,packageName);
         this.currentBitmapArray=this.bitmaps[0];
 
     }
@@ -85,16 +85,11 @@ public abstract class Character {
         return bitmaps;
     }
 
-    protected void loadBitmaps(GameView gv){
+    protected void loadBitmaps(int blocksize, Resources res, String packageName){
         //fpm: frames per movement; pacman 4; ghosts 2
-        int idBm,blocksize;
-        String packageName;
-        Resources res;
+        int idBm;
         String[] positions;
 
-        blocksize=gv.getBlockSize();
-        res = gv.getResources();
-        packageName = gv.getContext().getPackageName();
         positions=new String[]{"up","right","left","down"};
 
         for (int i=0;i<4;i++){

@@ -41,6 +41,16 @@ public class CountDownGhost extends Thread {
         this.stage=stage;
         this.state=state;
         this.time=getTime(state,level,stage);
+        this.started=false;
+    }
+
+    public CountDownGhost(Ghost ghost,int level,int stage, char state,boolean started) {
+        this.ghost=ghost;
+        this.level=level;
+        this.stage=stage;
+        this.state=state;
+        this.time=getTime(state,level,stage);
+        this.started=started;
     }
 
     public void cancel(){
@@ -51,10 +61,14 @@ public class CountDownGhost extends Thread {
         }catch (Exception e){}
     }
 
+    public boolean hasStarted(){
+        return started;
+    }
+
     public void pause(){
         //The new countDown will be used by the ghost to reestablish the behavior
-        this.ghost.setCountdownGhost(new CountDownGhost(this.time,this.ghost,this.level,this.stage,this.state),false);
         this.cancel();
+        this.ghost.setCountdownGhost(new CountDownGhost(this.time,this.ghost,this.level,this.stage,this.state),false);
     }
 
     public void run(){
@@ -96,8 +110,6 @@ public class CountDownGhost extends Thread {
             };
             this.countDownTimer.start();
             Looper.loop();
-        }else {
-
         }
 
     }

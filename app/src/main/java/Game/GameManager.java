@@ -1,11 +1,13 @@
 package Game;
 
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.Semaphore;
 
 import Game.Behavior.ChaseBehavior.*;
 import Game.Character_package.Ghost;
@@ -20,7 +22,8 @@ public class GameManager {
     private CountDownScareGhosts scareCountDown;
     private Pacman pacman;
     private Ghost[] ghosts;
-    boolean fruitHasBeenInTheLevel;
+    private boolean fruitHasBeenInTheLevel;
+    private Semaphore changeScoreSemaphore;
 
     public GameManager(){
         this.fruitHasBeenInTheLevel=false;
@@ -33,13 +36,19 @@ public class GameManager {
         this.scareCountDown=null;
     }
 
+    public void setChangeScoreSemaphore(Semaphore changeScoreSemaphore) {
+        this.changeScoreSemaphore = changeScoreSemaphore;
+    }
+
     public void addScore(int s){
         this.score+=s;
+        //this.changeScoreSemaphore.release();
     }
 
     public int getScore() {
         return this.score;
     }
+
     public int getLevel() {
         return this.level;
     }
@@ -48,9 +57,6 @@ public class GameManager {
     }
     public Ghost[] getGhosts(){
         return this.ghosts;
-    }
-    public Ghost getGhost(int i) {
-        return this.ghosts[i];
     }
     public Pacman getPacman(){
         return this.pacman;
@@ -64,12 +70,14 @@ public class GameManager {
         this.score+=10;
         //Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
+        //this.changeScoreSemaphore.release();
     }
 
     public void eatBonus(int posXMap,int posYMap){
         this.score+=500;
         //Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
+        //this.changeScoreSemaphore.release();
     }
 
     public void eatSuperPallet(int posXMap,int posYMap){
@@ -83,6 +91,7 @@ public class GameManager {
         }
         this.scareCountDown = new CountDownScareGhosts(this.ghosts,this.gameMap.getMap());
         this.scareCountDown.start();
+        //this.changeScoreSemaphore.release();
     }
 
     public void tryCreateBonus(){
@@ -102,25 +111,23 @@ public class GameManager {
         }
     }
 
-    public synchronized void initGhosts(@NotNull GameView gv) {
+    public synchronized void initGhosts(int blocksize, Resources res, String packageName,int movementFluency) {
         int[][]spawnPositions,cornersPositions, notUpDownPositions,defaultTargets;
-        int movementeFluency;
 
         defaultTargets=this.gameMap.getDefaultGhostTarget();
         notUpDownPositions=this.gameMap.getNotUpDownDecisionPositions();
         spawnPositions=this.gameMap.getGhostsSpawnPositions();
         cornersPositions=this.gameMap.getGhostsScatterTarget();
-        movementeFluency=gv.getMovementFluencyLevel();
         //start position
         // 5 blinky spawn [13, 11]
         // 6 pinky spawn [15,11]
         // 7 inky spawn [13,16]
         // 8 clyde spawn [15,16]
         this.ghosts=new Ghost[4];
-        ghosts[0] = new Ghost("blinky",gv,spawnPositions[0], cornersPositions[0] ,new BehaviorChaseAgressive(notUpDownPositions,movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'l',defaultTargets[0]);
-        ghosts[1] = new Ghost("pinky",gv,spawnPositions[1],cornersPositions[1],new BehaviorChaseAmbush(notUpDownPositions,movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'r',defaultTargets[1]);
-        ghosts[2] = new Ghost("inky",gv,spawnPositions[2],cornersPositions[2],new BehaviorChasePatrol(notUpDownPositions,this.ghosts[0],movementeFluency,defaultTargets[0]),movementeFluency,notUpDownPositions,'l',defaultTargets[0]);
-        ghosts[3] = new Ghost("clyde",gv,spawnPositions[3],cornersPositions[3],new BehaviorChaseRandom(notUpDownPositions,cornersPositions[3],movementeFluency,defaultTargets[1]),movementeFluency,notUpDownPositions,'r',defaultTargets[1]);
+        ghosts[0] = new Ghost("blinky",spawnPositions[0], cornersPositions[0] ,new BehaviorChaseAgressive(notUpDownPositions,movementFluency,defaultTargets[0]),movementFluency,notUpDownPositions,'l',defaultTargets[0],blocksize,res,packageName);
+        ghosts[1] = new Ghost("pinky",spawnPositions[1],cornersPositions[1],new BehaviorChaseAmbush(notUpDownPositions,movementFluency,defaultTargets[1]),movementFluency,notUpDownPositions,'r',defaultTargets[1],blocksize,res,packageName);
+        ghosts[2] = new Ghost("inky",spawnPositions[2],cornersPositions[2],new BehaviorChasePatrol(notUpDownPositions,this.ghosts[0],movementFluency,defaultTargets[0]),movementFluency,notUpDownPositions,'l',defaultTargets[0],blocksize,res,packageName);
+        ghosts[3] = new Ghost("clyde",spawnPositions[3],cornersPositions[3],new BehaviorChaseRandom(notUpDownPositions,cornersPositions[3],movementFluency,defaultTargets[1]),movementFluency,notUpDownPositions,'r',defaultTargets[1],blocksize,res,packageName);
 
         try{
             Thread.sleep(200);
