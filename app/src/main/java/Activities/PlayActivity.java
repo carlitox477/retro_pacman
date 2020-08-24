@@ -19,18 +19,17 @@ public class PlayActivity extends AppCompatActivity {
     private TextView scoreTv;
     private TextView maxScore;
     private SurfaceView gameSurfaceView;
-    private GameView gameView;
-    private Semaphore changeScoreSemaphore, changeDirectionSemaphore;
+    private GameView gameView; //no lose in references?
+    private static Semaphore CHANGE_LIFES_MUTEX=new Semaphore(0,true);
+    private static Semaphore CHANGE_SCORE_MUTEX=new Semaphore(0,true);
+    private static Semaphore CHANGE_DIRECTION_MUTEX=new Semaphore(0,true);
     private Thread changeScoreThread, changeDirectionThread;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         //Modified code
-        this.changeScoreSemaphore=new Semaphore(0,true);
-        this.changeDirectionSemaphore=new Semaphore(0,true);
         setContentView(R.layout.activity_game);
         //we get text view that we will use
         playerNickname=(TextView) this.findViewById(R.id.tv_player);
@@ -43,33 +42,28 @@ public class PlayActivity extends AppCompatActivity {
         scoreTv.setText("0");
 
         maxScore.setText("To modify");
-
         this.gameView=new GameView(gameSurfaceView.getContext());
-        this.gameView.setSemaphores(this.changeScoreSemaphore,this.changeDirectionSemaphore);
-        try {
-            Thread.sleep(200);
-        }catch (Exception e){}
+        this.gameView.setSemaphores(CHANGE_SCORE_MUTEX,CHANGE_DIRECTION_MUTEX);
         this.gameSurfaceView.getHolder().addCallback(this.gameView);
     }
 
     protected void onResume(){
         super.onResume();
-        this.gameView.resume();
         this.initChangerThreads();
     }
-    protected void onPause(){
-        super.onPause();
-        this.gameView.pause();
-        //in order to stop the threads
-        this.changeScoreSemaphore.release();
-        this.changeDirectionSemaphore.release();
-    }
 
-    public void updateScore(int score){
+    public void updateScoreTv(int score){
         this.scoreTv.setText(""+score);
     }
 
-    public void onLose(double score){
+    protected void onPause(){
+        super.onPause();
+        //in order to stop the threads
+        CHANGE_SCORE_MUTEX.release();
+        CHANGE_DIRECTION_MUTEX.release();
+    }
+
+    public void onLose(int score){
         //We try to save the score, if there is a previous register we write only if this score
         //is better that the one before
         DBManager manager;
@@ -93,19 +87,18 @@ public class PlayActivity extends AppCompatActivity {
         this.changeScoreThread = new Thread(new Runnable() {
             public void run() {
                 while (gameView.isDrawing()) {
+                    //Log.i("Score ",""+gameManager.getScore());
                     try {
-                        changeScoreSemaphore.acquire();
+                        CHANGE_SCORE_MUTEX.acquire();
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                try{
-                                    int score=gameView.getGameManager().getScore();
-                                    scoreTv.setText(""+score);
-                                }catch (Exception e){};
+                                updateScoreTv(gameView.getGameManager().getScore());
                             }
                         });
                     }catch (Exception e){}
                 }
+                Log.i("Score Thread","ended");
             }
         });
         this.changeScoreThread.start();

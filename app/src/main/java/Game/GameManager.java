@@ -17,17 +17,18 @@ import Game.GameCountDown.*;
 
 public class GameManager {
     private static final int TOTAL_LEVELS=256;
+    private static int SCORE=0;
     private GameMap gameMap;
-    private int level,bonusResetTime,score;
+    private int level,bonusResetTime;//,score;
     private CountDownScareGhosts scareCountDown;
     private Pacman pacman;
     private Ghost[] ghosts;
     private boolean fruitHasBeenInTheLevel;
-    private Semaphore changeScoreSemaphore;
+    private static Semaphore CHANGE_SCORE_MUTEX;
 
     public GameManager(){
         this.fruitHasBeenInTheLevel=false;
-        this.score=0;
+        //this.score=0;
         this.gameMap=new GameMap();
         this.gameMap.loadMap1();
         this.level=1;
@@ -37,16 +38,29 @@ public class GameManager {
     }
 
     public void setChangeScoreSemaphore(Semaphore changeScoreSemaphore) {
-        this.changeScoreSemaphore = changeScoreSemaphore;
+        CHANGE_SCORE_MUTEX = changeScoreSemaphore;
+        //if(this.changeScoreSemaphore==null){
+        //    Log.i("Change Score Semaphore","I'm null");
+        //}else{
+        //    Log.i("Change Score Semaphore","I'm not null");
+        //}
     }
 
     public void addScore(int s){
-        this.score+=s;
+        //this.score+=s;
+        SCORE+=s;
+        CHANGE_SCORE_MUTEX.release();
+        /*if(this.changeScoreSemaphore==null){
+            Log.i("Change Score Semaphore","I'm null");
+        }else{
+            Log.i("Change Score Semaphore","I'm not null");
+        }*/
         //this.changeScoreSemaphore.release();
     }
 
     public int getScore() {
-        return this.score;
+        return SCORE;
+        //return this.score;
     }
 
     public int getLevel() {
@@ -67,22 +81,33 @@ public class GameManager {
 
 
     public void eatPallet(int posXMap, int posYMap){
-        this.score+=10;
-        //Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
+        SCORE+=10;
+        CHANGE_SCORE_MUTEX.release();
+        //this.score+=10;
+        //Log.i("Score GM", ""+SCORE);
+        //Log.i("Score GM", ""+this.score);
         this.gameMap.getMap()[posYMap][posXMap]=0;
         //this.changeScoreSemaphore.release();
+        //if(this.changeScoreSemaphore==null){
+        //    Log.i("Change Score Semaphore","I'm null");
+        //}else{
+        //    Log.i("Change Score Semaphore","I'm not null");
+        //}
     }
 
     public void eatBonus(int posXMap,int posYMap){
-        this.score+=500;
+        SCORE+=500;
+        CHANGE_SCORE_MUTEX.release();
+        //this.score+=500;
         //Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
         this.gameMap.getMap()[posYMap][posXMap]=0;
         //this.changeScoreSemaphore.release();
     }
 
     public void eatSuperPallet(int posXMap,int posYMap){
-        this.score+=50;
-        Log.i("Score", Double.toString(this.score).substring(0,Double.toString(this.score).indexOf('.')));
+        SCORE+=50;
+        CHANGE_SCORE_MUTEX.release();
+        //this.score+=50;
         this.gameMap.getMap()[posYMap][posXMap]=0;
 
         //Si hay un timer andando lo cancelo y ejecuto otro

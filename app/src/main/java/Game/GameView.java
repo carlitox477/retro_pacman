@@ -10,33 +10,29 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
 
 import java.util.concurrent.Semaphore;
 
-import Activities.PlayActivity;
 import Game.Character_package.Ghost;
 import Game.Character_package.Pacman;
 
 public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback, GestureDetector.OnGestureListener {
     private static final float SWIPE_THRESHOLD = 2;
     private static final float SWIPE_VELOCITY = 2;
-    private boolean GHOST_INICIALIZED=false;
+    private static boolean CAN_DRAW = true;
+    private static boolean GHOST_INICIALIZED=false;
     private GestureDetector gestureDetector;
-    private GameManager gameManager;
+    private volatile GameManager gameManager;
     private Thread thread; //game thread
     private SurfaceHolder holder;
-    private boolean canDraw = false;
     private int blockSize;                // Ancho de la pantalla, ancho del bloque
     private static int movementFluencyLevel=8; //this movement should be a multiple of the blocksize and multiple of 4, if note the pacman will pass walls
 
     private int totalFrame = 4;             // Cantidad total de animation frames por direccion
     private int currentArrowFrame = 0;      // animation frame de arrow actual
     private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
-
-    private Semaphore changeScoreSemaphore, changeDirectionSemaphore;
 
     //----------------------------------------------------------------------------------------------
     //Constructors
@@ -58,7 +54,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private void constructorHelper(Context context) {
         this.gestureDetector = new GestureDetector(this);
-        this.setFocusable(true);
+        setFocusable(true);
         this.holder = getHolder();
         this.holder.addCallback(this);
         this.frameTicker = (long) (1000.0f / totalFrame);
@@ -70,7 +66,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.holder.setFixedSize(blockSize*this.gameManager.getGameMap().getMapWidth(),blockSize*this.gameManager.getGameMap().getMapHeight());
 
         this.gameManager.getGameMap().loadBonusBitmaps(this.getBlockSize(),this.getResources(),this.getContext().getPackageName());
-        this.gameManager.setPacman(new Pacman("pacman","",this.movementFluencyLevel,this.gameManager.getGameMap().getPacmanSpawnPosition(),this.blockSize,this.getResources(),this.getContext().getPackageName()));
+        this.gameManager.setPacman(new Pacman("pacman","",movementFluencyLevel,this.gameManager.getGameMap().getPacmanSpawnPosition(),this.blockSize,this.getResources(),this.getContext().getPackageName()));
 
         Ghost.loadCommonBitmaps(this.blockSize,this.getResources(),this.getContext().getPackageName());
     }
@@ -83,7 +79,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return gameManager;
     }
     public boolean isDrawing(){
-        return this.canDraw;
+        return CAN_DRAW;
     }
     //----------------------------------------------------------------------------------------------
 
@@ -99,11 +95,13 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public void run() {
         long gameTime;
         Canvas canvas;
-        while (!holder.getSurface().isValid()) {
-        }
-        this.initGhost();
-        this.setFocusable(true);
-        while (canDraw) {
+        while (CAN_DRAW) {
+            if (!holder.getSurface().isValid()) {
+                continue;
+            }
+            this.setFocusable(true);
+            this.initGhost();
+            this.setFocusable(true);
             gameTime=System.currentTimeMillis();
             if(gameTime > frameTicker + (totalFrame * 15)){
                 canvas = holder.lockCanvas();
@@ -115,7 +113,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     }
                     holder.unlockCanvasAndPost(canvas);
                     if(this.gameManager.checkWinLevel()){
-                        canDraw=false;
+                        CAN_DRAW=false;
                         this.gameManager.cancelThreads();
                         try {
                             Thread.sleep(2000);
@@ -125,7 +123,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     }else if(!this.gameManager.getPacman().hasLifes()){
                         //we lost
 
-                        canDraw=false;
+                        CAN_DRAW=false;
                         this.gameManager.cancelThreads();
 
                         //animation
@@ -183,6 +181,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return pacmanIsDeath;
     }
 
+    public int getScore(){
+        return this.getGameManager().getScore();
+    }
+
     public void setSemaphores(Semaphore changeScoreSemaphore, Semaphore changeDirectionSemaphore){
         this.gameManager.setChangeScoreSemaphore(changeScoreSemaphore);
         this.gameManager.getPacman().setChangeDirectionSemaphore(changeDirectionSemaphore);
@@ -194,32 +196,26 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        canDraw = true;
+        //on resume method
+        Log.i("Surface","created");
+        CAN_DRAW = true;
         this.thread= new Thread(this);
         this.thread.start();
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        Log.i("Surface","Changed");
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-    }
-
-    //----------------------------------------------------------------------------------------------
-    public void resume() {
-        this.canDraw = true;
-        thread = new Thread(this);
-        thread.start();
-    }
-
-    public void pause() {
-        this.canDraw = false;
+        //on pause method
+        Log.i("Surface","destroyed");
+        CAN_DRAW = false;
         while (true) {
             try {
                 thread.join();
-                return;
             } catch (InterruptedException e) {
                 // retry
             }
@@ -255,10 +251,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public boolean onFling(MotionEvent downEvent, MotionEvent moveEvent, float velocityX, float velocityY) {
         //To swipe
         //https://www.youtube.com/watch?v=32rSs4tE-mc
+        boolean result;
         float diffX, diffY;
         Pacman pacman;
         //Log.i("Fling", "detected");
 
+        result=false;
         diffX = moveEvent.getX() - downEvent.getX();
         diffY = moveEvent.getY() - downEvent.getY();
         pacman=this.gameManager.getPacman();
@@ -281,8 +279,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     pacman.setNextDirection('u');
                 }
             }
+            result=true;
         }
-        return true;
+        return result;
     }
 
 }

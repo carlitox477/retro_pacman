@@ -148,5 +148,4 @@ public class CountDownGhost extends Thread {
         return times2[stage-1];
     }
 
-
 }

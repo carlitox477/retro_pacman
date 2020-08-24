@@ -14,7 +14,7 @@ public class Pacman extends Character {
     private char nextDirection;
     private int lives;
     private int movementFluencyLevel;
-    private Semaphore changeDirectionSemaphore;
+    private static Semaphore CHANGE_DIRECTION_MUTEX;
 
     public Pacman(String characterName, String prefix, int movementFluencyLevel, int[]spawnPosition, int blocksize, Resources res, String packageName) {
         super(characterName,prefix,4,spawnPosition, blocksize, res, packageName);
@@ -26,7 +26,7 @@ public class Pacman extends Character {
         this.nextDirection=nextDirection;
     }
     public void setChangeDirectionSemaphore(Semaphore changeDirectionSemaphore){
-        this.changeDirectionSemaphore=changeDirectionSemaphore;
+        CHANGE_DIRECTION_MUTEX=changeDirectionSemaphore;
     }
 
     public boolean move(@NotNull GameManager gm, Canvas canvas){
