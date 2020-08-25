@@ -44,6 +44,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private int[] soundsId;
     private MediaPlayer mediaPlayer;
     private ReentrantLock surfaceLock;
+    private static char WIN_LOSE_KEY='P';
+    private static Semaphore WIN_LOSE_MUTEX;
 
     //----------------------------------------------------------------------------------------------
     //Constructors
@@ -126,27 +128,39 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                         }catch (Exception e){}
                     }
                     holder.unlockCanvasAndPost(canvas);
-                    if(this.gameManager.checkWinLevel()){
-                        CAN_DRAW=false;
-                        this.gameManager.cancelThreads();
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {}
-                        //animation
-                        Log.i("Game","You win");
-                    }else if(!this.gameManager.getPacman().hasLifes()){
-                        //we lost
-
-                        CAN_DRAW=false;
-                        this.gameManager.cancelThreads();
-
-                        //animation
-                        Log.i("Game","You lose");
-                    }
+                    this.checkWinLose();
                 }
             }
         }
 
+    }
+
+    public char getWinLoseKey(){
+        return WIN_LOSE_KEY;
+    }
+
+    private void checkWinLose(){
+        if(this.gameManager.checkWinLevel()){
+            CAN_DRAW=false;
+            this.gameManager.cancelThreads();
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {}
+            //animation
+            Log.i("Game","You win");
+            WIN_LOSE_KEY='W';
+            WIN_LOSE_MUTEX.release();
+            //release
+        }else if(!this.gameManager.getPacman().hasLifes()){
+            //we lost
+
+            CAN_DRAW=false;
+            this.gameManager.cancelThreads();
+            WIN_LOSE_KEY='L';
+            WIN_LOSE_MUTEX.release();
+            //animation
+            Log.i("Game","You lose");
+        }
     }
 
     // Method to capture touchEvents
@@ -199,9 +213,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return this.getGameManager().getScore();
     }
 
-    public void setSemaphores(Semaphore changeScoreSemaphore, Semaphore changeDirectionSemaphore){
+    public void setSemaphores(Semaphore changeScoreSemaphore, Semaphore changeDirectionSemaphore, Semaphore winLoseMutex){
         this.gameManager.setChangeScoreSemaphore(changeScoreSemaphore);
         this.gameManager.getPacman().setChangeDirectionSemaphore(changeDirectionSemaphore);
+        WIN_LOSE_MUTEX=winLoseMutex;
         Log.i("Semaphore", "setted");
     }
 

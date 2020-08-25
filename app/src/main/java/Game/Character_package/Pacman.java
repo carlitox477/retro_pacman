@@ -20,7 +20,7 @@ public class Pacman extends Character {
 
     public Pacman(String characterName, String prefix, int movementFluencyLevel, int[]spawnPosition, int blocksize, Resources res, String packageName) {
         super(characterName,prefix,4,spawnPosition, blocksize, res, packageName);
-        this.lives=3;
+        this.lives=1;
         this.movementFluencyLevel=movementFluencyLevel;
     }
 

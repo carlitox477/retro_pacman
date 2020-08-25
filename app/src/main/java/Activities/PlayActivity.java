@@ -7,6 +7,7 @@ import android.view.SurfaceView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.example.pacman.DBManager;
 import Game.GameView;
@@ -24,6 +25,7 @@ public class PlayActivity extends AppCompatActivity {
     private static Semaphore CHANGE_LIFES_MUTEX=new Semaphore(0,true);
     private static Semaphore CHANGE_SCORE_MUTEX=new Semaphore(0,true);
     private static Semaphore CHANGE_DIRECTION_MUTEX=new Semaphore(0,true);
+    private static Semaphore WIN_LOSE_THREAD_MUTEX=new Semaphore(0,true);
     private Thread changeScoreThread, changeDirectionThread,changeLifesThread, winLoseThread;
     MediaPlayer mediaPlayer;
 
@@ -45,7 +47,7 @@ public class PlayActivity extends AppCompatActivity {
 
         maxScore.setText("To modify");
         this.gameView=new GameView(gameSurfaceView.getContext());
-        this.gameView.setSemaphores(CHANGE_SCORE_MUTEX,CHANGE_DIRECTION_MUTEX);
+        this.gameView.setSemaphores(CHANGE_SCORE_MUTEX,CHANGE_DIRECTION_MUTEX, WIN_LOSE_THREAD_MUTEX);
         this.gameSurfaceView.getHolder().addCallback(this.gameView);
     }
 
@@ -67,6 +69,7 @@ public class PlayActivity extends AppCompatActivity {
         //in order to stop the threads
         CHANGE_SCORE_MUTEX.release();
         CHANGE_DIRECTION_MUTEX.release();
+        WIN_LOSE_THREAD_MUTEX.release();
     }
 
     public void onLoseWin(int score, boolean lose){
@@ -111,7 +114,30 @@ public class PlayActivity extends AppCompatActivity {
                 Log.i("Score Thread","ended");
             }
         });
+
+        this.winLoseThread =new Thread(new Runnable(){
+            @Override
+            public void run() {
+                while (gameView.isDrawing()) {
+                    //Log.i("Checker ",""+gameManager.getScore());
+                    try {
+                        WIN_LOSE_THREAD_MUTEX.acquire();
+                        Log.i("Fragment","try to create fragment (STATE "+gameView.getWinLoseKey()+")");
+                        if(gameView.getWinLoseKey()=='W'){
+                            FragmentWin fragmentWin=new FragmentWin();
+                            fragmentWin.show(getSupportFragmentManager(),"Fragment Win");
+                        }else if(gameView.getWinLoseKey()=='L'){
+                            Log.i("Lose","create fragment");
+                            FragmentLose fragmentLose=new FragmentLose();
+                            fragmentLose.show(getSupportFragmentManager(),"Fragment Lose");
+                        }
+                    }catch (Exception e){}
+                }
+
+            }
+        });
         this.changeScoreThread.start();
+        this.winLoseThread.start();
     }
 
 }
