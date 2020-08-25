@@ -19,8 +19,10 @@ public class FragmentLose extends DialogFragment {
         View view;
 
         view = inflater.inflate(R.layout.fragment_lost, container, false);
-        //scoreTv=(TextView)view.findViewById(R.id.tv_score_value);
-        //scoreTv.setText("200"+"");
+        Bundle bundle = getArguments();
+        String score = bundle.getString("Score");
+        scoreTv=(TextView)view.findViewById(R.id.tv_score);
+        scoreTv.setText(score);
         return view;
     }
 
