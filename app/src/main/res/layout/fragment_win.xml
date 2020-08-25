@@ -8,7 +8,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:padding="4dp"
+        android:padding="10dp"
         android:background="@color/border"
         >
         <LinearLayout
@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:background="@color/background"
-            android:padding="4dp"
+            android:padding="10dp"
             >
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
                     android:layout_centerHorizontal="true"
                     android:textColor="@color/text"
                     android:fontFamily="@font/pixelar"
-                    android:textSize="30sp"
+                    android:textSize="65sp"
                     android:text="CONGRATS!"
                     />
                 <TextView
@@ -43,33 +43,37 @@
                     android:layout_below="@id/tv_congrats"
                     android:textColor="@color/white"
                     android:fontFamily="@font/pixelar"
-                    android:textSize="18sp"
+                    android:textSize="50sp"
                     android:text="YOU'VE WON!"
                     />
-                <TextView
-                    android:id="@+id/tv_score_msg"
-                    android:padding="1dp"
+                <RelativeLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_win_msg"
-                    android:layout_toRightOf="@id/tv_score_msg"
-                    android:textColor="@color/white"
-                    android:fontFamily="@font/pixelar"
-                    android:textSize="13sp"
-                    android:text="YOUR SCORE WAS "
-                    />
-                <TextView
-                    android:id="@+id/tv_score"
-                    android:padding="1dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_win_msg"
-                    android:layout_toRightOf="@id/tv_score_msg"
-                    android:textColor="@color/white"
-                    android:fontFamily="@font/pixelar"
-                    android:textSize="13sp"
-                    android:text="100000"
-                    />
+                    android:layout_centerHorizontal="true"
+                    android:layout_below="@id/tv_win_msg">
+                    <TextView
+                        android:id="@+id/tv_score_msg"
+                        android:padding="1dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/tv_score_msg"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/pixelar"
+                        android:textSize="25sp"
+                        android:text="YOUR SCORE WAS "
+                        />
+                    <TextView
+                        android:id="@+id/tv_score"
+                        android:padding="1dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/tv_score_msg"
+                        android:textColor="@color/white"
+                        android:fontFamily="@font/pixelar"
+                        android:textSize="25sp"
+                        android:text="100000"
+                        />
+                </RelativeLayout>
             </RelativeLayout>
 
 

@@ -27,7 +27,8 @@ public class PlayActivity extends AppCompatActivity {
     private static Semaphore CHANGE_DIRECTION_MUTEX=new Semaphore(0,true);
     private static Semaphore WIN_LOSE_THREAD_MUTEX=new Semaphore(0,true);
     private Thread changeScoreThread, changeDirectionThread,changeLifesThread, winLoseThread;
-    MediaPlayer mediaPlayer;
+    private String playerNickNameString;
+    private DBManager scoreManagerDB;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,10 +43,12 @@ public class PlayActivity extends AppCompatActivity {
         gameSurfaceView= (GameView) this.findViewById(R.id.game_view);
 
         //set text view initial values
-        playerNickname.setText(getIntent().getExtras().getString("playerNickname"));
+        playerNickNameString=getIntent().getExtras().getString("playerNickname");
+        playerNickname.setText(playerNickNameString);
         scoreTv.setText("0");
 
-        maxScore.setText("To modify");
+        //this.scoreManagerDB=new DBManager(this);
+        this.maxScore.setText("To modify");
         this.gameView=new GameView(gameSurfaceView.getContext());
         this.gameView.setSemaphores(CHANGE_SCORE_MUTEX,CHANGE_DIRECTION_MUTEX, WIN_LOSE_THREAD_MUTEX);
         this.gameSurfaceView.getHolder().addCallback(this.gameView);
@@ -72,28 +75,16 @@ public class PlayActivity extends AppCompatActivity {
         WIN_LOSE_THREAD_MUTEX.release();
     }
 
-    public void onLoseWin(int score, boolean lose){
+    public void saveScore(int score){
         //We try to save the score, if there is a previous register we write only if this score
         //is better that the one before
-        DBManager manager;
-        long raw;
         Score scoreToSave;
-        manager=new DBManager(this);
 
         scoreToSave=new Score(this.playerNickname.toString(), score);
-        if(manager.saveScore(scoreToSave)==-1){
-            //if i couldn't save the score
-            if(manager.updateScore(scoreToSave)!=-1){
-                //if my new score is better than the one previous
-            }else{
-                //if my new score is worse or equal than the one previous
-            }
-        }
-        if(lose){
-            //inflate lose fragment
-        }else{
-            //inflate win fragment
-        }
+        Log.i("SCORE DB",this.playerNickNameString+" " + score);
+        //if(this.scoreManagerDB.saveScore(scoreToSave)!=-1){
+        //    this.scoreManagerDB.updateScore(scoreToSave);
+        //}
     }
 
     private void initChangerThreads() {
@@ -127,15 +118,27 @@ public class PlayActivity extends AppCompatActivity {
                             FragmentWin fragmentWin=new FragmentWin();
                             Bundle bundle = new Bundle();
                             bundle.putString("Score", (String)scoreTv.getText());
+                            saveScore(gameView.getGameManager().getScore());
                             fragmentWin.setArguments(bundle);
                             fragmentWin.show(getSupportFragmentManager(),"Fragment Win");
                         }else if(gameView.getWinLoseKey()=='L'){
+                            /*
+                            Just for demostration
+                            FragmentWin fragmentWin=new FragmentWin();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("Score", (String)scoreTv.getText());
+                            saveScore(gameView.getGameManager().getScore());
+                            fragmentWin.setArguments(bundle);
+                            fragmentWin.show(getSupportFragmentManager(),"Fragment Win");
+                            */
                             Log.i("Lose","create fragment");
                             FragmentLose fragmentLose=new FragmentLose();
                             Bundle bundle = new Bundle();
                             bundle.putString("Score", (String)scoreTv.getText());
+                            saveScore(gameView.getGameManager().getScore());
                             fragmentLose.setArguments(bundle);
                             fragmentLose.show(getSupportFragmentManager(),"Fragment Lose");
+
                         }
                     }catch (Exception e){}
                 }

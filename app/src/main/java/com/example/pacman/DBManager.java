@@ -24,7 +24,7 @@ public class DBManager extends SQLiteOpenHelper implements Serializable {
 
         //Creates the table upon instatiation of this class.
         db.execSQL(" CREATE TABLE " + ScoreContract.ScoreEntry.TABLE_NAME + " ("
-                + ScoreContract.ScoreEntry.NICKNAME + " TEXT PRIMARY KEY AUTOINCREMENT,"
+                + ScoreContract.ScoreEntry.NICKNAME + " TEXT PRIMARY KEY,"
                 + ScoreContract.ScoreEntry.MAX_SCORE + " REAL NOT NULL)");
     }
 
