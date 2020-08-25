@@ -19,9 +19,12 @@ public class BehaviorRespawn extends Behavior{
         ghostMapPosition=new int[]{ghostScreenPosition[0]/blocksize,ghostScreenPosition[1]/blocksize};
         //Log.i("RT","["+ghostMapPosition[0]+", "+ghostMapPosition[1]+"]");
 
+
         if(this.shouldChangeDirection(ghostScreenPosition,blocksize)){
             if(map[ghostMapPosition[0]][ghostMapPosition[1]]==98){
                 nextDirection=new int[]{ghostMapPosition[0],ghostMapPosition[1],'d',this.movementFluency};
+            }else if(map[ghostMapPosition[0]][ghostMapPosition[1]]!=99 && map[ghostMapPosition[0]][ghostMapPosition[1]]!=10 ){
+                nextDirection=this.nextDirection(ghostMapPosition,this.defaultTarget,map,ghostDirection,true);
             }else{
                 nextDirection=this.nextDirection(ghostMapPosition,this.respawnTarget,map,ghostDirection,true);
             }

@@ -3,6 +3,9 @@ package Game;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -13,7 +16,10 @@ import android.view.SurfaceView;
 
 import androidx.annotation.RequiresApi;
 
+import com.example.pacman.R;
+
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 import Game.Character_package.Ghost;
 import Game.Character_package.Pacman;
@@ -24,7 +30,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private static boolean CAN_DRAW = true;
     private static boolean GHOST_INICIALIZED=false;
     private GestureDetector gestureDetector;
-    private volatile GameManager gameManager;
+    private GameManager gameManager;
     private Thread thread; //game thread
     private SurfaceHolder holder;
     private int blockSize;                // Ancho de la pantalla, ancho del bloque
@@ -33,6 +39,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private int totalFrame = 4;             // Cantidad total de animation frames por direccion
     private int currentArrowFrame = 0;      // animation frame de arrow actual
     private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
+    private boolean surfaceFirstCreation=false;
+    private SoundPool soundPool;
+    private int[] soundsId;
+    private MediaPlayer mediaPlayer;
+    private ReentrantLock surfaceLock;
 
     //----------------------------------------------------------------------------------------------
     //Constructors
@@ -69,7 +80,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.gameManager.setPacman(new Pacman("pacman","",movementFluencyLevel,this.gameManager.getGameMap().getPacmanSpawnPosition(),this.blockSize,this.getResources(),this.getContext().getPackageName()));
 
         Ghost.loadCommonBitmaps(this.blockSize,this.getResources(),this.getContext().getPackageName());
+        this.soundsId=new int[4];
+        this.mediaPlayer=null;
+        this.surfaceLock=new ReentrantLock(true);
     }
+
     //----------------------------------------------------------------------------------------------
     //Getters and setters
     public int getBlockSize() {
@@ -99,7 +114,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             if (!holder.getSurface().isValid()) {
                 continue;
             }
-            this.setFocusable(true);
             this.initGhost();
             this.setFocusable(true);
             gameTime=System.currentTimeMillis();
@@ -162,7 +176,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         canvas.drawColor(Color.BLACK);
         this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
         this.gameManager.moveGhosts(canvas,this.blockSize);
-        pacmanIsDeath=pacman.move(this.gameManager,canvas);
+        pacmanIsDeath=pacman.move(this.gameManager,canvas,this.soundPool,this.soundsId);
 
         if(!pacmanIsDeath){
             // incrementar el frame
@@ -191,16 +205,34 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         Log.i("Semaphore", "setted");
     }
 
+    private void createSoundPool(){
+        //https://www.youtube.com/watch?v=fIWPSni7kUk&t=214s
+        this.soundPool = new SoundPool(4, AudioManager.STREAM_MUSIC, 0);
+        this.soundsId[0]=this.soundPool.load(getContext(), R.raw.eatball,1);
+        this.soundsId[1]=this.soundPool.load(getContext(), R.raw.pacman_eatfruit,1);
+        this.soundsId[2]=this.soundPool.load(getContext(), R.raw.pacman_eatghost,1);
+        this.soundsId[3]=this.soundPool.load(getContext(), R.raw.pacman_death,1);
+    }
+
     //----------------------------------------------------------------------------------------------
     //Callback methods
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         //on resume method
+        this.surfaceLock.lock();
         Log.i("Surface","created");
+        this.createSoundPool();
         CAN_DRAW = true;
         this.thread= new Thread(this);
         this.thread.start();
+
+        if(this.surfaceFirstCreation){
+            this.gameManager.onResume();
+        }else{
+            this.surfaceFirstCreation=true;
+        }
+        this.surfaceLock.unlock();
     }
 
     @Override
@@ -211,8 +243,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         //on pause method
+        this.surfaceLock.lock();
         Log.i("Surface","destroyed");
         CAN_DRAW = false;
+        this.gameManager.onPause();
+
         while (true) {
             try {
                 thread.join();
@@ -222,6 +257,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             break;
         }
         this.thread=null;
+        this.soundPool.release();
+        this.soundPool = null;
+        this.surfaceLock.unlock();
     }
 
     @Override

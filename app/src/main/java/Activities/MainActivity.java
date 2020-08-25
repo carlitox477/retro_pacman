@@ -7,7 +7,6 @@ import android.view.View;
 import com.example.pacman.R;
 
 public class MainActivity extends ActivityWithBackGroundMusic {
-    private boolean mIsBound = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

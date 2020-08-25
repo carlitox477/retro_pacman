@@ -5,7 +5,8 @@ import android.graphics.Canvas;
 import android.os.Build;
 import android.util.Log;
 import androidx.annotation.RequiresApi;
-import org.jetbrains.annotations.NotNull;
+
+import com.example.pacman.R;
 
 import java.util.concurrent.Semaphore;
 
@@ -24,6 +25,7 @@ public class GameManager {
     private Pacman pacman;
     private Ghost[] ghosts;
     private boolean fruitHasBeenInTheLevel;
+    private static char GAME_STATE; //playing or in pause, w win, l lost
     private static Semaphore CHANGE_SCORE_MUTEX;
 
     public GameManager(){
@@ -35,6 +37,11 @@ public class GameManager {
         this.ghosts=new Ghost[4];
         this.bonusResetTime = 5000;
         this.scareCountDown=null;
+        GAME_STATE='p';
+    }
+
+    public char getGameState() {
+        return GAME_STATE;
     }
 
     public void setChangeScoreSemaphore(Semaphore changeScoreSemaphore) {
@@ -169,22 +176,38 @@ public class GameManager {
         return this.gameMap.countPallets()==0;
     }
 
-    public void onResume(){
+    public int onResume(){
+        int musicID;
         for (int i=0 ; i<this.ghosts.length;i++){
-            this.ghosts[i].cancelBehavoirThread();
+            if(this.ghosts[i]!=null){
+                Log.i("PAUSE","resume "+i);
+                this.ghosts[i].onResume();
+            }
         }
         if(this.scareCountDown!=null && !this.scareCountDown.hasEnded()){
-            this.scareCountDown.start();
+            this.scareCountDown.onResume();
+            musicID=R.raw.pacman_power_siren;
+        }else{
+            Log.i("Media player", "Created");
+            musicID =R.raw.pacman_siren;
         }
+        return musicID;
     }
 
     public void onPause(){
         for (int i=0 ; i<this.ghosts.length;i++){
-            this.ghosts[i].cancelBehavoirThread();
+            if(this.ghosts[i]!=null){
+                Log.i("PAUSE","ghost "+i);
+                this.ghosts[i].onPause();
+            }
         }
         if(this.scareCountDown!=null && !this.scareCountDown.hasEnded()){
             this.scareCountDown=this.scareCountDown.onPause();
         }
+    }
+
+    public boolean isScareCountDownRunning(){
+        return this.scareCountDown!=null && !this.scareCountDown.hasEnded();
     }
 
     public void cancelThreads(){

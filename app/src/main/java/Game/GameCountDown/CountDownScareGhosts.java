@@ -28,8 +28,7 @@ public class CountDownScareGhosts extends Thread{
     }
 
     public void onResume(){
-        CountDownScareGhosts sal;
-        this.start();
+       this.start();
     }
 
     public CountDownScareGhosts onPause(){

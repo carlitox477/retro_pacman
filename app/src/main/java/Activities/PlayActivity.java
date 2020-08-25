@@ -1,5 +1,6 @@
 package Activities;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -23,7 +24,8 @@ public class PlayActivity extends AppCompatActivity {
     private static Semaphore CHANGE_LIFES_MUTEX=new Semaphore(0,true);
     private static Semaphore CHANGE_SCORE_MUTEX=new Semaphore(0,true);
     private static Semaphore CHANGE_DIRECTION_MUTEX=new Semaphore(0,true);
-    private Thread changeScoreThread, changeDirectionThread;
+    private Thread changeScoreThread, changeDirectionThread,changeLifesThread, winLoseThread;
+    MediaPlayer mediaPlayer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,10 @@ public class PlayActivity extends AppCompatActivity {
 
     protected void onResume(){
         super.onResume();
+        //mediaPlayer=MediaPlayer.create(this, R.raw.pacman_siren);
+        //mediaPlayer.setVolume(50,50);
+        //mediaPlayer.setLooping(true);
+        //mediaPlayer.start();
         this.initChangerThreads();
     }
 
@@ -63,7 +69,7 @@ public class PlayActivity extends AppCompatActivity {
         CHANGE_DIRECTION_MUTEX.release();
     }
 
-    public void onLose(int score){
+    public void onLoseWin(int score, boolean lose){
         //We try to save the score, if there is a previous register we write only if this score
         //is better that the one before
         DBManager manager;
@@ -80,7 +86,11 @@ public class PlayActivity extends AppCompatActivity {
                 //if my new score is worse or equal than the one previous
             }
         }
-
+        if(lose){
+            //inflate lose fragment
+        }else{
+            //inflate win fragment
+        }
     }
 
     private void initChangerThreads() {

@@ -41,6 +41,10 @@ public abstract class Character {
         return this.spawnPositionScreen[1]/this.blocksize;
     }
 
+    public String getName(){
+        return this.name;
+    }
+
     public int getSpawnPositionScreenX(){
         return this.spawnPositionScreen[0];
     }

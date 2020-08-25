@@ -2,7 +2,9 @@ package Game.Character_package;
 
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.media.SoundPool;
 import android.util.Log;
+
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +31,7 @@ public class Pacman extends Character {
         CHANGE_DIRECTION_MUTEX=changeDirectionSemaphore;
     }
 
-    public boolean move(@NotNull GameManager gm, Canvas canvas){
+    public boolean move(@NotNull GameManager gm, Canvas canvas, SoundPool soundPool, int[]sounds){
         int posXMap, posYMap;
         Ghost[] ghosts;
         int[][]map;
@@ -41,11 +43,12 @@ public class Pacman extends Character {
         this.usePortal(map[0].length,this.movementFluencyLevel);
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         posYMap=this.currentPositionScreen[1]/this.blocksize;
-        shouldRespawn=!this.successTryingToEatGhosts(ghosts,gm);
+        shouldRespawn=!this.successTryingToEatGhosts(ghosts,gm,sounds[2],soundPool);
 
         if(shouldRespawn){
             Log.i("Pacman","it was eaten");
             this.lives--;
+            soundPool.play(sounds[3],1,1,0,0,1);
             this.respawn(ghosts);
         }else{
             if(this.currentPositionScreen[0]%this.blocksize==0&&this.currentPositionScreen[1]%this.blocksize==0){
@@ -53,12 +56,15 @@ public class Pacman extends Character {
                 switch (map[posYMap][posXMap]){
                     case 2:
                         gm.eatPallet(posXMap,posYMap);
+                        soundPool.play(sounds[0],1,1,0,0,1);
                         break;
                     case 3:
                         gm.eatSuperPallet(posXMap,posYMap);
+                        //Change media player
                         break;
                     case 9:
                         gm.eatBonus(posXMap,posYMap);
+                        soundPool.play(sounds[1],1,1,0,0,1);
                         break;
                     default:
                         break;
@@ -81,7 +87,7 @@ public class Pacman extends Character {
     }
 
 
-    private boolean successTryingToEatGhosts(Ghost[] ghosts,GameManager gm){
+    private boolean successTryingToEatGhosts(Ghost[] ghosts,GameManager gm, int eatSound, SoundPool soundPool){
         //check if ghosts should respawn
         //¿Why 5?
         boolean ghostShouldRespawn,pacmanShouldNotRespawn;
@@ -105,6 +111,7 @@ public class Pacman extends Character {
                 ghosts[i].setRespawnBehaviour();
                 gm.addScore(score);
                 score*=2;
+                soundPool.play(eatSound,1,1,0,0,1);
             }
             i++;
 

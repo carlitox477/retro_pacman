@@ -135,7 +135,7 @@ public class Ghost extends Character {
         this.getCurrentBitmap();
         //this.countdownGhost.pause();//to reestablish behavior later
     }
-
+    
     public void cancelBehavoirThread(){
         if(this.countdownGhost!=null){
             this.countdownGhost.cancel();
@@ -175,6 +175,7 @@ public class Ghost extends Character {
     }
 
     public synchronized void onResume(){
+        Log.i("Ghost"+this.name,"Behavior "+this.currentBehaviour.getClass().getName());
         if(this.currentBehaviour.isAttacking()){
             this.countdownGhost.start();
         }
