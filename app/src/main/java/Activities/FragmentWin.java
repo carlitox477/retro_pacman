@@ -16,14 +16,17 @@ public class FragmentWin extends DialogFragment {
     private TextView scoreTv;
 
 
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstance,int score) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstance) {
         super.onCreateView(inflater, container, savedInstance);
         TextView scoreTv;
         View view;
 
         view = inflater.inflate(R.layout.fragment_win, container, false);
-        scoreTv=(TextView)view.findViewById(R.id.tv_score_value);
-        scoreTv.setText(score+"");
+
+        Bundle bundle = getArguments();
+        String score = bundle.getString("Score");
+        scoreTv=(TextView)view.findViewById(R.id.tv_score);
+        scoreTv.setText(score);
         return view;
     }
 }
