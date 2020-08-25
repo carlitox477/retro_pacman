@@ -121,14 +121,20 @@ public class PlayActivity extends AppCompatActivity {
                 while (gameView.isDrawing()) {
                     //Log.i("Checker ",""+gameManager.getScore());
                     try {
-                        WIN_LOSE_THREAD_MUTEX.acquire();
+                         WIN_LOSE_THREAD_MUTEX.acquire();
                         Log.i("Fragment","try to create fragment (STATE "+gameView.getWinLoseKey()+")");
                         if(gameView.getWinLoseKey()=='W'){
                             FragmentWin fragmentWin=new FragmentWin();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("Score", (String)scoreTv.getText());
+                            fragmentWin.setArguments(bundle);
                             fragmentWin.show(getSupportFragmentManager(),"Fragment Win");
                         }else if(gameView.getWinLoseKey()=='L'){
                             Log.i("Lose","create fragment");
                             FragmentLose fragmentLose=new FragmentLose();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("Score", (String)scoreTv.getText());
+                            fragmentLose.setArguments(bundle);
                             fragmentLose.show(getSupportFragmentManager(),"Fragment Lose");
                         }
                     }catch (Exception e){}
