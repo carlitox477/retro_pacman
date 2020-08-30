@@ -25,7 +25,7 @@ public class BehaviorChaseAmbush extends BehaviorChase {
         int[][]targetPositions;
         int up,left,down,right;
 
-        pacmanDirection=pacman.getDirection();
+        pacmanDirection=pacman.getCurrentDirection();
         pacmanMapPosition=new int[]{pacman.getPositionMapY(),pacman.getPositionMapX()};
 
         up=pacmanMapPosition[0]-4;

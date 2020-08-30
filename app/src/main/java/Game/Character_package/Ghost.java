@@ -4,24 +4,14 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
-import android.os.Looper;
 import android.util.Log;
-
 import androidx.annotation.RequiresApi;
-
-import org.jetbrains.annotations.NotNull;
-
-import java.util.concurrent.Semaphore;
-
 import Game.Behavior.*;
 import Game.Behavior.ChaseBehavior.*;
 import Game.GameCountDown.CountDownGhost;
-import Game.GameView;
-
-
 
 public class Ghost extends Character {
-    private static Bitmap[] vulnerableGhostBitmap,respawningGhostBitmap;
+    private static Bitmap[] VULNERABLE_GHOST_BITMAPS,RESPAWNING_GHOST_BITMAPS;
     private Behavior currentBehaviour;
 
     private BehaviorChase behaviorChaseBehaviour; //set bitmap
@@ -49,20 +39,20 @@ public class Ghost extends Character {
 
 
         positions=new String[]{"up","right","left","down"};
-        respawningGhostBitmap=new Bitmap[4];
-        vulnerableGhostBitmap=new Bitmap[4];
+        RESPAWNING_GHOST_BITMAPS=new Bitmap[4];
+        VULNERABLE_GHOST_BITMAPS=new Bitmap[4];
 
-        for(int i=0;i<vulnerableGhostBitmap.length;i++){
+        for(int i=0;i<RESPAWNING_GHOST_BITMAPS.length;i++){
             pngName="ghost_respawn_"+positions[i];
             idBm=res.getIdentifier(pngName,"drawable",packageName);
-            respawningGhostBitmap[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
+            RESPAWNING_GHOST_BITMAPS[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
             //Log.i("Load Bitmap",pngName+" loaded" );
         }
 
-        for(int i=0;i<vulnerableGhostBitmap.length;i++){
+        for(int i=0;i<VULNERABLE_GHOST_BITMAPS.length;i++){
             pngName="ghost_frighten"+i;
             idBm=res.getIdentifier(pngName,"drawable",packageName);
-            vulnerableGhostBitmap[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
+            VULNERABLE_GHOST_BITMAPS[i]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(res, idBm), blockSize, blockSize, false);
             //Log.i("Load Bitmap",pngName+" loaded" );
         }
 
@@ -88,7 +78,7 @@ public class Ghost extends Character {
         }
 
         this.currentDirection = (char)nextPosition[2];
-        this.usePortal(map[0].length,this.getPositionMapX());
+        this.usePortal(map[0].length);
 
 
         //Log.i("Ghost direction",this.currentDirection+"");
@@ -120,7 +110,7 @@ public class Ghost extends Character {
         if (!this.currentBehaviour.isRespawning()) {
             this.countdownGhost.pause();
             this.currentBehaviour=this.frightenedBehaviour;
-            this.currentBitmapArray=Ghost.vulnerableGhostBitmap;
+            this.currentBitmapArray=Ghost.VULNERABLE_GHOST_BITMAPS;
             this.getCurrentBitmap();
             this.currentDirection=this.getOpositeDirection();
         }
@@ -129,7 +119,7 @@ public class Ghost extends Character {
     public synchronized void setRespawnBehaviour() {
         //Change current bitmap
         //Log.i("GHOST "+this.name.toUpperCase(),"Respawning");
-        this.currentBitmapArray=Ghost.respawningGhostBitmap;
+        this.currentBitmapArray=Ghost.RESPAWNING_GHOST_BITMAPS;
         this.currentBehaviour=this.respawningBehaviour;
         this.currentDirection=this.getOpositeDirection();
         this.getCurrentBitmap();
@@ -151,23 +141,23 @@ public class Ghost extends Character {
         if(this.currentBehaviour.isRespawning()){
             switch (this.currentDirection){
                 case 'u':
-                    currentBM=Ghost.respawningGhostBitmap[0];
+                    currentBM=Ghost.RESPAWNING_GHOST_BITMAPS[0];
                     break;
                 case 'r':
-                    currentBM=Ghost.respawningGhostBitmap[1];
+                    currentBM=Ghost.RESPAWNING_GHOST_BITMAPS[1];
                     break;
                 case 'l':
-                    currentBM=Ghost.respawningGhostBitmap[2];
+                    currentBM=Ghost.RESPAWNING_GHOST_BITMAPS[2];
                     break;
                 case 'd':
-                    currentBM=Ghost.respawningGhostBitmap[3];
+                    currentBM=Ghost.RESPAWNING_GHOST_BITMAPS[3];
                     break;
                 default:
                     currentBM=null;
                     break;
             }
         }else if(this.currentBehaviour.isFrightened()){
-            currentBM=Ghost.vulnerableGhostBitmap[this.currentFrame];
+            currentBM=Ghost.VULNERABLE_GHOST_BITMAPS[this.currentFrame];
         }else{
             currentBM=super.getCurrentBitmap();
         }
@@ -204,6 +194,12 @@ public class Ghost extends Character {
         this.countdownGhost.start();
     }
 
+    public void respawn(){
+        if(this.currentBehaviour.isAttacking()){
+            this.countdownGhost.pause();
+        }
+        super.respawn();
+    }
 
     private char getOpositeDirection(){
         char oposite;
@@ -227,11 +223,5 @@ public class Ghost extends Character {
         return oposite;
     }
 
-    public void respawn(){
-        if(this.currentBehaviour.isAttacking()){
-            this.countdownGhost.pause();
-        }
-        super.respawn();
-    }
 
 }

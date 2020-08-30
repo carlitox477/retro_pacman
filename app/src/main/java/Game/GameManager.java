@@ -17,16 +17,17 @@ import Game.GameCountDown.*;
 
 
 public class GameManager {
-    private static final int TOTAL_LEVELS=256;
+    //private static final int TOTAL_LEVELS=256;
     private static int SCORE=0;
+    private static char GAME_STATE; //playing or in pause, w win, l lost
+    private static Semaphore CHANGE_SCORE_MUTEX;
     private GameMap gameMap;
-    private int level,bonusResetTime;//,score;
+    private int level,bonusResetTime;
     private CountDownScareGhosts scareCountDown;
     private Pacman pacman;
     private Ghost[] ghosts;
     private boolean fruitHasBeenInTheLevel;
-    private static char GAME_STATE; //playing or in pause, w win, l lost
-    private static Semaphore CHANGE_SCORE_MUTEX;
+
 
     public GameManager(){
         this.fruitHasBeenInTheLevel=false;
@@ -136,7 +137,7 @@ public class GameManager {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void moveGhosts(Canvas canvas,int blocksize) {
+    public void moveGhosts(Canvas canvas) {
         for (int i = 0; i < ghosts.length; i++) {
             ghosts[i].move(this.gameMap.getMap(),this.pacman);
             ghosts[i].draw(canvas);

@@ -2,7 +2,6 @@ package Game.GameCountDown;
 
 import android.os.CountDownTimer;
 import android.os.Looper;
-import android.util.Log;
 
 import Game.GameMap;
 

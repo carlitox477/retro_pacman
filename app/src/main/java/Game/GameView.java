@@ -29,43 +29,45 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private static final float SWIPE_VELOCITY = 2;
     private static boolean CAN_DRAW = true;
     private static boolean GHOST_INICIALIZED=false;
+    private static int MOVEMENT_FLUENCY_LEVEL=8; //this movement should be a multiple of the blocksize and multiple of 4, if note the pacman will pass walls
+    private static char WIN_LOSE_KEY='P';
+    private static Semaphore WIN_LOSE_MUTEX;
+
     private GestureDetector gestureDetector;
     private GameManager gameManager;
     private Thread thread; //game thread
     private SurfaceHolder holder;
     private int blockSize;                // Ancho de la pantalla, ancho del bloque
-    private static int movementFluencyLevel=8; //this movement should be a multiple of the blocksize and multiple of 4, if note the pacman will pass walls
 
     private int totalFrame = 4;             // Cantidad total de animation frames por direccion
-    private int currentArrowFrame = 0;      // animation frame de arrow actual
+    //private int currentArrowFrame = 0;      // animation frame de arrow actual
     private long frameTicker;               // tiempo desde que el ultimo frame fue dibujado
     private boolean surfaceFirstCreation=false;
     private SoundPool soundPool;
     private int[] soundsId;
-    private MediaPlayer mediaPlayer;
+    //private MediaPlayer mediaPlayer;
     private ReentrantLock surfaceLock;
-    private static char WIN_LOSE_KEY='P';
-    private static Semaphore WIN_LOSE_MUTEX;
+
 
     //----------------------------------------------------------------------------------------------
     //Constructors
     public GameView(Context context) {
         super(context);
-        this.constructorHelper(context);
+        this.constructorHelper();
     }
 
     public GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.constructorHelper(context);
+        this.constructorHelper();
     }
 
     public GameView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        this.constructorHelper(context);
+        this.constructorHelper();
 
     }
 
-    private void constructorHelper(Context context) {
+    private void constructorHelper() {
         this.gestureDetector = new GestureDetector(this);
         setFocusable(true);
         this.holder = getHolder();
@@ -75,15 +77,15 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         this.gameManager=new GameManager();
 
         int screenWidth=getResources().getDisplayMetrics().widthPixels;
-        this.blockSize = ((((screenWidth/this.gameManager.getGameMap().getMapWidth())/movementFluencyLevel)*movementFluencyLevel)/4)*4;
+        this.blockSize = ((((screenWidth/this.gameManager.getGameMap().getMapWidth())/MOVEMENT_FLUENCY_LEVEL)*MOVEMENT_FLUENCY_LEVEL)/4)*4;
         this.holder.setFixedSize(blockSize*this.gameManager.getGameMap().getMapWidth(),blockSize*this.gameManager.getGameMap().getMapHeight());
 
         this.gameManager.getGameMap().loadBonusBitmaps(this.getBlockSize(),this.getResources(),this.getContext().getPackageName());
-        this.gameManager.setPacman(new Pacman("pacman","",movementFluencyLevel,this.gameManager.getGameMap().getPacmanSpawnPosition(),this.blockSize,this.getResources(),this.getContext().getPackageName()));
+        this.gameManager.setPacman(new Pacman("pacman","",MOVEMENT_FLUENCY_LEVEL,this.gameManager.getGameMap().getPacmanSpawnPosition(),this.blockSize,this.getResources(),this.getContext().getPackageName()));
 
         Ghost.loadCommonBitmaps(this.blockSize,this.getResources(),this.getContext().getPackageName());
         this.soundsId=new int[4];
-        this.mediaPlayer=null;
+        //this.mediaPlayer=null;
         this.surfaceLock=new ReentrantLock(true);
     }
 
@@ -103,7 +105,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private synchronized void initGhost(){
         if(!GHOST_INICIALIZED){
             GHOST_INICIALIZED=true;
-            this.gameManager.initGhosts(this.blockSize,this.getResources(),this.getContext().getPackageName(),movementFluencyLevel);
+            this.gameManager.initGhosts(this.blockSize,this.getResources(),this.getContext().getPackageName(),MOVEMENT_FLUENCY_LEVEL);
         }
     }
 
@@ -151,7 +153,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             WIN_LOSE_KEY='W';
             WIN_LOSE_MUTEX.release();
             //release
-        }else if(!this.gameManager.getPacman().hasLifes()){
+        }else if(!this.gameManager.getPacman().hasLives()){
             //we lost
 
             CAN_DRAW=false;
@@ -189,7 +191,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         frameTicker = gameTime;
         canvas.drawColor(Color.BLACK);
         this.gameManager.getGameMap().draw(canvas, Color.BLUE,this.blockSize,this.gameManager.getLevel());
-        this.gameManager.moveGhosts(canvas,this.blockSize);
+        this.gameManager.moveGhosts(canvas);
         pacmanIsDeath=pacman.move(this.gameManager,canvas,this.soundPool,this.soundsId);
 
         if(!pacmanIsDeath){
@@ -198,8 +200,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             for(int i=0; i<ghosts.length;i++){
                 ghosts[i].changeFrame();
             }
-            currentArrowFrame++;
-            currentArrowFrame%=7;
+            //currentArrowFrame++;
+            //currentArrowFrame%=7;
         }else{
             pacman.setNextDirection(' ');
             for(int i=0; i<ghosts.length;i++){

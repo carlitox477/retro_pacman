@@ -6,9 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.util.Log;
-
-import Game.GameView;
 
 public abstract class Character {
     protected String name,prefix;
@@ -34,84 +31,39 @@ public abstract class Character {
 
     }
 
+    public String getName(){
+        return this.name;
+    }
     public int getSpawnPositionMapX(){
         return this.spawnPositionScreen[0]/this.blocksize;
     }
     public int getSpawnPositionMapY(){
         return this.spawnPositionScreen[1]/this.blocksize;
     }
-
-    public String getName(){
-        return this.name;
-    }
-
     public int getSpawnPositionScreenX(){
         return this.spawnPositionScreen[0];
     }
-
     public int getSpawnPositionScreenY(){
         return this.spawnPositionScreen[1];
     }
-
     public int getPositionMapX(){
         return this.currentPositionScreen[0]/this.blocksize;
     }
-
     public int getPositionMapY(){
         return this.currentPositionScreen[1]/this.blocksize;
     }
-
     public int getPositionScreenX(){
         return this.currentPositionScreen[0];
     }
-    
     public int getPositionScreenY(){
         return this.currentPositionScreen[1];
     }
-
-    public int getCurrentFrame() {
-        int sal=currentFrame;
-        this.currentFrame++;
-        this.currentFrame%=fpm;
-        return sal;
-    }
-
-    public void respawn(){
-        this.currentPositionScreen[0]=this.spawnPositionScreen[0];
-        this.currentPositionScreen[1]=this.spawnPositionScreen[1];
-    }
-
     public char getCurrentDirection(){
         return this.currentDirection;
     }
 
-    public Bitmap[][] getBitmaps() {
-        return bitmaps;
-    }
-
-    protected void loadBitmaps(int blocksize, Resources res, String packageName){
-        //fpm: frames per movement; pacman 4; ghosts 2
-        int idBm;
-        String[] positions;
-
-        positions=new String[]{"up","right","left","down"};
-
-        for (int i=0;i<4;i++){
-            for (int j=0;j<fpm;j++){
-                idBm=res.getIdentifier(prefix+name + "_"+positions[i] + j, "drawable", packageName);
-                this.bitmaps[i][j]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                        res, idBm), blocksize, blocksize, false);
-                //Log.i("Load Bitmap", "\""+prefix+name + "_"+positions[i] + j+"\" loaded");
-            }
-        }
-    }
-
-    public char getDirection(){
-        return this.currentDirection;
-    }
-
     public Bitmap getCurrentBitmap(){
-       // int frame;
+        // int frame;
         switch (currentDirection){
             case 'u':
                 this.currentBitmapArray=this.bitmaps[0];
@@ -131,6 +83,12 @@ public abstract class Character {
         return this.currentBitmapArray[this.currentFrame];
     }
 
+    public void respawn(){
+        this.currentPositionScreen[0]=this.spawnPositionScreen[0];
+        this.currentPositionScreen[1]=this.spawnPositionScreen[1];
+    }
+
+
     public void changeFrame(){
         this.currentFrame=(this.currentFrame+1)%fpm;
     }
@@ -142,6 +100,27 @@ public abstract class Character {
         canvas.drawBitmap(this.getCurrentBitmap(),this.currentPositionScreen[0],this.currentPositionScreen[1],paint);
     }
 
+    public void setFpm(int fpm) {
+        this.fpm = fpm;
+        this.currentFrame=this.currentFrame%fpm;
+    }
+
+    protected void loadBitmaps(int blocksize, Resources res, String packageName){
+        //fpm: frames per movement; pacman 4; ghosts 2
+        int idBm;
+        String[] positions;
+
+        positions=new String[]{"up","right","left","down"};
+
+        for (int i=0;i<4;i++){
+            for (int j=0;j<fpm;j++){
+                idBm=res.getIdentifier(prefix+name + "_"+positions[i] + j, "drawable", packageName);
+                this.bitmaps[i][j]=Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+                        res, idBm), blocksize, blocksize, false);
+                //Log.i("Load Bitmap", "\""+prefix+name + "_"+positions[i] + j+"\" loaded");
+            }
+        }
+    }
 
     protected void changePositionScreen(char direction,int movementFluencyLevel){
         switch (direction){
@@ -162,12 +141,7 @@ public abstract class Character {
         }
     }
 
-    public void setFpm(int fpm) {
-        this.fpm = fpm;
-        this.currentFrame=this.currentFrame%fpm;
-    }
-
-    protected void usePortal(int mapLength, int movementFluencyLevel){
+    protected void usePortal(int mapLength){
         int posXMap, limitWidth;
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         limitWidth=mapLength*this.blocksize;

@@ -4,8 +4,6 @@ import android.os.CountDownTimer;
 import android.os.Looper;
 import android.util.Log;
 
-import java.util.concurrent.Semaphore;
-
 import Game.Character_package.Ghost;
 
 public class CountDownGhost extends Thread {

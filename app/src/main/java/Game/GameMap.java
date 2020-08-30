@@ -222,7 +222,7 @@ public class GameMap {
         canvas.drawBitmap(this.bonusBitmaps[bitmapId], (bonusPos[1]) * blockSize, (bonusPos[0]) * blockSize, null);
     }
 
-
+/*
     public void passLevelAnimation(Canvas c, int blockSize, Pacman pacman, int level) throws InterruptedException {
         for(int i=0; i<10;i++){
             this.draw(c, Color.WHITE,blockSize,level);
@@ -236,4 +236,6 @@ public class GameMap {
         //we need to restart sound
         Thread.sleep(1000);
     }
+
+ */
 }

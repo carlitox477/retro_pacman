@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 import Game.Character_package.Ghost;
 import Game.Character_package.Pacman;
-import Game.Path.Path;
-import Game.Path.PathNode;
 
 public abstract class Behavior {
     protected int[]defaultTarget;
@@ -45,17 +43,17 @@ public abstract class Behavior {
 
         if(canGoUpDown){
             //Log.i("GPD","Strange");
-            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nearPositions[0],'u',distances[0],nearPositions[1],'l',distances[1],ghostPosition,ghostDirection);
-            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],nearPositions[2],'d',distances[2],ghostPosition,ghostDirection);
-            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],nearPositions[3],'r',distances[3],ghostPosition,ghostDirection);
+            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nearPositions[0],'u',distances[0],nearPositions[1],'l',distances[1]);
+            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],nearPositions[2],'d',distances[2]);
+            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nextPosition,direction[0],minDistance[0],nearPositions[3],'r',distances[3]);
         }else{
-            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nearPositions[1],'l',distances[1],nearPositions[3],'r',distances[3],ghostPosition,ghostDirection);
+            minDistance(minDistance,direction,nextPosition,opositeDirection,map,nearPositions[1],'l',distances[1],nearPositions[3],'r',distances[3]);
         }
 
         return new int[]{nextPosition[0],nextPosition[1],direction[0]};
     }
 
-    protected void minDistance(double[]minDistance,char[]resultDirection,int[]resPosition,char opositeDirection,int[][] map,int[]position1,char direction1,double distance1,int[]position2,char direction2,double distance2,int[]currentPosition, char ghostDirection){
+    protected void minDistance(double[]minDistance,char[]resultDirection,int[]resPosition,char opositeDirection,int[][] map,int[]position1,char direction1,double distance1,int[]position2,char direction2,double distance2){
         //La direccion elegida no puede ser la opuesta a la direccion actual la siguiente
         boolean canUsePosition1,canUsePosition2;
 
@@ -150,31 +148,6 @@ public abstract class Behavior {
             i++;
         }
         return can;
-    }
-
-    @NotNull
-    protected Path getPath(int[][]map, int[] ghostMapPosition, int[] target, char ghostDirection, int[][]notUpDownPositions){
-        Path pathToTarget;
-        PathNode node;
-        boolean cont,canGoUpDown;
-        int[]currentPosition,positionToAdd;
-        char currentDirection;
-
-        canGoUpDown=this.canGoUpDown(ghostMapPosition,notUpDownPositions);
-        node=new PathNode(ghostMapPosition,ghostDirection);
-        pathToTarget=new Path(node,target);
-        cont=true;
-        currentPosition=ghostMapPosition;
-        currentDirection=ghostDirection;
-
-        while(cont){
-            positionToAdd=this.nextDirection(currentPosition,target,map,currentDirection,canGoUpDown);
-            currentPosition=new int[]{positionToAdd[0],positionToAdd[1]};
-            currentDirection=(char)positionToAdd[2];
-            node=new PathNode(currentPosition,currentDirection);
-            cont=pathToTarget.addNode(node) && !(currentPosition[0]!=target[0]&&currentPosition[1]!=target[1]);
-        }
-        return pathToTarget;
     }
 
     public boolean isFrightened(){

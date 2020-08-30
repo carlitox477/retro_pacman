@@ -16,11 +16,11 @@ public class Pacman extends Character {
     private char nextDirection;
     private int lives;
     private int movementFluencyLevel;
-    private static Semaphore CHANGE_DIRECTION_MUTEX;
+    //private static Semaphore CHANGE_DIRECTION_MUTEX;
 
     public Pacman(String characterName, String prefix, int movementFluencyLevel, int[]spawnPosition, int blocksize, Resources res, String packageName) {
         super(characterName,prefix,4,spawnPosition, blocksize, res, packageName);
-        this.lives=1;
+        this.lives=2;
         this.movementFluencyLevel=movementFluencyLevel;
     }
 
@@ -28,7 +28,7 @@ public class Pacman extends Character {
         this.nextDirection=nextDirection;
     }
     public void setChangeDirectionSemaphore(Semaphore changeDirectionSemaphore){
-        CHANGE_DIRECTION_MUTEX=changeDirectionSemaphore;
+        //CHANGE_DIRECTION_MUTEX=changeDirectionSemaphore;
     }
 
     public boolean move(@NotNull GameManager gm, Canvas canvas, SoundPool soundPool, int[]sounds){
@@ -40,7 +40,7 @@ public class Pacman extends Character {
         map=gm.getGameMap().getMap();
         ghosts=gm.getGhosts();
 
-        this.usePortal(map[0].length,this.movementFluencyLevel);
+        this.usePortal(map[0].length);
         posXMap=this.currentPositionScreen[0]/this.blocksize;
         posYMap=this.currentPositionScreen[1]/this.blocksize;
         shouldRespawn=!this.successTryingToEatGhosts(ghosts,gm,sounds[2],soundPool);
@@ -82,7 +82,7 @@ public class Pacman extends Character {
         return shouldRespawn;
     }
 
-    public boolean hasLifes(){
+    public boolean hasLives(){
         return this.lives>0;
     }
 
@@ -144,7 +144,7 @@ public class Pacman extends Character {
     }
 
     public void respawn(Ghost[] ghosts){
-        this.respawn();
+        super.respawn();
         for(int i=0; i<ghosts.length;i++){
             ghosts[i].respawn();
         }
